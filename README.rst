@@ -19,7 +19,8 @@ Aliyun TableStore SDK for Python
 PIP安装
 ------
 
-	pip install aliyun-tablestore
+.. code-block:: bash
+    $ pip install aliyun-tablestore
 
 Github安装
 ---------
@@ -28,12 +29,12 @@ Github安装
 	
 
 .. code-block:: bash
-	git clone https://github.com/aliyun/aliyun-tablestore-python-sdk.git
+    $ git clone https://github.com/aliyun/aliyun-tablestore-python-sdk.git
 
 2. 安装
 
 .. code-block:: bash
-	python setup.py install
+    $ python setup.py install
  
 
 源码安装
@@ -44,7 +45,7 @@ Github安装
 
 
 .. code-block:: bash
-	python setup.py install
+    $ python setup.py install
 	
 示例代码
 -------
@@ -58,7 +59,7 @@ TBD
 
 贡献代码
 --------
- - 我们非常欢迎大家为TableStore Python SDK以及其他TableStore SDK贡献代码
+- 我们非常欢迎大家为TableStore Python SDK以及其他TableStore SDK贡献代码
 
 联系我们
 --------
