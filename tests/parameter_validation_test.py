@@ -137,7 +137,7 @@ class ParameterValidationTest(OTS2APITestBase):
             self.assert_error(e, 400, "OTSParameterInvalid", "No attribute column specified to update row #%d in table: '%s'." % (0, table_name))
 
     def test_invalid_instance_name(self):
-        """BUG#269043 对于每个API，测试instance name为空，'*', '#', '中文', 'aa'的情形，期望返回ErrorCode: OTSParameterInvalid"""
+        """对于每个API，测试instance name为空，'*', '#', '中文', 'aa'的情形，期望返回ErrorCode: OTSParameterInvalid"""
         for instance_name in ["", "*", "#", "中文", "aa", "_aaa", "a###", "h***", "-aa", "aa-"]:
             client = self._get_client(instance_name)
             self._invalid_instance_or_table_name_op(client, error_code="OTSParameterInvalid", error_message="Invalid instance name: '%s'." % instance_name)
@@ -199,9 +199,8 @@ class ParameterValidationTest(OTS2APITestBase):
             self.assert_equal(table_list, ())
 
     def test_instance_name_of_huge_size(self):
-        """用一个长度为12M的instance name去访问OTS，期望返回OTSServiceError"""
+        """用一个长度为2K的instance name去访问OTS，期望返回OTSServiceError"""
         instance_name = 'X'  * (2 * 1024)
-        # TODO just 50K is OK here, we should check why 12M rejected by our load balance
         client = self._get_client(instance_name)
         try:
             client.list_table()
@@ -218,7 +217,7 @@ class ParameterValidationTest(OTS2APITestBase):
             self._invalid_instance_or_table_name_op(self.client_test, table_name, error_code="OTSParameterInvalid", error_message="Invalid table name: '%s'." % table_name)
 
     def test_valid_table_name(self):
-        """BUG#269084 测试所有相关API中表名为'_0', '_T', 'A0'的情况，期望操作成功"""
+        """测试所有相关API中表名为'_0', '_T', 'A0'的情况，期望操作成功"""
         table_list = ['_0', '_T', 'A0']
         for table_name in table_list:
             self._valid_instance_or_table_name_op(self.client_test, table_name)
@@ -322,7 +321,7 @@ class ParameterValidationTest(OTS2APITestBase):
         self.assert_BatchWriteRowResponseItem(response, expect_response) 
 
     def test_valid_column_name(self):
-        """BUG#268717 测试所有相关API中column name为'_0', '_T', 'A0'的情况，期望操作成功"""
+        """测试所有相关API中column name为'_0', '_T', 'A0'的情况，期望操作成功"""
         table_name = "table_test"
         table_meta = TableMeta(table_name, [("PK", "STRING")])
         reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
@@ -430,7 +429,7 @@ class ParameterValidationTest(OTS2APITestBase):
         self._invalid_pk_type_test(boolean_value, error_code="OTSParameterInvalid", error_message="BOOLEAN is an invalid type for the primary key.", error_message_for_range="BOOLEAN is an invalid type for the primary key in GetRange.")
         
     def test_table_not_exist(self):
-        """BUG#267486 BUG#268706 测试除CreateTable以外所有API，操作的表不存在的情况，期望返回OTSObjectNotExist"""
+        """测试除CreateTable以外所有API，操作的表不存在的情况，期望返回OTSObjectNotExist"""
         table_name = "table_name_for_table_not_exist_test"
         #delete_table
         try:

@@ -96,7 +96,7 @@ class TableOperationTest(OTS2APITestBase):
         self.assert_DescribeTableResponse(describe_response, reserved_throughput.capacity_unit, table_meta)
 
     def test_PK_type_invalid(self):
-        """BUG#269007   测试创建表时，第1，2，3，4个PK列type分别为DOUBLE, BOOLEAN, BINARY，期望返回OTSParameterInvalid, list_table()确认创建失败"""
+        """测试创建表时，第1，2，3，4个PK列type分别为DOUBLE, BOOLEAN, BINARY，期望返回OTSParameterInvalid, list_table()确认创建失败"""
         time.sleep(1) # to avoid too frequently table operation
         table_name = 'table_PK_type_invalid'
         pk_list = []

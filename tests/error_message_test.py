@@ -51,7 +51,7 @@ class ErrorMessageTest(OTS2APITestBase):
         return client
 
     def test_missing_header(self):
-        """BUG#272689 请求中缺少某个头，期望返回OTSParameterInvalid"""
+        """请求中缺少某个头，期望返回OTSParameterInvalid"""
 
         headers = [
             'x-ots-date', 
