@@ -22,8 +22,3 @@ MaxCUReduceTimeLimit = 4             # CU下调次数上限
 CUUpdateTimeLongest = 60             #UpdateTableCU最长响应时间，单位s
 
 CURestoreTimeInSec = 1               # 这个不是限制项，内置变量，CU的回血时间
-CUReduceTimeLimitCalcInterval = global_test_config.CUReduceTimeLimitCalcInterval
-                                           # 这个不是限制项，内置变量，系统CU的下调次数上限检查周期
-                                           # case如果改变了这个周期，需在结束时设置回这个变量
-AdjustCapacityUnitIntervalForTest = global_test_config.AdjustCapacityUnitIntervalForTest
-                                           # 这个不是限制项，测试设置的AdjustCapacityUnitInterval

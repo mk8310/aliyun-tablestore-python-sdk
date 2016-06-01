@@ -1,11 +1,12 @@
 # -*- coding: utf8 -*-
 
-from ots2_api_test_base import *
+import unittest
+from lib.ots2_api_test_base import *
 from ots2 import *
-import restriction
+import lib.restriction as restriction
+import lib.test_config as test_config
 import copy
 import time
-import atest.log as log
 
 class ParameterValidationTest(OTS2APITestBase):
 
@@ -13,11 +14,10 @@ class ParameterValidationTest(OTS2APITestBase):
 
     def _get_client(self, instance_name):
         client = OTSClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            instance_name,
-            logger_name=atest.log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            instance_name
             )
         return client
 
@@ -145,23 +145,16 @@ class ParameterValidationTest(OTS2APITestBase):
     def _valid_instance_or_table_name_op(self, client, table = None):
         table_name = table if table != None else "table_test"
         table_meta = TableMeta(table_name, [("PK", "STRING")])
-        reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
+        reserved_throughput = ReservedThroughput(CapacityUnit(1, 2))
         #create_table
 
         expect_increase_time = int(time.time())
         client.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
 
-        #update_table
-        time.sleep(restriction.AdjustCapacityUnitIntervalForTest)
-        expect_decrease_time = int(time.time())
-        update_table_response = client.update_table(table_name, ReservedThroughput(CapacityUnit(1000, 2000)))
-        expect_res = UpdateTableResponse(ReservedThroughputDetails(CapacityUnit(1000, 2000), expect_increase_time, expect_decrease_time, 1))
-        self.assert_UpdateTableResponse(update_table_response, expect_res)
-        self.wait_for_capacity_unit_update(table_name)
         #describe_table
         response = client.describe_table(table_name)
-        self.assert_DescribeTableResponse(response, CapacityUnit(1000, 2000), table_meta)
+        self.assert_DescribeTableResponse(response, CapacityUnit(1, 2), table_meta)
         #get_row
         consumed, primary_keys, columns = client.get_row(table_name, {"PK": "x"})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
@@ -205,22 +198,6 @@ class ParameterValidationTest(OTS2APITestBase):
             table_list = client.list_table()
             self.assert_equal(table_list, ())
 
-    def test_valid_instance_name(self):
-        """BUG#268827 对于每个API，测试instance name为‘0’, 'a', 'A', '-', ‘0A’, '-A', '--'的情形，期望操作成功 """
-        instance_name_list = ['b-0', 'a-a', 'a1a', 'a00']
-        self._create_instance(instance_name_list)
-        for instance_name in instance_name_list:
-            client = self._get_client(instance_name)
-            self._valid_instance_or_table_name_op(client)
-
-    def test_instance_name_case_insensitive(self):
-        """BUG#268717 OCM插入一个大写的instance name，OTS用小写的instance name去访问，期望成功；反之亦然"""
-        self._create_instance(['GOOGLE', 'baidu'])
-        client = self._get_client('google')
-        self._valid_instance_or_table_name_op(client)
-        client = self._get_client('BAIDU')
-        self._valid_instance_or_table_name_op(client)
-
     def test_instance_name_of_huge_size(self):
         """用一个长度为12M的instance name去访问OTS，期望返回OTSServiceError"""
         instance_name = 'X'  * (2 * 1024)
@@ -237,6 +214,7 @@ class ParameterValidationTest(OTS2APITestBase):
         """测试所有相关API中表名为空，'0', '#', '中文', 'T#', 'T中文', '3t', '-'的情况，期望返回ErrorCode: OTSParameterInvalid"""
         table_list = ['', '0', '#', '中文', 'T#', 'T中文', '3t', '-']
         for table_name in table_list:
+            time.sleep(2)  # to avoid too frequently table operation
             self._invalid_instance_or_table_name_op(self.client_test, table_name, error_code="OTSParameterInvalid", error_message="Invalid table name: '%s'." % table_name)
 
     def test_valid_table_name(self):
@@ -296,7 +274,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #create test table
         table_name = "table_test"
         table_meta = TableMeta(table_name, [('PK0', 'STRING')])
-        reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit,restriction.MaxReadWriteCapacityUnit))
+        reserved_throughput = ReservedThroughput(CapacityUnit(1, 1))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test')
         primary_keys = {"PK0": "x"}
@@ -351,7 +329,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #create_table
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
-        column_name_list = ['_0', '_T', 'A0', '_a-b', 'a-b-c', 'waef-', '_--', '_%', '_a%b', 'abc%def', '/', '\\', '|', '&', '$', '~', 'abc:', ':', ':abc']
+        column_name_list = ['_0', '_T', 'A0', '_a-b', 'a-b-c', 'waef-', '_--', '_%', '_a%b', 'abc%def', '/', '\\', '|', '&', '$', '~']
         for column_name in column_name_list:
             self._valid_column_name_test(table_name, column_name)
 
@@ -572,4 +550,5 @@ class ParameterValidationTest(OTS2APITestBase):
         self._column_restriction_test_except({"COL": INF_MAX}, "OTSParameterInvalid", "INF_MAX is an invalid type for the attribute column.")
 
 
-    # TODO int, double range
+if __name__ == '__main__':
+    unittest.main()

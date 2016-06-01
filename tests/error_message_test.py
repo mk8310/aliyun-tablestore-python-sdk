@@ -1,21 +1,20 @@
 # -*- coding: utf8 -*-
+import unittest
 import time
 import urllib
 import urlparse
 import base64
 import hashlib
 
-import atest.log as log
-
-from ots2_api_test_base import OTS2APITestBase
-import restriction
+from lib.ots2_api_test_base import OTS2APITestBase
+import lib.restriction
+import lib.test_config as test_config
 from ots2 import *
 from ots2.error import *
 from ots2.protocol import OTSProtocol
 from ots2.connection import ConnectionPool
 from ots2.protobuf.encoder import OTSProtoBufferEncoder
 import ots2.protobuf.ots_protocol_2_pb2 as pb2
-import ots2_api_test_config
 
 class ByPassHeaderCheckProtocol(OTSProtocol):
 
@@ -43,11 +42,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = MissingHeaderProtocol
 
         client = MissingHeaderClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         return client
@@ -64,7 +62,6 @@ class ErrorMessageTest(OTS2APITestBase):
         ]
         for missed_header in headers:
 
-            log.info("test missing header %s ..." % missed_header)
             client = self._get_missed_header_client(missed_header)
 
             try:
@@ -85,7 +82,6 @@ class ErrorMessageTest(OTS2APITestBase):
 
     def test_invalid_http_method(self):
         for method in ['PUT', 'DELETE', 'CONNECT', 'HEAD', 'TRACE']:
-            log.info("test http method %s ..." % method)
             class WrongHTTPMethodConnection(ConnectionPool):
 
                 def send_receive(self, url, request_headers, request_body):
@@ -122,11 +118,10 @@ class ErrorMessageTest(OTS2APITestBase):
                 protocol_class = WrongHTTPMethodProtocol
 
             client = WrongHTTPMethodClient(
-                ots2_api_test_config.endpoint,
-                ots2_api_test_config.access_id,
-                ots2_api_test_config.access_key,
-                ots2_api_test_config.instance_name_for_common,
-                logger_name=log.root.name,
+                test_config.OTS_ENDPOINT,
+                test_config.OTS_ID,
+                test_config.OTS_SECRET,
+                test_config.OTS_INSTANCE
             )
 
             try:
@@ -141,23 +136,12 @@ class ErrorMessageTest(OTS2APITestBase):
                 else:
                     self.assert_error(e, 405, 'OTSMethodNotAllowed', 'Only POST method for requests is supported.')
 
-    def test_too_large_post_data(self):
-        table_name = 'X' * 1024 * 1024 * 2
-        try:
-            self.client_test.get_row(table_name, {'PK0' : 1})
-            self.assert_false()
-        except OTSServiceError as e:
-            self.assert_error(e, 413, 'OTSRequestBodyTooLarge', 'The size of POST data is too large.')
-        except OTSClientError as e:
-            self.assertEqual(e.http_status, 413)
-
     def test_access_id_not_exist(self):
         client = OTSClient(
-            ots2_api_test_config.endpoint,
+            test_config.OTS_ENDPOINT,
             'blahblahblah',
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
         try:
             client.list_table()
@@ -170,11 +154,10 @@ class ErrorMessageTest(OTS2APITestBase):
 
     def test_instance_not_found(self):
         client = OTSClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            'blahblahblah',
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            'blahblahblah'
         )
 
         try:
@@ -182,27 +165,6 @@ class ErrorMessageTest(OTS2APITestBase):
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 403, 'OTSAuthFailed', 'The instance is not found.')
-
-    def test_user_has_no_privilege(self):
-        client = OTSClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.another_cluster_access_id,
-            ots2_api_test_config.another_cluster_access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
-        )
-
-        try:
-            client.list_table()
-            self.assert_false()
-        except OTSServiceError as e:
-            self.assert_error(e, 403, 'OTSAuthFailed', 'This instance is not belong to you or you are not allowed to access this instance.')
-
-    def _test_instance_not_running(self):
-        raise NotImplementedError
-
-    def _test_user_not_exist(self):
-        raise NotImplementedError
 
     def test_operation_not_supported(self):
 
@@ -215,28 +177,16 @@ class ErrorMessageTest(OTS2APITestBase):
             connection_pool_class = BadOpConnectionPool
 
         client = BadOpClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
         try:
             client.list_table()
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, 'OTSUnsupportOperation', "Unsupported operation: 'CreateTableInternal'.")
-
-    def test_too_large_post_data2(self):
-        # try to meet "The size of POST data is too large." but we have a bug #272743
-        table_name = 'X' * 90 * 1024 * 1024 
-        try:
-            self.client_test.get_row(table_name, {'PK0' : 1})
-            self.assert_false()
-        except OTSServiceError as e:
-            self.assert_error(e, 'OTSParameterInvalid', 'The size of POST data is too large or unexpected error occured while reading.')
-        except OTSClientError as e:
-            self.assertEqual(e.http_status, 413)
 
     def test_invalid_date_format(self):
 
@@ -267,11 +217,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = InvalidDateFormatProtocol
 
         client = InvalidDateFormatClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         try:
@@ -308,11 +257,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = InvalidDateFormatProtocol
 
         client = InvalidDateFormatClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         try:
@@ -349,11 +297,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = InvalidDateFormatProtocol
 
         client = InvalidDateFormatClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         try:
@@ -361,19 +308,6 @@ class ErrorMessageTest(OTS2APITestBase):
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 403, 'OTSAuthFailed', 'Mismatch between MD5 value of request body and x-ots-contentmd5 in header.')
-
-    def test_too_much_table(self):
-        # this case should run with default ots_server config with QoS parameter untouched
-
-        try:
-            for i in range(5000):
-                self.client_test.create_table(
-                    TableMeta('T_%d' % i, [('PK0', 'STRING')]),
-                    ReservedThroughput(CapacityUnit(1000, 2000)),
-                )
-            self.assert_false()
-        except OTSServiceError as e:
-            self.assert_error(e, 403, 'OTSQuotaExhausted', 'Number of tables exceeded the quota.')
 
     def test_failed_parse_pb(self):
     
@@ -395,11 +329,10 @@ class ErrorMessageTest(OTS2APITestBase):
  
         
         client = BadBodyClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         try:
@@ -424,11 +357,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = BadSignatureProtocol
 
         client = BadSignatureClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         try:
@@ -462,19 +394,17 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = NoWriteCUProtocol
 
         no_read_cu_client = NoReadCUClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
         
         no_write_cu_client = NoWriteCUClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
 
@@ -527,27 +457,24 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = NoCUProtocol
 
         no_read_cu_client = NoReadCUClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
         
         no_write_cu_client = NoWriteCUClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         no_cu_client = NoCUClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
         reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
@@ -582,11 +509,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = NoUtf8Protocol
 
         client = NoUtf8Client(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
 
@@ -872,11 +798,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = MissedFieldProtocol
 
         client = MissedFieldClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
         
         
@@ -903,11 +828,10 @@ class ErrorMessageTest(OTS2APITestBase):
             protocol_class = MissedFieldProtocol2
 
         client2 = MissedFieldClient2(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE
         )
 
 
@@ -986,3 +910,6 @@ class ErrorMessageTest(OTS2APITestBase):
     def _test_server_is_busy(self):
         """503 OTSServerBusy Server is busy."""
         raise NotImplementedError
+
+if __name__ == '__main__':
+    unittest.main()

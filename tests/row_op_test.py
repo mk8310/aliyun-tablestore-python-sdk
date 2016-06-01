@@ -1,9 +1,9 @@
 # -*- coding: utf8 -*-
 
-from ots2_api_test_base import OTS2APITestBase
-import atest.log
+import unittest
+from lib.ots2_api_test_base import OTS2APITestBase
 from ots2 import *
-import restriction
+import lib.restriction as restriction 
 import copy
 from collections import OrderedDict
 from ots2.error import *
@@ -18,9 +18,6 @@ class RowOpTest(OTS2APITestBase):
     # 行操作API： GetRow, PutRow, UpdateRow, BatchGetRow, BatchWriteRow, GetRange
     # 测试每一个写操作，都要用GetRow或BatchGetRow验证数据操作符合预期
     # 成功返回的操作都要验证CU消耗，失败的操作要后台验证CU消耗
-    
-    #################################################################################
-    #付哲从这里开始
     def _check_all_row_op_with_exception_meta_not_match(self, wrong_pk):
         try:
             self.client_test.get_row('XX', wrong_pk)
@@ -629,52 +626,6 @@ class RowOpTest(OTS2APITestBase):
             i += 1
         self.assert_consumed(cu_sum, CapacityUnit(2, 0))
 
-    ###################################################################################
-    #淑婷
-    def test_get_range_CU_noenough_one_row(self):
-        """BUG#5438578 get_range操作时CU没有消耗完但是CU不够读取第一行数据的情况下, 预期抛出异常"""
-        table_name = "table_test"
-        table_meta = TableMeta(table_name, [("PK","INTEGER")])
-        reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
-        self.client_test.create_table(table_meta, reserved_throughput)
-        self.wait_for_partition_load('table_test')
-        self.client_test.put_row(table_name, Condition("IGNORE"), {"PK": 1}, {"COL": "1"*9000})
-        self.client_test.put_row(table_name, Condition("IGNORE"), {"PK": 10}, {"COL1": 1})
-
-        time.sleep(restriction.AdjustCapacityUnitIntervalForTest)
-        update_table_response = self.client_test.update_table(table_name, ReservedThroughput(CapacityUnit(2, 2)))
-        self.wait_for_capacity_unit_update(table_name)
-        try:
-            self.client_test.get_range(table_name, "FORWARD", {"PK": INF_MIN}, {"PK": INF_MAX})
-            self.assert_false()
-
-        except OTSServiceError as e:
-            self.assert_error(e, 403, "OTSNotEnoughCapacityUnit", "Remaining capacity unit for read is not enough.")
-   
-         
-
-    def test_xget_range_CU_noenough_one_row(self):
-        """BUG#5438578 xget_range操作时,CU不够读取第一行数据的情况下,预期xget_range第一次操作就抛出异常"""
-        table_name = "table_test"
-        table_meta = TableMeta(table_name, [("PK","INTEGER")])
-        reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
-        self.client_test.create_table(table_meta, reserved_throughput)
-        self.wait_for_partition_load('table_test')
-        self.client_test.put_row(table_name, Condition("IGNORE"), {"PK": 1}, {"COL": "1"*10000})
-        self.client_test.put_row(table_name, Condition("IGNORE"), {"PK": 10}, {"COL1": 1})
-
-        time.sleep(restriction.AdjustCapacityUnitIntervalForTest)
-        update_table_response = self.client_test.update_table(table_name, ReservedThroughput(CapacityUnit(2, 2)))
-        self.wait_for_capacity_unit_update(table_name)
-        rows = [({"PK": 1}, {"COL": 1}), ({"PK": 11}, {"COL1": "1" * 10000})]
-        try:
-            consumed_cnt = CapacityUnit(0, 0)
-            from itertools import izip
-            for row, except_row in izip(self.client_test.xget_range(table_name, "FORWARD", {"PK": INF_MIN}, {"PK": INF_MAX}, consumed_cnt), rows): 
-                self.assert_false()
-        except OTSServiceError as e:
-            self.assert_error(e, 403, "OTSNotEnoughCapacityUnit", "Remaining capacity unit for read is not enough.")
-
     def _valid_column_name_test(self, table_name, pk, columns):
         #put_row
         consumed = self.client_test.put_row(table_name, Condition("IGNORE"), pk, columns)
@@ -772,89 +723,6 @@ class RowOpTest(OTS2APITestBase):
         for col in [integer_columns, string_columns, bool_columns, binary_columns, double_columns]:
             self._valid_column_name_test(table_name, pk, col)
 
-    def test_chinese_string(self):
-        """BUG#270021 BUG#269007 对于每一个行操作API，测试一个行，包含1KB个中文字符，UTF8编码，类型分别是BINARY和BOOLEAN，判断CU消耗符合预期(一个中文字符占3个字节)"""
-        table_name = "table_test"
-        table_meta = TableMeta(table_name, [("PK", "STRING")])
-        reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
-        self.client_test.create_table(table_meta, reserved_throughput)
-        self.wait_for_partition_load('table_test')
-        
-        columns = {"COL": "中" * 1024}
-        self._valid_column_name_test(table_name, {"PK": "1"}, columns)
-
-        columns = {"COL": bytearray("中" * 1024)}
-        self._valid_column_name_test(table_name, {"PK": "1"}, columns)
-
-    def test_max_table_num_in_batch_ops(self):
-        """BUG#268717 对于BatchWriteRow(分别测试put, delete, update), BatchGetRow, 包含MaxRowCountForMultiGetRow或MaxRowCountForMultiWriteRow等量的表名（10个表名，重复10次），每个表包含1个行，期望操作成功，CU消耗符合预期"""
-        reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
-
-        table_names = []
-        for i in range(restriction.MaxTableCountForInstance):
-            table_name = "table%d" % i
-            table_names.append(table_name)
-            table_meta = TableMeta(table_name, [("PK", "STRING")])
-            self.client_test.create_table(table_meta, reserved_throughput)
-
-        for table_name in table_names:
-            self.wait_for_partition_load(table_name)
-
-        columns_old = {"COL": "c"}
-        columns_new = {"COL1": "z"}
-        write_batches_put = []
-        write_batches_update = []
-        write_batches_delete = []
-        read_batches = []
-        cnt = restriction.MaxRowCountForMultiGetRow/restriction.MaxTableCountForInstance
-        for i in range(restriction.MaxTableCountForInstance):
-            put_row_list = []
-            update_row_list = []
-            delete_row_list = []
-            read_list = []
-            for j in range(cnt):
-                put_row_list.append(PutRowItem(Condition("IGNORE"), {"PK": "x%d"%j}, columns_old))
-                update_row_list.append(UpdateRowItem(Condition("EXPECT_EXIST"), {"PK": "x%d"%j}, {'put':columns_new}))
-                delete_row_list.append(DeleteRowItem(Condition("EXPECT_EXIST"), {"PK": "x%d"%j}))
-                read_list.append({"PK": "x%d"%j})
-            write_batches_put.append({'table_name':"table%d"%i, 'put':put_row_list})
-            write_batches_update.append({'table_name':"table%d"%i, 'update':update_row_list})
-            write_batches_delete.append({'table_name':"table%d"%i, 'delete':delete_row_list})
-            read_batches.append(("table%d"%i, read_list, []))
-
-        response = self.client_test.batch_write_row(write_batches_put)
-        expect_row = []
-        for i in range(cnt):
-            expect_row.append(BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row({"PK": "x%d"%i}, columns_old))))
-        expect_rows = {'put':expect_row}
-        expect_res = [expect_rows] * restriction.MaxTableCountForInstance
-        self.assert_BatchWriteRowResponseItem(response, expect_res)
-
-        response = self.client_test.batch_get_row(read_batches)
-        expect_row = []
-        for i in range(cnt):
-            expect_row.append(RowDataItem(True, "", "", CapacityUnit(self.sum_CU_from_row({"PK": "x%d"%i}, columns_old), 0), {"PK": "x%d"%i}, columns_old))
-        expect_res = [expect_row] * restriction.MaxTableCountForInstance
-        self.assert_RowDataItem_equal(response, expect_res)
-
-        response = self.client_test.batch_write_row(write_batches_update)
-        expect_row = []
-        for i in range(cnt):
-            expect_row.append(BatchWriteRowResponseItem(True, "", "", CapacityUnit(self.sum_CU_from_row({"PK": "x%d"%i}, {}), self.sum_CU_from_row({"PK": "x%d"%i}, columns_new))))
-        expect_rows = {'update':expect_row}
-        expect_res = [expect_rows] * restriction.MaxTableCountForInstance
-        self.assert_BatchWriteRowResponseItem(response, expect_res)
-
-        response = self.client_test.batch_write_row(write_batches_delete)
-        expect_row = []
-        for i in range(cnt):
-            expect_row.append(BatchWriteRowResponseItem(True, "", "", CapacityUnit(self.sum_CU_from_row({"PK": "x%d"%i}, {}), self.sum_CU_from_row({"PK": "x%d"%i}, {}))))
-        expect_rows = {'delete':expect_row}
-        expect_res = [expect_rows] * restriction.MaxTableCountForInstance
-        self.assert_BatchWriteRowResponseItem(response, expect_res)
-
-    ########################################################################
-    #杨恋
     def test_batch_get_on_the_same_row(self):
         """BUG#268767 创建一个表T，一个行R，数据量为 < 1KB，BatchGetRow([(T, [R, R])])，重复行，期望返回OTSParameterInvalid，再一次BatchGetRow([(T, [R]), (T, [R]])，同名表在不同组，期望返回OTSParameterInvalid"""
         table_name = 'table_test_batch_get_on_the_same_row'
@@ -881,38 +749,6 @@ class RowOpTest(OTS2APITestBase):
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSParameterInvalid", "Duplicated table name: 'table_test_batch_get_on_the_same_row'.")
-
-    def test_batch_get_row_CU_not_enough(self):
-        """BUG#269061 创建一个表T，CU(3, 10)，两个行R1、R2，数据量为 < 1KB，BatchGetRow([(T, [R1, R2])])，期望正常返回；再一次BatchGetRow([(T, [R1, R2])])，期望一个行正常，一个行失败"""
-        table_name = 'table_test_batch_get_row_CU_not_enough'
-        table_meta = TableMeta(table_name, [('PK0', 'STRING'), ('PK1', 'INTEGER')])
-        pk_dict_1 = {'PK0':'a', 'PK1':1}
-        pk_dict_2 = {'PK0':'a', 'PK1':2}
-        column_dict = {'col1': 'M' * 500}
-        pk_list = [pk_dict_1, pk_dict_2]
-        reserved_throughput = ReservedThroughput(CapacityUnit(3, 10))
-
-        self.client_test.create_table(table_meta, reserved_throughput)
-        self.wait_for_partition_load('table_test_batch_get_row_CU_not_enough')
-
-        for pk_dict in pk_list:
-            consumed = self.client_test.put_row(table_name, Condition("IGNORE"), pk_dict, column_dict)
-            consumed_expect = CapacityUnit(0, 1)
-            self.assert_consumed(consumed, consumed_expect)
-
-        cu_consumed = CapacityUnit(1, 0)
-        row_item_normal_1 = RowDataItem(True, "", "", cu_consumed, pk_dict_1, column_dict) 
-        row_item_exception_1 = RowDataItem(False, "OTSNotEnoughCapacityUnit", "Remaining capacity unit for read is not enough.", None, pk_dict_1, column_dict)
-        row_item_normal_2 = RowDataItem(True, "", "", cu_consumed, pk_dict_2, column_dict)
-        row_item_exception_2 = RowDataItem(False, "OTSNotEnoughCapacityUnit", "Remaining capacity unit for read is not enough.", None, pk_dict_2, column_dict)
-        response = self.client_test.batch_get_row([(table_name, pk_list, [])])
-        self.assert_RowDataItem_equal(response, [[row_item_normal_1, row_item_normal_2]])
-
-        response = self.client_test.batch_get_row([(table_name, pk_list, [])])
-        if response[0][0].is_ok == True:
-            self.assert_RowDataItem_equal(response, [[row_item_normal_1, row_item_exception_2]])
-        else:
-            self.assert_RowDataItem_equal(response, [[row_item_exception_1, row_item_normal_2]])
 
     def test_batch_write_on_the_same_row(self):
         """BUG#268767 BatchWriteRow，分别为put, delete, update，操作在同一行（在同一个表名下，或者重复的两个表名下），期望返回OTSParameterInvalid"""
@@ -1253,22 +1089,6 @@ class RowOpTest(OTS2APITestBase):
             #TODO LOG...
             self._check_xget_range(table_name, begin, end, direction, expect_rows, limit)
 
-    def test_get_range_with_insufficient_CU(self):
-        """get_range要读的数据超过了设定的CU, 期望返回读到的数据，并且将next_start_primary_keys指向下一个get_range应该开始的位置"""
-        table_name = 'T'
-        table_meta = TableMeta('T', [('PK0', 'INTEGER')])
-        self.client_test.create_table(table_meta, ReservedThroughput(CapacityUnit(1, 3)))
-        self.wait_for_partition_load('T')
-        cols = {'C0' : 'X' * 3000}
-        self.client_test.put_row('T', Condition('IGNORE'), {'PK0' : 0}, cols)
-        self.client_test.put_row('T', Condition('IGNORE'), {'PK0' : 1}, cols)
-        self.client_test.put_row('T', Condition('IGNORE'), {'PK0' : 2}, cols)
-
-        consumed, next_start_primary_keys, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 3})
-        self.assert_consumed(CapacityUnit(1, 0), consumed)
-        self.assert_equal(next_start_primary_keys, {'PK0' : 1})
-        self.assert_equal(row_list, [({'PK0' : 0}, cols)])
-
     def test_read_empty_row(self):
         """BUG#269084 BUG#268968 测试对空行的读操作，以及GetRange在行没有对应的列时期望不返回空行"""
         table_name = 'T'
@@ -1435,3 +1255,5 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(pks, {})
         self.assert_equal(cols, {})
 
+if __name__ == '__main__':
+    unittest.main()

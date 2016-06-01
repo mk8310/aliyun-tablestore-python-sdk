@@ -1,16 +1,11 @@
 #*-coding:utf-8-*-
 import subprocess
 
+import test_config
 from unittest import TestCase
-import ots2_api_test_config
-import global_test_config
-import global_test_lib
 from ots2 import * 
 from ots2.error import * 
 from ots2.retry import *
-import atest.log
-import atest.auto as auto
-from atest.auto import AutoCmdRetcodeError
 import types
 import math
 import time
@@ -18,36 +13,39 @@ import restriction
 import traceback
 import commands
 import sys 
-from ocm_client import *
 
 import os 
 import inspect
+import logging
 
 class OTS2APITestBase(TestCase):
 
     def __init__(self, methodName=None):
         TestCase.__init__(self, methodName=methodName)
-        self.logger = atest.log.root
         self.start_time = 0
 
-    def _check_ots_server_alive(self, host):
-        try:
-            auto.run('ssh %s "ps ax | grep ots_server | grep -v grep"' % host)
-            return True
-        except AutoCmdRetcodeError as e:
-            return False
+        self.logger = logging.getLogger('OTS2APITestBase')  
+        self.logger.setLevel(logging.INFO) 
+          
+        fh = logging.FileHandler('ots_sdk_test.log')  
+        fh.setLevel(logging.INFO)  
+          
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
+        fh.setFormatter(formatter)  
+          
+        self.logger.addHandler(fh)  
 
     def setUp(self):
-
         self.client_test = OTSClient(
-            ots2_api_test_config.endpoint,
-            ots2_api_test_config.access_id,
-            ots2_api_test_config.access_key,
-            ots2_api_test_config.instance_name_for_common,
-            logger_name=atest.log.root.name,
+            test_config.OTS_ENDPOINT,
+            test_config.OTS_ID,
+            test_config.OTS_SECRET,
+            test_config.OTS_INSTANCE,
+            logger_name = 'OTS2APITestBase',
             retry_policy=NoRetryPolicy(),
         )
         
+        time.sleep(1) # to avoid too frequent table operations
         for table_name in self.client_test.list_table():
             self.client_test.delete_table(table_name)
 
@@ -60,7 +58,7 @@ class OTS2APITestBase(TestCase):
     def assert_error(self, error, http_status, error_code, error_message):
         self.assert_equal(error.http_status, http_status)
         self.assert_equal(error.code, error_code)
-        self.assert_equal(error.message, error_message)
+        self.assert_equal(error.message.encode('utf-8'), error_message)
 
     def assert_false(self):
         self.logger.warn("\nAssertion Failed\n" + "".join(traceback.format_stack()))
@@ -68,7 +66,7 @@ class OTS2APITestBase(TestCase):
 
     def assert_equal(self, res, expect_res):
         if res != expect_res:
-            self.logger.warn("\nAssertion Failed\nactual: %s\nexpect: %s\n" % (res, expect_res) + "".join(traceback.format_stack()))
+            #self.logger.warn("\nAssertion Failed\nactual: %s\nexpect: %s\n" % (res.decode('utf-8'), expect_res.decode('utf-8')) + "".join(traceback.format_stack()))
             self.assertEqual(res, expect_res)
 
     def try_exhaust_cu(self, func, count, read_cu, write_cu):
@@ -254,16 +252,10 @@ class OTS2APITestBase(TestCase):
         self.assert_TableMeta(response.table_meta, expect_table_meta)
 
     def wait_for_capacity_unit_update(self, table_name):
-        return global_test_lib.wait_for_partition_reload(ots2_api_test_config.instance_id_for_common, table_name)
+        time.sleep(2)
 
     def wait_for_partition_load(self, table_name, instance_name=""):
-        instance_id = ots2_api_test_config.instance_id_for_common
-        if instance_name != "":
-            instance_id = self.get_instance_id(instance_name)
-        return global_test_lib.wait_for_partition_load(instance_id, table_name)
-
-    def wait_for_CU_restore(self):
-        time.sleep(restriction.CURestoreTimeInSec)
+        time.sleep(2)
 
     def get_primary_keys(self, pk_cnt, pk_type, pk_name="PK", pk_value="x"):
         pk_schema = []
@@ -307,98 +299,6 @@ class OTS2APITestBase(TestCase):
         sum = self.get_row_size(pk_dict, column_dict) 
         return int(math.ceil(sum * 1.0 / 4096))
     
-    def set_DecreaseCapacityUnitDuration(self, duration):
-        self.logger.debug("set global flag sqlol_master_DecreaseCapacityUnitDuration begin")
-        cmd = '/apsara/deploy/rpc_caller --Server=nuwa://localcluster/sys/sqlonline-OTS/master --Method=/fuxi/SetGlobalFlag --Parameter="{\\"sqlol_master_DecreaseCapacityUnitPeriod\\": %d}"' % duration
-        output = subprocess.check_output(cmd, shell=True)
-        if "OK" not in output:
-            raise Exception("set global flag sqlol_master_DecreaseCapacityUnitDuration fail")
-        else:
-            self.logger.debug("set global flag sqlol_master_DecreaseCapacityUnitDuration OK")
-
-    def set_AdjustCapacityUnitInterval(self, interval):
-        cmd = '/apsara/deploy/rpc_caller --Server=nuwa://localcluster/sys/sqlonline-OTS/master --Method=/fuxi/SetGlobalFlag --Parameter="{\\"sqlol_master_AdjustCapacityUnitInterval\\": %d}"' % interval
-        if 'OK' != auto.run(cmd)[-2]:
-            raise Exception("Failed to set global flag sqlol_master_AdjustCapacityUnitInterval")
-    
-    def _create_instance(self, instance_name_list, readcu=5000, writecu=5000):
-        ots_client_list = []
-        ocm_client = OCMClient(
-                ots2_api_test_config.ocm_host,
-                int(ots2_api_test_config.ocm_port),
-                ots2_api_test_config.ocm_admin_access_id,
-                ots2_api_test_config.ocm_admin_access_key
-                )   
-        raw_instance = ocm_client.get_instance(ots2_api_test_config.instance_name_for_common) 
-        user_id = raw_instance['UserId']
-        cluster_name = raw_instance['ClusterName']
-
-        instance_list = [x['InstanceName'] for x in ocm_client.list_instance()]
-        for inst_name in instance_name_list:
-            self.logger.info("create or update instance with name %s", inst_name)
-            if inst_name not in instance_list:
-                ocm_client.insert_instance({
-                    'InstanceName'    : inst_name,
-                    'UserId'          : user_id,
-                    'ClusterName'     : cluster_name,
-                    'ReadCapacity'    : readcu,
-                    'WriteCapacity'   : writecu,
-                    'Quota'           : {}, 
-                    'ModelType'       : 'BASIC',
-                    'Description'     : '' 
-                })  
-            else:
-                ocm_client.update_instance({
-                    'InstanceName'    : inst_name,
-                    'UserId'          : user_id,
-                    'ReadCapacity'    : readcu,
-                    'WriteCapacity'   : writecu,
-                    'Quota'           : {}, 
-                    'ModelType'       : 'BASIC',
-                    'Description'     : '' 
-                })
-                instance_info = ocm_client.get_instance(inst_name)
-                status = instance_info['Status']
-                inst_id = instance_info['InstanceId']
-                '''保证创建的instance的status为1'''
-                if status == 2:
-                    ocm_client.enable_instance(instance_id = inst_id)
-                if status == 3:
-                    ocm_client.delete_instance(inst_id)
-                    ocm_client.insert_instance({
-                        'InstanceName'    : inst_name,
-                        'UserId'          : user_id,
-                        'ClusterName'     : cluster_name,
-                        'ReadCapacity'    : readcu,
-                        'WriteCapacity'   : writecu,
-                        'Quota'           : {}, 
-                        'ModelType'       : 'BASIC',
-                        'Description'     : '' 
-                    })
-            time.sleep(20)
-            client = OTSClient(
-                ots2_api_test_config.endpoint,
-                ots2_api_test_config.access_id,
-                ots2_api_test_config.access_key,
-                inst_name,
-                logger_name=atest.log.root.name,
-            )
-            for table_name in client.list_table():
-                client.delete_table(table_name)
-            ots_client_list.append(client)
-        return ots_client_list
-
-    def get_instance_id(self, instance_name):
-        ocm_client = OCMClient(
-                ots2_api_test_config.ocm_host,
-                int(ots2_api_test_config.ocm_port),
-                ots2_api_test_config.ocm_access_id,
-                ots2_api_test_config.ocm_access_key
-        )
-        instance_info = ocm_client.get_instance(instance_name) 
-        instance_id = instance_info['InstanceId']
-        return instance_id
-        
     def _create_table_with_4_pk(self, table_name):
         table_meta = TableMeta(table_name, [('PK0', 'STRING'), ('PK1', 'STRING'), 
             ('PK2', 'STRING'), ('PK3', 'STRING')])                
