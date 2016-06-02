@@ -58,7 +58,14 @@ Github安装
 示例代码
 ---------
 
-TBD
+- `表操作（表的创建、获取、更新和删除） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/table_operations.py>`_
+- `单行写（向表内写入一行数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/put_row.py>`_
+- `单行读（从表内读出一样数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/get_row.py>`_
+- `更新单行（更新某一行的部分字段） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/update_row.py>`_
+- `删除某行（从表内删除某一行数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/delete_row.py>`_
+- `批量写（向多张表，一次性写入多行数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/batch_write_row.py>`_
+- `批量读（从多张表，一次性读出多行数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/batch_get_row.py>`_
+- `范围扫描（给定一个范围，扫描出该范围内的所有数据） <https://github.com/aliyun/aliyun-tablestore-python-sdk/blob/master/examples/get_range.py>`_
 
 执行测试
 ---------
