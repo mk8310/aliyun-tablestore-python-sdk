@@ -8,10 +8,13 @@ import time
 import urlparse
 import calendar
 import logging
+import sys
+import platform
 from email.utils import formatdate
 
 import google.protobuf.text_format as text_format
 
+import ots2
 from ots2.error import *
 from ots2.protobuf.encoder import OTSProtoBufferEncoder
 from ots2.protobuf.decoder import OTSProtoBufferDecoder
@@ -24,6 +27,9 @@ class OTSProtocol:
 
     encoder_class = OTSProtoBufferEncoder
     decoder_class = OTSProtoBufferDecoder
+
+    python_version = '%s.%s.%s' % (sys.version_info.major, sys.version_info.micro, sys.version_info.minor)
+    user_agent = 'aliyun-tablestore-sdk-python/%s(%s/%s/%s;%s)' % (ots2.__version__, platform.system(), platform.release(), platform.machine(), python_version)
 
     api_list = {
         'CreateTable',
@@ -92,7 +98,7 @@ class OTSProtocol:
 
         signature = self._make_request_signature(query, headers)
         headers['x-ots-signature'] = signature
-        headers['User-Agent'] = "aliyun-sdk-python 2.0.6"
+        headers['User-Agent'] = self.user_agent 
         return headers
 
     def _make_response_signature(self, query, headers):
