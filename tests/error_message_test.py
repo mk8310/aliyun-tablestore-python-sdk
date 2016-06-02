@@ -170,7 +170,7 @@ class ErrorMessageTest(OTS2APITestBase):
 
         class BadOpConnectionPool(ConnectionPool):
             def send_receive(self, url, request_headers, request_body):
-                return ConnectionPool.send_receive(self, '/CreateTableInternal', request_headers, request_body)
+                return ConnectionPool.send_receive(self, '/HelloWorld', request_headers, request_body)
 
         class BadOpClient(OTSClient):
 
@@ -186,7 +186,7 @@ class ErrorMessageTest(OTS2APITestBase):
             client.list_table()
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, 'OTSUnsupportOperation', "Unsupported operation: 'CreateTableInternal'.")
+            self.assert_error(e, 400, 'OTSUnsupportOperation', "Unsupported operation: 'HelloWorld'.")
 
     def test_invalid_date_format(self):
 
