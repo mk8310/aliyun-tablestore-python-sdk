@@ -1,6 +1,11 @@
 Aliyun TableStore SDK for Python
 ==================================
 
+.. image:: https://travis-ci.org/aliyun/aliyun-tablestore-python-sdk.svg?branch=master
+    :target: https://travis-ci.org/aliyun/aliyun-tablestore-python-sdk
+.. image:: https://coveralls.io/repos/github/aliyun/aliyun-tablestore-python-sdk/badge.svg?branch=master
+    :target: https://coveralls.io/github/aliyun/aliyun-tablestore-python-sdk?branch=master
+
 概述
 ----
 
@@ -10,7 +15,7 @@ Aliyun TableStore SDK for Python
 运行环境
 ---------
 
-- 安装Python即可运行，目前支持python2.6和python2.7，暂不支持python3
+- 安装Python即可运行，目前仅支持python2.7，暂不支持python3
 
 安装方法
 ---------
