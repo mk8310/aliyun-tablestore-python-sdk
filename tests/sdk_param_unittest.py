@@ -8,12 +8,8 @@ import exceptions
 from ots2.client import *
 from ots2.metadata import *
 from ots2.error import *
-from ots2.test.mock_connection import MockConnection
-
-ENDPOINT = ''
-ACCESSID = ''
-ACCESSKEY = ''
-INSTANCENAME = ''
+from lib.mock_connection import MockConnection
+from lib.test_config import *
 
 class SDKParamTest(unittest.TestCase):
 
@@ -27,7 +23,7 @@ class SDKParamTest(unittest.TestCase):
         logger.setLevel(logging.DEBUG)
 
         OTSClient.connection_pool_class = MockConnection
-        self.ots_client = OTSClient(ENDPOINT, ACCESSID, ACCESSKEY, INSTANCENAME, logger_name='test')
+        self.ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
 
     def tearDown(self):
         pass

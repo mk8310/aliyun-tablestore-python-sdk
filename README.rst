@@ -1,6 +1,8 @@
 Aliyun TableStore SDK for Python
 ==================================
 
+[![Build Status](https://travis-ci.org/aliyun/aliyun-tablestore-python-sdk.svg)](https://travis-ci.org/aliyun/aliyun-tablestore-python-sdk)
+
 概述
 ----
 
