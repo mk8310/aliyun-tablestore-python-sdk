@@ -14,10 +14,8 @@ import time
 class RowOpTest(OTS2APITestBase):
 
     """行读写测试"""
-
     # 行操作API： GetRow, PutRow, UpdateRow, BatchGetRow, BatchWriteRow, GetRange
     # 测试每一个写操作，都要用GetRow或BatchGetRow验证数据操作符合预期
-    # 成功返回的操作都要验证CU消耗，失败的操作要后台验证CU消耗
     def _check_all_row_op_with_exception_meta_not_match(self, wrong_pk):
         try:
             self.client_test.get_row('XX', wrong_pk)
@@ -1044,44 +1042,6 @@ class RowOpTest(OTS2APITestBase):
             cu_read = 1
         consumed_expect = CapacityUnit(cu_read, 0)
         self.assert_consumed(consumed_count, consumed_expect)
-
-    def test_get_range_with_limit(self):
-        """有3个partition，边界为(0, 10), (10, 20), (20, 30)，其中有4个Row，PK分别为0, 9, 20, 29。分别测试xget_range的以下组合：a) range=(0, 10), limit=2  b) range=(0, 10), limit=1, c) range=(0, 10), limit=3  d) range=(0, 30), limit=3。每个组合分别测试正向反向。检查返回和CU是否符合预期"""
-        table_name = 'table_test_get_range_with_limit'
-        table_meta = TableMeta(table_name, [('PK0', 'INTEGER')])
-        pk_dict0 = {'PK0':0}
-        pk_dict1 = {'PK0':9}
-        pk_dict2 = {'PK0':20}
-        pk_dict3 = {'PK0':29}
-        pk_dict_list = [pk_dict0, pk_dict1, pk_dict2, pk_dict3]
-        row_list = []
-        putrow_list = []
-        for pk_dict in pk_dict_list:
-            putrow_list.append(PutRowItem(Condition("IGNORE"), pk_dict, {}))
-            row_list.append((pk_dict, {}))
-
-        reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
-
-        self.client_test.create_table(table_meta, reserved_throughput)
-        self.wait_for_partition_load('table_test_get_range_with_limit')
-
-        self.client_test.batch_write_row([{'table_name':table_name, 'put':putrow_list}])
-
-
-        range_list = [ #range        direction   limit   期望结果 期望rows
-            ([{'PK0':0}, {'PK0':10}], 'FORWARD',   2,      True,    row_list[0:2]),
-            ([{'PK0':10}, {'PK0':0}], 'BACKWARD',  2,      True,    row_list[1:2]),
-            ([{'PK0':0}, {'PK0':10}], 'FORWARD',   1,      True,    row_list[0:1]),
-            ([{'PK0':10}, {'PK0':0}], 'BACKWARD',  1,      True,    row_list[1:2]),
-            ([{'PK0':0}, {'PK0':10}], 'FORWARD',   3,      True,    row_list[0:2]),
-            ([{'PK0':10}, {'PK0':0}], 'BACKWARD',  3,      True,    row_list[1:2]),
-            ([{'PK0':0}, {'PK0':30}], 'FORWARD',   3,      True,    row_list[0:3]),
-            ([{'PK0':30}, {'PK0':0}], 'BACKWARD',  3,      True,    row_list[1:4]),
-        ]
-        for range_, direction, limit, is_normal, expect_rows in range_list:
-            begin, end = range_
-            self.logger.info("%s  %s  %s  %s" %(begin, end, direction, expect_rows))
-            self._check_xget_range(table_name, begin, end, direction, expect_rows, limit)
 
     def test_read_empty_row(self):
         """测试对空行的读操作，以及GetRange在行没有对应的列时期望不返回空行"""
