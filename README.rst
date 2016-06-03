@@ -25,7 +25,7 @@ PIP安装
 
 .. code-block:: bash
 
-    $ pip install aliyun-tablestore
+    $ pip install ots2 
 
 Github安装
 ------------
