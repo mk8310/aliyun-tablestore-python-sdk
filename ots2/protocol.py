@@ -11,6 +11,7 @@ import logging
 import sys
 import platform
 from email.utils import formatdate
+from email.utils import parsedate 
 
 import google.protobuf.text_format as text_format
 
@@ -148,7 +149,7 @@ class OTSProtocol:
         # 3, check date 
         if 'x-ots-date' in headers:
             try:
-                server_time = time.strptime(headers['x-ots-date'], '%a, %d %b %Y %H:%M:%S %Z')
+                server_time = parsedate(headers['x-ots-date'])
             except ValueError:
                 raise OTSClientError('Invalid date format in response.')
         
