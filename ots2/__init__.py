@@ -22,6 +22,12 @@ __all__ = [
     'OTSClientError',
     'OTSServiceError',
     'DefaultRetryPolicy',
+    'LogicalOperator',
+    'ComparatorType',
+    'ColumnConditionType',
+    'ColumnCondition',
+    'CompositeCondition',
+    'RelationCondition',
 ]
 
 

@@ -454,7 +454,9 @@ class OTSClient(object):
     def get_range(self, table_name, direction, 
                   inclusive_start_primary_key, 
                   exclusive_end_primary_key, 
-                  columns_to_get=None, limit=None):
+                  columns_to_get=None, 
+                  limit=None, 
+                  filter=None):
         """
         说明：根据范围条件获取多行数据。
 

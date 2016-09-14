@@ -115,6 +115,97 @@ class OTSProtoBufferEncoder:
                 )
             )
 
+    def _make_composite_condition(self, condition):
+        proto = pb2.CompositeCondition()
+
+        # combinator
+        enum_map = {
+            LogicalOperator.NOT     : pb2.LO_NOT,
+            LogicalOperator.AND     : pb2.LO_AND,
+            LogicalOperator.OR      : pb2.LO_OR,
+        }
+
+        combinator_str = self._get_unicode(condition.combinator) 
+        if combinator_str in enum_map:
+            proto.combinator = enum_map[combinator_str]
+        else:
+            raise OTSClientError(
+                "LogicalOperator should be one of [%s], not %s" % (
+                    ", ".join(enum_map.keys()), str(combinator_str)
+                )
+            )
+
+        for sub in condition.sub_conditions:
+            self._make_column_condition(proto.sub_conditions.add(), sub)
+
+        return proto.SerializeToString()
+
+    def _make_relation_condition(self, condition):
+        proto = pb2.RelationCondition()
+
+        # comparator
+        enum_map = {
+            ComparatorType.EQUAL          : pb2.CT_EQUAL,
+            ComparatorType.NOT_EQUAL      : pb2.CT_NOT_EQUAL,
+            ComparatorType.GREATER_THAN   : pb2.CT_GREATER_THAN,
+            ComparatorType.GREATER_EQUAL  : pb2.CT_GREATER_EQUAL,
+            ComparatorType.LESS_THAN      : pb2.CT_LESS_THAN,
+            ComparatorType.LESS_EQUAL     : pb2.CT_LESS_EQUAL,
+        }
+
+        comparator_str = self._get_unicode(condition.comparator) 
+        if comparator_str in enum_map:
+            proto.comparator = enum_map[comparator_str]
+        else:
+            raise OTSClientError(
+                "ComparatorType should be one of [%s], not %s" % (
+                    ", ".join(enum_map.keys()), str(comparator_str)
+                )
+            )
+
+        proto.column_name = self._get_unicode(condition.column_name)
+        self._make_column_value(proto.column_value, condition.column_value)
+        proto.pass_if_missing = condition.pass_if_missing 
+
+        return proto.SerializeToString()
+
+    def _make_column_condition(self, proto, column_condition):
+        if column_condition == None:
+            return
+
+        if not isinstance(column_condition, ColumnCondition):
+            raise OTSClientError(
+                "column condition should be an instance of ColumnCondition, not %s" %
+                condition.__class__.__name__
+            )
+
+        # type
+        enum_map = {
+            ColumnConditionType.COMPOSITE_CONDITION : pb2.CCT_RELATION,
+            ColumnConditionType.RELATION_CONDITION  : pb2.CCT_COMPOSITE,
+        }
+
+        column_condition_type_str = self._get_unicode(column_condition.type) 
+        if column_condition_type_str in enum_map:
+            proto.type = enum_map[column_condition_type_str]
+        else:
+            raise OTSClientError(
+                "column_condition_type should be one of [%s], not %s" % (
+                    ", ".join(enum_map.keys()), str(column_condition_type_str)
+                )
+            )
+
+        # condition
+        if isinstance(column_condition.condition, CompositeCondition):
+            proto.condition = self._make_composite_condition(column_condition.condition)
+        elif isinstance(column_condition.condition, RelationCondition):
+            proto.condition = self._make_relation_condition(column_condition.condition)
+        else:
+            raise OTSClientError(
+                "expect CompositeCondition, RelationCondition but not %s"
+                % column_condition.condition.__class__.__name__
+            )
+
     def _make_condition(self, proto, condition):
 
         if not isinstance(condition, Condition):
@@ -138,6 +229,8 @@ class OTSProtoBufferEncoder:
                     ", ".join(enum_map.keys()), str(expectation_str)
                 )
             )
+
+        self._make_column_condition(proto.column_condition, condition.column_condition)
 
     def _get_direction(self, direction_str):
         enum_map = {

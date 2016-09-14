@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 
 from ots2.error import *
+from ots2.utils import *
 
 __all__ = [
     'INF_MIN',
@@ -78,12 +79,117 @@ class RowDataItem(object):
         self.primary_key_columns = primary_key_columns
         self.attribute_columns = attribute_columns
 
+class LogicalOperator(object):
+    NOT = "NOT"
+    AND = "AND"
+    OR = "OR"
+
+class ComparatorType(object):
+    EQUAL = "EQUAL"
+    NOT_EQUAL = "NOT_EQUAL"
+    GREATER_THAN = "GREATER_THAN"
+    GREATER_EQUAL = "GREATER_EQUAL"
+    LESS_THAN = "LESS_THAN"
+    LESS_EQUAL = "LESS_EQUAL"
+
+class ColumnConditionType(object):
+    COMPOSITE_CONDITION = "COMPOSITE_CONDITION"
+    RELATION_CONDITION = "RELATION_CONDITION"
+
+class ColumnCondition(object):
+    
+    def get_type(self):
+        raise OTSClientError("ColumnCondition is abstract class, can not be an instance obj.")
+
+class CompositeCondition(ColumnCondition):
+    
+    def __init__(self, combinator, sub_conditions = []):
+        self.combinator = combinator
+        self.sub_conditions = sub_conditions
+
+    def get_type(self):
+        return ColumnConditionType.COMPOSITE_CONDITION
+
+    def set_combinator(self, combinator):
+        if combinator not in GET_OBJ_DEFINE(ComparatorType):
+            raise OTSClientError(
+                "Expect input combinator in %s, but %s"%(str(GET_OBJ_DEFINE(LogicalOperator)), combinator)
+            )
+        self.combinator = combinator
+
+    def get_combinator(self):
+        return combinator
+
+    def add_sub_condition(self, condition):
+        if not isinstance(condition, ColumnCondition):
+            raise OTSClientError(
+                "The input condition should be an instance of ColumnCondition, not %s"%
+                condition.__class__.__name__
+            )
+ 
+        self.sub_conditions.append(condition)
+
+    def clear_sub_condition(self):
+        self.sub_conditions = []
+
+class RelationCondition(ColumnCondition):
+   
+    def __init__(self, column_name, comparator, column_value, pass_if_missing = True):
+        self.column_name = column_name
+        self.comparator = comparator
+        self.column_value = column_value
+        self.pass_if_missing = pass_if_missing
+
+    def get_type(self):
+        return ColumnConditionType.RELATION_CONDITION
+
+    def set_pass_if_missing(self, pass_if_missing):
+        """
+        设置```pass_if_missing```
+
+        由于OTS一行的属性列不固定，有可能存在有condition条件的列在该行不存在的情况，这时
+        参数控制在这种情况下对该行的检查结果。
+        如果设置为True，则若列在该行中不存在，则检查条件通过。
+        如果设置为False，则若列在该行中不存在，则检查条件失败。
+        默认值为True。
+        """
+        if not isinstance(pass_if_missing, bool):
+            raise OTSClientError(
+                "The input pass_if_missing should be an instance of Bool, not %s"%
+                pass_if_missing.__class__.__name__
+            )
+        self.pass_if_missing = pass_if_missing
+
+    def get_pass_if_missing(self):
+        return self.pass_if_missing
+
+    def set_column_name(self, column_name):
+        self.column_name = column_name
+
+    def get_column_name(self):
+        return self.column_name
+
+    def set_column_value(self, column_value):
+        self.column_value = column_value
+
+    def get_column_value(self):
+        return self.column_value
+
+    def set_comparator(self, comparator):
+        if comparator not in GET_OBJ_DEFINE(ComparatorType):
+            raise OTSClientError(
+                "Expect input comparator in %s, but %s"%(str(GET_OBJ_DEFINE(ComparatorType)), comparator)
+            )
+        self.comparator = comparator
+
+    def get_comparator(self):
+        return self.comparator
 
 class Condition(object):
 
-    def __init__(self, row_existence_expectation):
+    def __init__(self, row_existence_expectation, column_condition = None):
         self.row_existence_expectation = row_existence_expectation 
-
+        self.column_condition = column_condition
 
 class PutRowItem(object):
 
