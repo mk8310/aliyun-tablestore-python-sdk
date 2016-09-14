@@ -138,13 +138,13 @@ class SDKParamTest(unittest.TestCase):
         try:
             primary_key = {'PK1':'hello', 'PK2':100}
             attribute_columns = {'COL1':'world', 'COL2':1000}
-            consumed = self.ots_client.put_row('test_table', ['IGNORE'], primary_key, attribute_columns)
+            consumed = self.ots_client.put_row('test_table', [RowExistenceExpectation.IGNORE], primary_key, attribute_columns)
             self.assertTrue(False)
         except:
             pass
     
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.put_row('test_table', condition, 'primary_key', 'attribute_columns')
             self.assertTrue(False)
         except:
@@ -171,28 +171,28 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, 'update_of_attribute_columns')
             self.assertTrue(False)
         except OTSClientError as e:
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'ncv' : 1})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
             
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'put' : []})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
             
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'delete' : {}})
             self.assertTrue(False)
         except OTSClientError as e:
@@ -206,7 +206,7 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.delete_row('test_table', condition, 'primary_key')
             self.assertTrue(False)
         except:
@@ -331,6 +331,33 @@ class SDKParamTest(unittest.TestCase):
             self.assertTrue(False)
         except OTSClientError:
             pass
+
+    def assert_client_error(self, error, message):
+        self.assertEqual(str(error), message)
+
+    def test_condition(self):
+        Condition(RowExistenceExpectation.IGNORE)
+        Condition(RowExistenceExpectation.EXPECT_EXIST)
+        Condition(RowExistenceExpectation.EXPECT_NOT_EXIST)
+
+        try:
+            cond = Condition('errr')
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input row_existence_expectation should be one of ['EXPECT_EXIST', 'IGNORE', 'EXPECT_NOT_EXIST'], but 'errr'", str(e))
+
+        try:
+            cond = Condition(RowExistenceExpectation.IGNORE, "")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("The input column_condition should be an instance of ColumnCondition, not str", str(e))
+
+        try:
+            cond = Condition(RowExistenceExpectation.IGNORE, RelationCondition("", "", ""))
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input comparator should be one of ['GREATER_THAN', 'NOT_EQUAL', 'GREATER_EQUAL', 'LESS_EQUAL', 'LESS_THAN', 'EQUAL'], but ''", str(e))
+
 
 if __name__ == '__main__':
     unittest.main()

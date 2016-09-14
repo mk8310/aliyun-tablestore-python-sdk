@@ -181,8 +181,8 @@ class OTSProtoBufferEncoder:
 
         # type
         enum_map = {
-            ColumnConditionType.COMPOSITE_CONDITION : pb2.CCT_RELATION,
-            ColumnConditionType.RELATION_CONDITION  : pb2.CCT_COMPOSITE,
+            ColumnConditionType.COMPOSITE_CONDITION : pb2.CCT_COMPOSITE,
+            ColumnConditionType.RELATION_CONDITION  : pb2.CCT_RELATION,
         }
 
         column_condition_type_str = self._get_unicode(column_condition.type) 
@@ -196,14 +196,14 @@ class OTSProtoBufferEncoder:
             )
 
         # condition
-        if isinstance(column_condition.condition, CompositeCondition):
-            proto.condition = self._make_composite_condition(column_condition.condition)
-        elif isinstance(column_condition.condition, RelationCondition):
-            proto.condition = self._make_relation_condition(column_condition.condition)
+        if isinstance(column_condition, CompositeCondition):
+            proto.condition = self._make_composite_condition(column_condition)
+        elif isinstance(column_condition, RelationCondition):
+            proto.condition = self._make_relation_condition(column_condition)
         else:
             raise OTSClientError(
                 "expect CompositeCondition, RelationCondition but not %s"
-                % column_condition.condition.__class__.__name__
+                % column_condition.__class__.__name__
             )
 
     def _make_condition(self, proto, condition):

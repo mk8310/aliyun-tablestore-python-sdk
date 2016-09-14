@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-__version__ = '2.0.8'
+__version__ = '2.1.0'
 __all__ = [
     'OTSClient',
 
@@ -28,6 +28,7 @@ __all__ = [
     'ColumnCondition',
     'CompositeCondition',
     'RelationCondition',
+    'RowExistenceExpectation',
 ]
 
 

@@ -3,7 +3,6 @@
 from example_config import *
 
 from ots2 import *
-
 import time
 
 table_name = 'PutRowExample'
@@ -24,10 +23,23 @@ def put_row(ots_client):
     attribute_columns = {'name':'John', 'mobile':15100000000, 'address':'China', 'age':20}
 
     # Expect not exist: put it into table only when this row is not exist.
-    condition = Condition('EXPECT_NOT_EXIST', CompositeCondition(ComparatorType.EQUAL))
-     
+    condition = Condition('EXPECT_NOT_EXIST')
     consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
     print u'Write succeed, consume %s write cu.' % consumed.write
+
+    attribute_columns = {'name':'John', 'mobile':15100000000, 'address':'China', 'age':25}
+    condition = Condition('EXPECT_EXIST', RelationCondition("age", 20, ComparatorType.EQUAL))
+    consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
+    print u'Write succeed, consume %s write cu.' % consumed.write
+
+    attribute_columns = {'name':'John', 'mobile':15100000000, 'address':'China', 'age':25}
+
+    # 上面的age已经被修改为25了，现在我们继续期望age=20，TableStore将报错
+    condition = Condition('EXPECT_EXIST', RelationCondition("age", 20, ComparatorType.EQUAL))
+    try:
+        consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
+    except OTSServiceError, e:
+        print str(e)
 
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)

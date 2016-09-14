@@ -17,7 +17,14 @@ __all__ = [
     'PutRowItem',
     'UpdateRowItem',
     'DeleteRowItem',
-    'BatchWriteRowResponseItem'
+    'BatchWriteRowResponseItem',
+    'LogicalOperator',
+    'ComparatorType',
+    'ColumnConditionType',
+    'ColumnCondition',
+    'CompositeCondition',
+    'RelationCondition',
+    'RowExistenceExpectation', 
 ]
 
 
@@ -103,17 +110,18 @@ class ColumnCondition(object):
 
 class CompositeCondition(ColumnCondition):
     
-    def __init__(self, combinator, sub_conditions = []):
-        self.combinator = combinator
-        self.sub_conditions = sub_conditions
+    def __init__(self, combinator):
+        self.sub_conditions = []
+        self.type = ColumnConditionType.COMPOSITE_CONDITION
+        self.set_combinator(combinator)
 
     def get_type(self):
-        return ColumnConditionType.COMPOSITE_CONDITION
+        return type
 
     def set_combinator(self, combinator):
-        if combinator not in GET_OBJ_DEFINE(ComparatorType):
+        if combinator not in GET_OBJ_DEFINE(LogicalOperator):
             raise OTSClientError(
-                "Expect input combinator in %s, but %s"%(str(GET_OBJ_DEFINE(LogicalOperator)), combinator)
+                "Expect input combinator should be one of %s, but '%s'"%(str(GET_OBJ_DEFINE(LogicalOperator)), combinator)
             )
         self.combinator = combinator
 
@@ -134,14 +142,19 @@ class CompositeCondition(ColumnCondition):
 
 class RelationCondition(ColumnCondition):
    
-    def __init__(self, column_name, comparator, column_value, pass_if_missing = True):
+    def __init__(self, column_name, column_value, comparator, pass_if_missing = True):
+        self.type = ColumnConditionType.RELATION_CONDITION
         self.column_name = column_name
-        self.comparator = comparator
         self.column_value = column_value
-        self.pass_if_missing = pass_if_missing
+
+        self.comparator = None
+        self.pass_if_missing = None
+
+        self.set_comparator(comparator)
+        self.set_pass_if_missing(pass_if_missing)
 
     def get_type(self):
-        return ColumnConditionType.RELATION_CONDITION
+        return type
 
     def set_pass_if_missing(self, pass_if_missing):
         """
@@ -178,18 +191,49 @@ class RelationCondition(ColumnCondition):
     def set_comparator(self, comparator):
         if comparator not in GET_OBJ_DEFINE(ComparatorType):
             raise OTSClientError(
-                "Expect input comparator in %s, but %s"%(str(GET_OBJ_DEFINE(ComparatorType)), comparator)
+                "Expect input comparator should be one of %s, but '%s'"%(str(GET_OBJ_DEFINE(ComparatorType)), comparator)
             )
         self.comparator = comparator
 
     def get_comparator(self):
         return self.comparator
 
+class RowExistenceExpectation(object):
+    IGNORE = "IGNORE"
+    EXPECT_EXIST = "EXPECT_EXIST"
+    EXPECT_NOT_EXIST = "EXPECT_NOT_EXIST"
+
 class Condition(object):
 
     def __init__(self, row_existence_expectation, column_condition = None):
-        self.row_existence_expectation = row_existence_expectation 
+        self.row_existence_expectation = None
+        self.column_condition = None
+
+        self.set_row_existence_expectation(row_existence_expectation)
+        if column_condition != None:
+            self.set_column_condition(column_condition)
+
+    def set_row_existence_expectation(self, row_existence_expectation):
+        if row_existence_expectation not in GET_OBJ_DEFINE(RowExistenceExpectation):
+            raise OTSClientError(
+                "Expect input row_existence_expectation should be one of %s, but '%s'"%(str(GET_OBJ_DEFINE(RowExistenceExpectation)), row_existence_expectation)
+            )
+
+        self.row_existence_expectation = row_existence_expectation
+        
+    def get_row_existence_expectation(self):
+        return self.row_existence_expectation 
+
+    def set_column_condition(self, column_condition):
+        if not isinstance(column_condition, ColumnCondition):
+            raise OTSClientError(
+                "The input column_condition should be an instance of ColumnCondition, not %s"%
+                column_condition.__class__.__name__
+            )
         self.column_condition = column_condition
+
+    def get_column_condition(self):
+        self.column_condition
 
 class PutRowItem(object):
 
