@@ -97,13 +97,13 @@ class OTSProtoBufferEncoder:
 
     def _get_column_type(self, type_str):
         enum_map = {
-            'INF_MIN'   : pb2.INF_MIN,
-            'INF_MAX'   : pb2.INF_MAX,
-            'INTEGER'   : pb2.INTEGER,
-            'STRING'    : pb2.STRING,
-            'BOOLEAN'   : pb2.BOOLEAN,
-            'DOUBLE'    : pb2.DOUBLE,
-            'BINARY'    : pb2.BINARY,
+            ColumnType.INF_MIN   : pb2.INF_MIN,
+            ColumnType.INF_MAX   : pb2.INF_MAX,
+            ColumnType.INTEGER   : pb2.INTEGER,
+            ColumnType.STRING    : pb2.STRING,
+            ColumnType.BOOLEAN   : pb2.BOOLEAN,
+            ColumnType.DOUBLE    : pb2.DOUBLE,
+            ColumnType.BINARY    : pb2.BINARY,
         }
 
         if type_str in enum_map:
@@ -234,8 +234,8 @@ class OTSProtoBufferEncoder:
 
     def _get_direction(self, direction_str):
         enum_map = {
-            'FORWARD'           : pb2.FORWARD,
-            'BACKWARD'          : pb2.BACKWARD
+            Direction.FORWARD           : pb2.FORWARD,
+            Direction.BACKWARD          : pb2.BACKWARD
         }
 
         if direction_str in enum_map:
@@ -370,26 +370,65 @@ class OTSProtoBufferEncoder:
         
         self._make_update_capacity_unit(proto.capacity_unit, reserved_throughput.capacity_unit)
 
+    def _make_batch_get_row_deprecated(self, table_item, item):
+        # TODO 在下一个大版本下移除该方法
+        table_name = item[0]
+        row_list = item[1]
+        columns_to_get = item[2]
+
+        table_item.table_name = self._get_unicode(table_name)
+        self._make_repeated_column_names(table_item.columns_to_get, columns_to_get)
+        for primary_key in row_list:
+            if isinstance(primary_key, dict):
+                row = table_item.rows.add()
+                self._make_columns_with_dict(row.primary_key, primary_key)
+            else:
+                raise OTSClientError(
+                    "The row should be a dict, not %s" 
+                    % row_item.__class__.__name__
+                )
+
+    def _make_batch_get_row_internal(self, table_item, item):
+        table_item.table_name = self._get_unicode(item.table_name)
+        self._make_repeated_column_names(table_item.columns_to_get, item.columns_to_get)
+        self._make_column_condition(table_item.filter, item.filter)
+
+        for primary_key in item.primary_keys:
+            if isinstance(primary_key, dict):
+                row = table_item.rows.add()
+                self._make_columns_with_dict(row.primary_key, primary_key)
+            else:
+                raise OTSClientError(
+                    "The row should be a dict, not %s" 
+                    % row_item.__class__.__name__
+                )
+
+
     def _make_batch_get_row(self, proto, batch_list):
         if not isinstance(batch_list, list):
             raise OTSClientError(
                 "batch_list should be a list, not %s" 
                 % batch_list.__class__.__name__
             )
-        
-        for (table_name, row_list, columns_to_get) in batch_list:
+
+        deprecated = None
+        for item in batch_list:
             table_item = proto.tables.add()
-            table_item.table_name = self._get_unicode(table_name)
-            self._make_repeated_column_names(table_item.columns_to_get, columns_to_get)
-            for primary_key in row_list:
-                if isinstance(primary_key, dict):
-                    row = table_item.rows.add()
-                    self._make_columns_with_dict(row.primary_key, primary_key)
-                else:
-                    raise OTSClientError(
-                        "The row should be a dict, not %s" 
-                        % row_item.__class__.__name__
-                    )
+           
+            if isinstance(item, TableInBatchGetRowItem):
+                if deprecated == True:
+                    raise OTSClientError("The item of batch list should be aways TableInBatchGetRowItem object.")
+
+                deprecated = False
+                self._make_batch_get_row_internal(table_item, item) 
+            elif len(item) == 3:
+                if deprecated == False:
+                    raise OTSClientError("The item of batch list should be aways TableInBatchGetRowItem object.")
+
+                deprecated = True 
+                self._make_batch_get_row_deprecated(table_item, item)
+            else:
+                raise OTSClientError("The item of batch list should be a TableInBatchGetRowItem object, not %d"%(len(item.__class__.__name__)))
 
     def _make_put_row_item(self, proto, put_row_item):
         self._make_condition(proto.condition, put_row_item.condition)
@@ -484,11 +523,12 @@ class OTSProtoBufferEncoder:
         proto.table_name = self._get_unicode(table_name)
         return proto
 
-    def _encode_get_row(self, table_name, primary_key, columns_to_get):
+    def _encode_get_row(self, table_name, primary_key, columns_to_get, filter):
         proto = pb2.GetRowRequest()
         proto.table_name = self._get_unicode(table_name)
         self._make_columns_with_dict(proto.primary_key, primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
+        self._make_column_condition(proto.filter, filter)
         return proto
 
     def _encode_put_row(self, table_name, condition, primary_key, attribute_columns):
@@ -526,13 +566,14 @@ class OTSProtoBufferEncoder:
 
     def _encode_get_range(self, table_name, direction, 
                 inclusive_start_primary_key, exclusive_end_primary_key, 
-                columns_to_get, limit):
+                columns_to_get, limit, filter):
         proto = pb2.GetRangeRequest()
         proto.table_name = self._get_unicode(table_name)
         proto.direction = self._get_direction(direction)
         self._make_columns_with_dict(proto.inclusive_start_primary_key, inclusive_start_primary_key)
         self._make_columns_with_dict(proto.exclusive_end_primary_key, exclusive_end_primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
+        self._make_column_condition(proto.filter, filter)
         if limit is not None:
             proto.limit = self._get_int32(limit)
         return proto

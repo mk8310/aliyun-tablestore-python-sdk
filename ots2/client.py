@@ -236,13 +236,14 @@ class OTSClient(object):
         describe_table_response = self._request_helper('DescribeTable', table_name)
         return describe_table_response
 
-    def get_row(self, table_name, primary_key, columns_to_get=None):
+    def get_row(self, table_name, primary_key, columns_to_get=None, filter=None):
         """
         说明：获取一行数据。
 
         ``table_name``是对应的表名。
         ``primary_key``是主键，类型为dict。
         ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
+        ``filter``是可选参数，表示读取指定条件的行
 
         返回：本次操作消耗的CapacityUnit、主键列和属性列。
 
@@ -258,7 +259,7 @@ class OTSClient(object):
         """
 
         (consumed, primary_key_columns, attribute_columns) = self._request_helper(
-                    'GetRow', table_name, primary_key, columns_to_get
+                    'GetRow', table_name, primary_key, columns_to_get, filter
         )
         return consumed, primary_key_columns, attribute_columns
 
@@ -348,11 +349,42 @@ class OTSClient(object):
     def batch_get_row(self, batch_list):
         """
         说明：批量获取多行数据。
+        方式一:
+        ``batch_list``表示获取多行的条件列表，格式如下：
+        [
+            TableInBatchGetRowItem(myTable0, primary_keys, column_to_get=None, filter=None)
+            TableInBatchGetRowItem(myTable1, primary_keys, column_to_get=None, filter=None)
+            TableInBatchGetRowItem(myTable2, primary_keys, column_to_get=None, filter=None)
+            TableInBatchGetRowItem(myTable3, primary_keys, column_to_get=None, filter=None)
+            TableInBatchGetRowItem(myTable4, primary_keys, column_to_get=None, filter=None)
+            TableInBatchGetRowItem(myTable5, primary_keys, column_to_get=None, filter=None)
+        ]
+        返回：对应行的结果列表。
+
+        ``response_rows_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
+        [
+            [row_data_item0, row_data_item1, ...],      # for myTable0
+            [row_data_item0, row_data_item1, ...],      # for myTable1
+            ...
+        ]
+        其中，row_data_item0, row_data_item1为ots2.metadata.RowDataItem的实例。
+        示例：
+
+            batch_list = []
+            batch_list.append(TableInBatchGetRowItem('myTable0', [{'gid':1, 'uid':103}]))
+            batch_list.append(TableInBatchGetRowItem('myTable1', [{'gid':1, 'uid':104}]))
+            batch_list.append(TableInBatchGetRowItem('myTable2', [{'gid':1, 'uid':105}]))
+            batch_list.append(TableInBatchGetRowItem('myTable3', [{'gid':1, 'uid':106}]))
+            batch_list.append(TableInBatchGetRowItem('myTable4', [{'gid':1, 'uid':107}]))
+
+            batch_get_response = ots_client.batch_get_row(batch_list) 
+
+        方式二: 这种方式不支持filter，而且这种方式在未来会被取消，该方法保留只是为了兼容以前的老版本，请使用方式一
 
         ``batch_list``表示获取多行的条件列表，格式如下：
         [
             (table_name0, [row0_primary_key, row1_primary_key, ...], [column_name0, column_name1, ...]),
-            (table_name1, [row0_primary_key, row1_primary_key, ...], [column_name0, column_name1, ...])
+            (table_name1, [row0_primary_key, row1_primary_key, ...], [column_name0, column_name1, ...]),
             ...
         ]
         其中，row0_primary_key, row1_primary_key为主键，类型为dict。
@@ -384,7 +416,6 @@ class OTSClient(object):
     def batch_write_row(self, batch_list):
         """
         说明：批量修改多行数据。
-
         ``batch_list``表示获取多行的条件列表，格式如下：
         [
             {
@@ -466,6 +497,7 @@ class OTSClient(object):
         ``exclusive_end_primary_key``表示范围的结束主键（不在范围内）。
         ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
         ``limit``是可选参数，表示最多读取多少行；如果不填，则没有限制。
+        ``filter``是可选参数，表示读取指定条件的行
 
         返回：符合条件的结果列表。
 
@@ -488,24 +520,29 @@ class OTSClient(object):
         (consumed, next_start_primary_key, row_list) = self._request_helper(
                     'GetRange', table_name, direction, 
                     inclusive_start_primary_key, exclusive_end_primary_key,
-                    columns_to_get, limit
+                    columns_to_get, limit,
+                    filter
         )
         return consumed, next_start_primary_key, row_list
 
     def xget_range(self, table_name, direction,
                    inclusive_start_primary_key,
-                   exclusive_end_primary_key, consumed_counter,
-                   columns_to_get=None, count=None):
+                   exclusive_end_primary_key, 
+                   consumed_counter,
+                   columns_to_get=None, 
+                   count=None,
+                   filter=None):
         """
         说明：根据范围条件获取多行数据，iterator版本。
 
         ``table_name``是对应的表名。
-        ``direction``表示范围的方向，字符串格式，取值包括'FORWARD'和'BACKWARD'。
+        ``direction``表示范围的方向，取值为Direction的FORWARD和BACKWARD。
         ``inclusive_start_primary_key``表示范围的起始主键（在范围内）。
         ``exclusive_end_primary_key``表示范围的结束主键（不在范围内）。
         ``consumed_counter``用于消耗的CapacityUnit统计，是ots2.metadata.CapacityUnit类的实例。
         ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
         ``count``是可选参数，表示最多读取多少行；如果不填，则尽量读取整个范围内的所有行。
+        ``filter``是可选参数，表示读取指定条件的行
 
         返回：符合条件的结果列表。
 
@@ -520,7 +557,7 @@ class OTSClient(object):
             exclusive_end_primary_key = {'gid':4, 'uid':INF_MAX} 
             columns_to_get = ['name', 'address', 'mobile', 'age']
             range_iterator = client.xget_range(
-                        'myTable', 'FORWARD', 
+                        'myTable', Direction.FORWARD, 
                         inclusive_start_primary_key, exclusive_end_primary_key,
                         consumed_counter, columns_to_get, 100
             )
@@ -546,7 +583,7 @@ class OTSClient(object):
             consumed, next_start_pk, row_list = self.get_range(
                 table_name, direction,
                 next_start_pk, exclusive_end_primary_key, 
-                columns_to_get, left_count
+                columns_to_get, left_count, filter
             )
             consumed_counter.read += consumed.read
             for row in row_list:

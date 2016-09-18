@@ -10,6 +10,8 @@ __all__ = [
     'CapacityUnit',
     'ReservedThroughput',
     'ReservedThroughputDetails',
+    'ColumnType',
+    'Direction',
     'UpdateTableResponse',
     'DescribeTableResponse',
     'RowDataItem',
@@ -17,6 +19,7 @@ __all__ = [
     'PutRowItem',
     'UpdateRowItem',
     'DeleteRowItem',
+    'TableInBatchGetRowItem',
     'BatchWriteRowResponseItem',
     'LogicalOperator',
     'ComparatorType',
@@ -57,6 +60,19 @@ class ReservedThroughputDetails(object):
         self.last_decrease_time = last_decrease_time
         self.number_of_decreases_today = number_of_decreases_today
 
+class ColumnType(object):
+    STRING = "STRING"
+    INTEGER = "INTEGER"
+    BOOLEAN = "BOOLEAN"
+    DOUBLE = "DOUBLE"
+    BINARY = "BINARY"
+    INF_MIN = "INF_MIN"
+    INF_MAX = "INF_MAX"
+
+
+class Direction(object):
+    FORWARD = "FORWARD"
+    BACKWARD = "BACKWARD"
 
 class UpdateTableResponse(object):
 
@@ -116,7 +132,7 @@ class CompositeCondition(ColumnCondition):
         self.set_combinator(combinator)
 
     def get_type(self):
-        return type
+        return self.type
 
     def set_combinator(self, combinator):
         if combinator not in GET_OBJ_DEFINE(LogicalOperator):
@@ -154,7 +170,7 @@ class RelationCondition(ColumnCondition):
         self.set_pass_if_missing(pass_if_missing)
 
     def get_type(self):
-        return type
+        return self.type
 
     def set_pass_if_missing(self, pass_if_missing):
         """
@@ -256,6 +272,15 @@ class DeleteRowItem(object):
     def __init__(self, condition, primary_key):
         self.condition = condition
         self.primary_key = primary_key
+
+
+class TableInBatchGetRowItem(object):
+
+    def __init__(self, table_name, primary_keys, columns_to_get=None, filter=None):
+        self.table_name = table_name
+        self.primary_keys = primary_keys
+        self.columns_to_get = columns_to_get
+        self.filter = filter
 
 
 class BatchWriteRowResponseItem(object):
