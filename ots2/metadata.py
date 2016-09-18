@@ -20,6 +20,7 @@ __all__ = [
     'UpdateRowItem',
     'DeleteRowItem',
     'TableInBatchGetRowItem',
+    'TableInBatchWriteRowItem',
     'BatchWriteRowResponseItem',
     'LogicalOperator',
     'ComparatorType',
@@ -282,6 +283,13 @@ class TableInBatchGetRowItem(object):
         self.columns_to_get = columns_to_get
         self.filter = filter
 
+class TableInBatchWriteRowItem(object):
+    
+    def __init__(self, table_name, put=None, update=None, delete=None):
+        self.table_name = table_name
+        self.put = put
+        self.update = update
+        self.delete = delete
 
 class BatchWriteRowResponseItem(object):
 

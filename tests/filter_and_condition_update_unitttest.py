@@ -503,7 +503,6 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
 
         time.sleep(5)
 
-    
         # 注入一行 index = 0
         primary_key = {'gid':0, 'uid':0}
         attribute_columns = {'index':0}
@@ -537,9 +536,170 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
 
         condition = Condition(RowExistenceExpectation.IGNORE, cond)
         self.client_test.delete_row(table_name, condition, primary_key)
+
+
+    def test_batch_write_row(self): 
+        """调用BatchWriteRow API, 构造不同的Condition"""
+        table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
+        reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
+        self.client_test.create_table(table_meta, reserved_throughput)
+
+        table_meta = TableMeta('myTable1', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
+        reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
+        self.client_test.create_table(table_meta, reserved_throughput)
+
+        time.sleep(5)
+
+        primary_key = {'gid':0, 'uid':0}
+        attribute_columns = {'index':0, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable0', condition, primary_key, attribute_columns)
+
+        primary_key = {'gid':0, 'uid':1}
+        attribute_columns = {'index':1, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable0', condition, primary_key, attribute_columns)
+
+        primary_key = {'gid':0, 'uid':2}
+        attribute_columns = {'index':2, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable0', condition, primary_key, attribute_columns)
+
+        primary_key = {'gid':0, 'uid':3}
+        attribute_columns = {'index':3, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable1', condition, primary_key, attribute_columns)
+
+        primary_key = {'gid':0, 'uid':4}
+        attribute_columns = {'index':4, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable1', condition, primary_key, attribute_columns)
+
+        primary_key = {'gid':0, 'uid':5}
+        attribute_columns = {'index':5, 'addr':'china'}
+        condition = Condition(RowExistenceExpectation.IGNORE)
+        self.client_test.put_row('myTable1', condition, primary_key, attribute_columns)
+
+
+        # put
+        put_row_items = []
+        put_row_items.append(PutRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 0, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':0}, 
+            {'index':6, 'addr':'china'}))
+
+        put_row_items.append(PutRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 1, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':1}, 
+            {'index':7, 'addr':'china'}))
+
+        put_row_items.append(PutRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 2, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':2}, 
+            {'index':8, 'addr':'china'}))
+
+        batch_list = []
+        batch_list.append(TableInBatchWriteRowItem('myTable0', put=put_row_items))
+        batch_list.append(TableInBatchWriteRowItem('myTable1', put=put_row_items))
+
+        result = self.client_test.batch_write_row(batch_list)
+
+        put0 = result[0]['put']
+        put1 = result[1]['put']
+
+        self.assertEqual(3, len(put0))
+        self.assertEqual(3, len(put1))
+
+        for i in put0:
+            self.assertTrue(i.is_ok)
+            self.assertEqual(1, i.consumed.write)
+            self.assertEqual(1, i.consumed.read)
+
+        for i in put1:
+            self.assertTrue(i.is_ok)
+            self.assertEqual(1, i.consumed.write)
+            self.assertEqual(1, i.consumed.read)
+
+        # update
+        update_row_items = []
+        update_row_items.append(UpdateRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 0, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':0}, 
+            {
+                'put': {'index':9, 'addr':'china'}
+            }))
+
+        update_row_items.append(UpdateRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 1, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':1}, 
+            {
+                'put': {'index':10, 'addr':'china'}
+            }))
+
+
+        update_row_items.append(UpdateRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 2, ComparatorType.EQUAL)),  
+            {'gid':0, 'uid':2}, 
+            {
+                'put': {'index':11, 'addr':'china'}
+            }))
+
+
+        batch_list = []
+        batch_list.append(TableInBatchWriteRowItem('myTable0', update=update_row_items))
+        batch_list.append(TableInBatchWriteRowItem('myTable1', update=update_row_items))
+
+        result = self.client_test.batch_write_row(batch_list)
+
+        update0 = result[0]['update']
+        update1 = result[1]['update']
+
+        self.assertEqual(3, len(update0))
+        self.assertEqual(3, len(update1))
+
+        for i in update0:
+            self.assertFalse(i.is_ok)
+            self.assertEqual('OTSConditionCheckFail', i.error_code)
+
+        for i in update1:
+            self.assertFalse(i.is_ok)
+            self.assertEqual('OTSConditionCheckFail', i.error_code)
+
+        # delete
+        delete_row_items = []
+        delete_row_items.append(DeleteRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 3, ComparatorType.EQUAL, False)),  
+            {'gid':0, 'uid':0}))
+
+        delete_row_items.append(DeleteRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 4, ComparatorType.EQUAL, False)),  
+            {'gid':0, 'uid':1}))
+
+        delete_row_items.append(DeleteRowItem(
+            Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 5, ComparatorType.EQUAL, False)),  
+            {'gid':0, 'uid':2}))
+
+        batch_list = []
+        batch_list.append(TableInBatchWriteRowItem('myTable0', delete=delete_row_items))
+        batch_list.append(TableInBatchWriteRowItem('myTable1', delete=delete_row_items))
+
+        result = self.client_test.batch_write_row(batch_list)
+
+        delete0 = result[0]['delete']
+        delete1 = result[1]['delete']
+
+        self.assertEqual(3, len(delete0))
+        self.assertEqual(3, len(delete1))
+
+        for i in delete0:
+            self.assertFalse(i.is_ok)
+            self.assertEqual("OTSConditionCheckFail", i.error_code)
  
+        for i in delete1:
+            self.assertFalse(i.is_ok)
+            self.assertEqual("OTSConditionCheckFail", i.error_code)
        
-    def test_get_row(self):
+    def test_batch_get_row(self):
         """调用BatchGetRow API, 构造不同的Condition"""
         table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
         reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))

@@ -21,6 +21,7 @@ __all__ = [
     'UpdateRowItem',
     'DeleteRowItem',
     'TableInBatchGetRowItem',
+    'TableInBatchWriteRowItem',
     'BatchWriteRowResponseItem',
     'OTSClientError',
     'OTSServiceError',
