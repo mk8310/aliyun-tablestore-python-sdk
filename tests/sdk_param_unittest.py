@@ -359,5 +359,53 @@ class SDKParamTest(unittest.TestCase):
             self.assertEqual("Expect input comparator should be one of ['GREATER_THAN', 'NOT_EQUAL', 'GREATER_EQUAL', 'LESS_EQUAL', 'LESS_THAN', 'EQUAL'], but ''", str(e))
 
 
+    def test_column_condition(self):
+        try:
+            cond = ColumnCondition()
+            cond.get_type()
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("ColumnCondition is abstract class, can not be an instance obj.", str(e))
+
+        cond = RelationCondition("uid", 100, ComparatorType.EQUAL)
+        self.assertEqual(ColumnConditionType.RELATION_CONDITION, cond.get_type())
+        
+        cond = CompositeCondition(LogicalOperator.AND)
+        self.assertEqual(ColumnConditionType.COMPOSITE_CONDITION, cond.get_type())
+       
+
+    def test_relation_condition(self):
+        RelationCondition("uid", 100, ComparatorType.EQUAL)
+        RelationCondition("uid", 100, ComparatorType.NOT_EQUAL)
+        RelationCondition("uid", 100, ComparatorType.GREATER_THAN)
+        RelationCondition("uid", 100, ComparatorType.GREATER_EQUAL)
+        RelationCondition("uid", 100, ComparatorType.LESS_THAN)
+        RelationCondition("uid", 100, ComparatorType.LESS_EQUAL)
+
+        try:
+            cond = RelationCondition("uid", 100, "")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input comparator should be one of ['GREATER_THAN', 'NOT_EQUAL', 'GREATER_EQUAL', 'LESS_EQUAL', 'LESS_THAN', 'EQUAL'], but ''", str(e))
+       
+        try:
+            cond = RelationCondition("uid", 100, ComparatorType.LESS_EQUAL, "True")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("The input pass_if_missing should be an instance of Bool, not str", str(e))
+       
+
+    def test_composite_condition(self):
+        CompositeCondition(LogicalOperator.NOT)
+        CompositeCondition(LogicalOperator.AND)
+        CompositeCondition(LogicalOperator.OR)
+
+        try:
+            cond = CompositeCondition("")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input combinator should be one of ['AND', 'NOT', 'OR'], but ''", str(e))
+ 
+
 if __name__ == '__main__':
     unittest.main()
