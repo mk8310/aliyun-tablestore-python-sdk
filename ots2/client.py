@@ -416,6 +416,76 @@ class OTSClient(object):
     def batch_write_row(self, batch_list):
         """
         说明：批量修改多行数据。
+        方式一
+        ``batch_list``表示获取多行的条件列表，格式如下：
+        [
+            TableInBatchWriteRowItem(table0, put=put_row_items, update=update_row_items, delete=delete_row_items)
+            TableInBatchWriteRowItem(table1, put=put_row_items, update=update_row_items, delete=delete_row_items)
+            TableInBatchWriteRowItem(table2, put=put_row_items, update=update_row_items, delete=delete_row_items)
+            TableInBatchWriteRowItem(table3, put=put_row_items, update=update_row_items, delete=delete_row_items)
+            ...
+        ]
+        其中，put_row_items, 是ots2.metadata.PutRowItem类的实例列表；
+              update_row_items, 是ots2.metadata.UpdateRowItem类的实例列表；
+              delete_row_items, 是ots2.metadata.DeleteRowItem类的实例列表。
+
+        返回：对应行的修改结果列表。
+
+        ``response_items_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
+        [
+            {                                       # for table0
+                'put':[put_row_resp, ...],
+                'update':[update_row_resp, ...],
+                'delete':[delete_row_resp, ..])
+            },
+            {                                       # for table1
+                'put':[put_row_resp, ...],
+                'update':[update_row_resp, ...],
+                'delete':[delete_row_resp, ..]
+            },
+            ...
+        ]
+        其中put_row_resp，update_row_resp和delete_row_resp都是ots2.metadata.BatchWriteRowResponseItem类的实例。
+
+        示例：
+            # put
+            put_row_items = []
+            put_row_items.append(PutRowItem(
+                Condition(RowExistenceExpectation.IGNORE),
+                {'gid':0, 'uid':0},
+                {'index':0, 'addr':'china'}))
+
+            # update
+            update_row_items = []
+            update_row_items.append(UpdateRowItem(
+                Condition(RowExistenceExpectation.IGNORE),
+                {'gid':0, 'uid':1},
+                {
+                    'put': {'index':0, 'addr':'china'}
+                }))
+
+            # delete
+            delete_row_items = []
+            delete_row_items.append(DeleteRowItem(
+                Condition(RowExistenceExpectation.IGNORE),
+                {'gid':0, 'uid':3}))
+
+            batch_list = []
+            batch_list.append(TableInBatchWriteRowItem(
+                'myTable0', 
+                put=put_row_items, 
+                update=update_row_items, 
+                delete=delete_row_items))
+
+            batch_list.append(TableInBatchWriteRowItem(
+                'myTable1', 
+                put=put_row_items, 
+                update=update_row_items, 
+                delete=delete_row_items))
+
+            batch_write_response = ots_client.batch_write_row(batch_list) 
+
+        方式二：该方式保留只是为了兼容老的版本，请使用方式一
         ``batch_list``表示获取多行的条件列表，格式如下：
         [
             {
@@ -477,6 +547,8 @@ class OTSClient(object):
             table_item2  = {'table_name':'notExistTable', 'put':[put_row_item], 'update':[update_row_item], 'delete':[delete_row_item]}
             batch_list = [table_item1, table_item2]
             batch_write_response = ots_client.batch_write_row(batch_list) 
+
+
         """
 
         response_item_list = self._request_helper('BatchWriteRow', batch_list)
