@@ -13,7 +13,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
 
     """ConditionUpdate"""
 
-    def test_update_row(self):
+    def _test_update_row(self):
         """调用UpdateRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -203,7 +203,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         condition = Condition(RowExistenceExpectation.IGNORE, cond)
         self.client_test.update_row(table_name, condition, primary_key, attribute_columns)
 
-    def test_put_row(self):
+    def _test_put_row(self):
         """调用PutRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -389,7 +389,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         condition = Condition(RowExistenceExpectation.IGNORE, cond)
         self.client_test.put_row(table_name, condition, primary_key, attribute_columns)
 
-    def test_get_row(self):
+    def _test_get_row(self):
         """调用GetRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -411,7 +411,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cond.add_sub_condition(RelationCondition("index", 0, ComparatorType.NOT_EQUAL))
         cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.EQUAL))
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
         # 读取一行数据，(index == 0 & addr == china), 期望读取成功
@@ -419,7 +419,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cond.add_sub_condition(RelationCondition("index", 0, ComparatorType.EQUAL))
         cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.EQUAL))
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         ## OR
@@ -429,7 +429,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cond.add_sub_condition(RelationCondition("index", 0, ComparatorType.NOT_EQUAL))
         cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.NOT_EQUAL))
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
         # 读取一行数据，(index != 0 or addr == china), 期望读取成功
@@ -437,7 +437,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cond.add_sub_condition(RelationCondition("index", 0, ComparatorType.NOT_EQUAL))
         cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.EQUAL))
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         ## NOT
@@ -449,7 +449,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         sub_cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.EQUAL))
         cond.add_sub_condition(sub_cond)
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
         # 读取一行数据，!(index != 0 & addr != china), 期望读取成功
@@ -459,42 +459,42 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         sub_cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.NOT_EQUAL))
         cond.add_sub_condition(sub_cond)
 
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         ## RELATION_CONDITION
 
         # 读取一行数据，index != 0, 期望读取失败
         cond = RelationCondition("index", 0, ComparatorType.NOT_EQUAL)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
         # 读取一行数据, index == 0, 期望读取成功
         cond = RelationCondition("index", 0, ComparatorType.EQUAL)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         # 读取一行数据, index >= 0, 期望读取成功
         cond = RelationCondition("index", 0, ComparatorType.GREATER_EQUAL)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         # 读取一行数据, index <= 0, 期望读取成功
         cond = RelationCondition("index", 0, ComparatorType.LESS_EQUAL)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual(primary_key, pk)
 
         # 读取一行数据，index > 0, 期望读取失败
         cond = RelationCondition("index", 0, ComparatorType.GREATER_THAN)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
         # 读取一行数据，index < 0, 期望读取失败
         cond = RelationCondition("index", 0, ComparatorType.LESS_THAN)
-        cu, pk, attr = self.client_test.get_row(table_name, primary_key, filter=cond)
+        cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
-    def test_delete_row(self):
+    def _test_delete_row(self):
         """调用DeleteRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -538,7 +538,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         self.client_test.delete_row(table_name, condition, primary_key)
 
 
-    def test_batch_write_row(self): 
+    def _test_batch_write_row(self): 
         """调用BatchWriteRow API, 构造不同的Condition"""
         table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
         reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -751,26 +751,28 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
 
         column_to_get = ['gid', 'uid', 'index']
         
-        batch_list = []
+        batch_list = MultiTableInBatchGetRowItem()
 
         primary_keys = []
         primary_keys.append({'gid':0, 'uid':0})
         primary_keys.append({'gid':0, 'uid':1})
         primary_keys.append({'gid':0, 'uid':2})
-        batch_list.append(TableInBatchGetRowItem('myTable0', primary_keys, column_to_get, cond))
+        batch_list.add(TableInBatchGetRowItem('myTable0', primary_keys, column_to_get, cond))
 
         primary_keys = []
         primary_keys.append({'gid':0, 'uid':0})
         primary_keys.append({'gid':1, 'uid':0})
         primary_keys.append({'gid':2, 'uid':0})
-        batch_list.append(TableInBatchGetRowItem('myTable1', primary_keys, column_to_get, cond))
+        batch_list.add(TableInBatchGetRowItem('myTable1', primary_keys, column_to_get, cond))
 
         result = self.client_test.batch_get_row(batch_list)
 
-        self.assertEqual(2, len(result))
+        table0 = result.get_result_by_table('myTable0')
+        table1 = result.get_result_by_table('myTable1')
 
-        table0 = result[0]
-        table1 = result[1]
+        self.assertEqual(6, len(result.get_succeed_rows()))
+        self.assertEqual(0, len(result.get_failed_rows()))
+        self.assertEqual(True, result.is_all_succeed())
 
         self.assertEqual(3, len(table0))
         self.assertEqual(3, len(table1))
@@ -805,26 +807,29 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cond = RelationCondition('index', 0, ComparatorType.GREATER_THAN)
         column_to_get = ['gid', 'uid', 'index']
         
-        batch_list = []
+        batch_list = MultiTableInBatchGetRowItem()
 
         primary_keys = []
         primary_keys.append({'gid':0, 'uid':0})
         primary_keys.append({'gid':0, 'uid':1})
         primary_keys.append({'gid':0, 'uid':2})
-        batch_list.append(TableInBatchGetRowItem('myTable0', primary_keys, column_to_get, cond))
+        batch_list.add(TableInBatchGetRowItem('myTable0', primary_keys, column_to_get, cond))
 
         primary_keys = []
         primary_keys.append({'gid':0, 'uid':0})
         primary_keys.append({'gid':1, 'uid':0})
         primary_keys.append({'gid':2, 'uid':0})
-        batch_list.append(TableInBatchGetRowItem('myTable1', primary_keys, column_to_get, cond))
+        batch_list.add(TableInBatchGetRowItem('myTable1', primary_keys, column_to_get, cond))
 
         result = self.client_test.batch_get_row(batch_list)
 
-        self.assertEqual(2, len(result))
+        self.assertEqual(6, len(result.get_succeed_rows()))
+        self.assertEqual(0, len(result.get_failed_rows()))
 
-        table0 = result[0]
-        table1 = result[1]
+        self.assertEqual(True, result.is_all_succeed())
+
+        table0 = result.get_result_by_table('myTable0')
+        table1 = result.get_result_by_table('myTable1')
 
         self.assertEqual(3, len(table0))
         self.assertEqual(3, len(table1))
@@ -856,7 +861,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         self.assertEqual({'index': 2}, table1[2].attribute_columns)
 
 
-    def test_get_range(self):
+    def _test_get_range(self):
         """调用GetRange API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -889,7 +894,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
                 Direction.FORWARD, 
                 next_pk, 
                 exclusive_end_primary_key, 
-                filter=cond)
+                column_filter=cond)
 
             next_pk = next
             rows.extend(row_list)
@@ -916,7 +921,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
                 inclusive_start_primary_key,
                 exclusive_end_primary_key,
                 consumed_counter,
-                filter=cond) 
+                column_filter=cond) 
 
         for r in range_iterator:
             rows.append(r)

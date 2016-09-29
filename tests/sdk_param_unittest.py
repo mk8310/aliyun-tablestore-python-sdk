@@ -344,7 +344,7 @@ class SDKParamTest(unittest.TestCase):
             cond = Condition('errr')
             self.assertTrue(False)
         except OTSClientError, e:
-            self.assertEqual("Expect input row_existence_expectation should be one of ['EXPECT_EXIST', 'IGNORE', 'EXPECT_NOT_EXIST'], but 'errr'", str(e))
+            self.assertEqual("Expect input row_existence_expectation should be one of ['RowExistenceExpectation.IGNORE', 'RowExistenceExpectation.EXPECT_EXIST', 'RowExistenceExpectation.EXPECT_NOT_EXIST'], but 'errr'", str(e))
 
         try:
             cond = Condition(RowExistenceExpectation.IGNORE, "")
@@ -356,7 +356,7 @@ class SDKParamTest(unittest.TestCase):
             cond = Condition(RowExistenceExpectation.IGNORE, RelationCondition("", "", ""))
             self.assertTrue(False)
         except OTSClientError, e:
-            self.assertEqual("Expect input comparator should be one of ['GREATER_THAN', 'NOT_EQUAL', 'GREATER_EQUAL', 'LESS_EQUAL', 'LESS_THAN', 'EQUAL'], but ''", str(e))
+            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
 
 
     def test_column_condition(self):
@@ -386,7 +386,7 @@ class SDKParamTest(unittest.TestCase):
             cond = RelationCondition("uid", 100, "")
             self.assertTrue(False)
         except OTSClientError, e:
-            self.assertEqual("Expect input comparator should be one of ['GREATER_THAN', 'NOT_EQUAL', 'GREATER_EQUAL', 'LESS_EQUAL', 'LESS_THAN', 'EQUAL'], but ''", str(e))
+            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
        
         try:
             cond = RelationCondition("uid", 100, ComparatorType.LESS_EQUAL, "True")
@@ -404,7 +404,7 @@ class SDKParamTest(unittest.TestCase):
             cond = CompositeCondition("")
             self.assertTrue(False)
         except OTSClientError, e:
-            self.assertEqual("Expect input combinator should be one of ['AND', 'NOT', 'OR'], but ''", str(e))
+            self.assertEqual("Expect input combinator should be one of ['LogicalOperator.NOT', 'LogicalOperator.AND', 'LogicalOperator.OR'], but ''", str(e))
  
 
 if __name__ == '__main__':
