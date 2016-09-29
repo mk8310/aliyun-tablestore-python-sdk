@@ -350,37 +350,32 @@ class OTSClient(object):
 
         response = ots_client.batch_get_row(request)
 
-        ``response``为返回的结果列表，与请求的顺序一一对应，格式如下：
+        ``response``为返回的结果，类型为ots2.metadata.MultiTableInBatchGetRowResult
 
-        方式一:
-        ``batch_list``表示获取多行的条件列表，格式如下：
-        [
-            TableInBatchGetRowItem(myTable0, primary_keys, column_to_get=None, column_filter=None)
-            TableInBatchGetRowItem(myTable1, primary_keys, column_to_get=None, column_filter=None)
-            TableInBatchGetRowItem(myTable2, primary_keys, column_to_get=None, column_filter=None)
-            TableInBatchGetRowItem(myTable3, primary_keys, column_to_get=None, column_filter=None)
-            TableInBatchGetRowItem(myTable4, primary_keys, column_to_get=None, column_filter=None)
-            TableInBatchGetRowItem(myTable5, primary_keys, column_to_get=None, column_filter=None)
-        ]
-        返回：对应行的结果列表。
-
-        ``response_rows_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
-        [
-            [row_data_item0, row_data_item1, ...],      # for myTable0
-            [row_data_item0, row_data_item1, ...],      # for myTable1
-            ...
-        ]
-        其中，row_data_item0, row_data_item1为ots2.metadata.RowDataItem的实例。
         示例：
+            cond = CompositeCondition(LogicalOperator.AND)
+            cond.add_sub_condition(RelationCondition("index", 0, ComparatorType.EQUAL))
+            cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.EQUAL))
 
-            batch_list = []
-            batch_list.append(TableInBatchGetRowItem('myTable0', [{'gid':1, 'uid':103}]))
-            batch_list.append(TableInBatchGetRowItem('myTable1', [{'gid':1, 'uid':104}]))
-            batch_list.append(TableInBatchGetRowItem('myTable2', [{'gid':1, 'uid':105}]))
-            batch_list.append(TableInBatchGetRowItem('myTable3', [{'gid':1, 'uid':106}]))
-            batch_list.append(TableInBatchGetRowItem('myTable4', [{'gid':1, 'uid':107}]))
+            request = MultiTableInBatchGetRowItem()
+            column_to_get = ['gid', 'uid', 'index']
 
-            batch_get_response = ots_client.batch_get_row(batch_list) 
+            primary_keys = []
+            primary_keys.append({'gid':0, 'uid':0})
+            primary_keys.append({'gid':0, 'uid':1})
+            primary_keys.append({'gid':0, 'uid':2})
+            request.add(TableInBatchGetRowItem('myTable0', primary_keys, column_to_get, cond))
+
+            primary_keys = []
+            primary_keys.append({'gid':0, 'uid':0})
+            primary_keys.append({'gid':1, 'uid':0})
+            primary_keys.append({'gid':2, 'uid':0})
+            request.add(TableInBatchGetRowItem('myTable1', primary_keys, column_to_get, cond))
+
+            result = ots_client.batch_get_row(request)
+
+            table0 = result.get_result_by_table('myTable0')
+            table1 = result.get_result_by_table('myTable1')
 
         方式二: 这种方式不支持column_filter，而且这种方式在未来会被取消，该方法保留只是为了兼容以前的老版本，请使用方式一
 
@@ -419,88 +414,80 @@ class OTSClient(object):
 
         response = self._request_helper('BatchGetRow', request)
 
-        return self._parse_batch_get_row_response(deprecated, response)
-
-    def _parse_batch_get_row_response(self, deprecated, response):
         if deprecated == True:
             return response
         else:
             return MultiTableInBatchGetRowResult(response)
 
-
-    def batch_write_row(self, batch_list):
+    def batch_write_row(self, request):
         """
         说明：批量修改多行数据。
         方式一:
-        ``batch_list``表示获取多行的条件列表，格式如下：
-        [
-            TableInBatchWriteRowItem(table0, put=put_row_items, update=update_row_items, delete=delete_row_items)
-            TableInBatchWriteRowItem(table1, put=put_row_items, update=update_row_items, delete=delete_row_items)
-            TableInBatchWriteRowItem(table2, put=put_row_items, update=update_row_items, delete=delete_row_items)
-            TableInBatchWriteRowItem(table3, put=put_row_items, update=update_row_items, delete=delete_row_items)
-            ...
-        ]
+        request = MiltiTableInBatchWriteRowItem()
+
+        request.add(TableInBatchWriteRowItem(table0, put=put_row_items, update=update_row_items, delete=delete_row_items))
+        request.add(TableInBatchWriteRowItem(table1, put=put_row_items, update=update_row_items, delete=delete_row_items))
+        request.add(TableInBatchWriteRowItem(table2, put=put_row_items, update=update_row_items, delete=delete_row_items))
+        request.add(TableInBatchWriteRowItem(table3, put=put_row_items, update=update_row_items, delete=delete_row_items))
+
+        response = ots_client.batch_write_row(request)
+
         其中，put_row_items, 是ots2.metadata.PutRowItem类的实例列表；
               update_row_items, 是ots2.metadata.UpdateRowItem类的实例列表；
               delete_row_items, 是ots2.metadata.DeleteRowItem类的实例列表。
-
-        返回：对应行的修改结果列表。
-
-        ``response_items_list``为返回的结果列表，与请求的顺序一一对应，格式如下：
-        [
-            {                                       # for table0
-                'put':[put_row_resp, ...],
-                'update':[update_row_resp, ...],
-                'delete':[delete_row_resp, ..])
-            },
-            {                                       # for table1
-                'put':[put_row_resp, ...],
-                'update':[update_row_resp, ...],
-                'delete':[delete_row_resp, ..]
-            },
-            ...
-        ]
-        其中put_row_resp，update_row_resp和delete_row_resp都是ots2.metadata.BatchWriteRowResponseItem类的实例。
+        
+        ``response``为返回的结果，类型为ots2.metadata.MultiTableInBatchWriteRowResult
 
         示例：
-            # put
+            # put 
             put_row_items = []
             put_row_items.append(PutRowItem(
-                Condition(RowExistenceExpectation.IGNORE),
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 0, ComparatorType.EQUAL)),
                 {'gid':0, 'uid':0},
-                {'index':0, 'addr':'china'}))
+                {'index':6, 'addr':'china'}))
+
+            put_row_items.append(PutRowItem(
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 1, ComparatorType.EQUAL)),
+                {'gid':0, 'uid':1},
+                {'index':7, 'addr':'china'}))
 
             # update
             update_row_items = []
             update_row_items.append(UpdateRowItem(
-                Condition(RowExistenceExpectation.IGNORE),
-                {'gid':0, 'uid':1},
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 0, ComparatorType.EQUAL)),
+                {'gid':1, 'uid':0},
                 {
-                    'put': {'index':0, 'addr':'china'}
+                    'put': {'index':9, 'addr':'china'}
+                }))
+
+            update_row_items.append(UpdateRowItem(
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 1, ComparatorType.EQUAL)),
+                {'gid':2, 'uid':1},
+                {
+                    'put': {'index':10, 'addr':'china'}
                 }))
 
             # delete
             delete_row_items = []
             delete_row_items.append(DeleteRowItem(
-                Condition(RowExistenceExpectation.IGNORE),
-                {'gid':0, 'uid':3}))
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 3, ComparatorType.EQUAL, False)),
+                {'gid':2, 'uid':0}))
 
-            batch_list = []
-            batch_list.append(TableInBatchWriteRowItem(
-                'myTable0', 
-                put=put_row_items, 
-                update=update_row_items, 
-                delete=delete_row_items))
+            delete_row_items.append(DeleteRowItem(
+                Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 4, ComparatorType.EQUAL, False)),
+                {'gid':2, 'uid':1}))
 
-            batch_list.append(TableInBatchWriteRowItem(
-                'myTable1', 
-                put=put_row_items, 
-                update=update_row_items, 
-                delete=delete_row_items))
+            request = MultiTableInBatchWriteRowItem()
+            request.add(TableInBatchWriteRowItem('myTable0', put=put_row_items, update=update_row_items, delete=delete_row_items))
+            request.add(TableInBatchWriteRowItem('myTable1', put=put_row_items, update=update_row_items, delete=delete_row_items))
 
-            batch_write_response = ots_client.batch_write_row(batch_list) 
+            result = self.client_test.batch_write_row(request)
 
-        方式二：该方式保留只是为了兼容老的版本，请使用方式一
+            r0 = result.get_put_by_table('myTable0')
+            r1 = result.get_put_by_table('myTable1')
+
+        方式二: 这种方式在未来会被取消，该方法保留只是为了兼容以前的老版本，请使用方式一
+
         ``batch_list``表示获取多行的条件列表，格式如下：
         [
             {
@@ -566,7 +553,17 @@ class OTSClient(object):
 
         """
 
-        return self._request_helper('BatchWriteRow', batch_list)
+        deprecated = None
+        if isinstance(request, list):
+            deprecated = True
+
+        response = self._request_helper('BatchWriteRow', request)
+
+        if deprecated == True:
+            return response
+        else:
+            return MultiTableInBatchWriteRowResult(response)
+
 
     def get_range(self, table_name, direction, 
                   inclusive_start_primary_key, 

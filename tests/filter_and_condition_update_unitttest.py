@@ -538,7 +538,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         self.client_test.delete_row(table_name, condition, primary_key)
 
 
-    def _test_batch_write_row(self): 
+    def test_batch_write_row(self): 
         """调用BatchWriteRow API, 构造不同的Condition"""
         table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
         reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -598,27 +598,33 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
             {'gid':0, 'uid':2}, 
             {'index':8, 'addr':'china'}))
 
-        batch_list = []
-        batch_list.append(TableInBatchWriteRowItem('myTable0', put=put_row_items))
-        batch_list.append(TableInBatchWriteRowItem('myTable1', put=put_row_items))
+        batch_list = MultiTableInBatchWriteRowItem()
+        batch_list.add(TableInBatchWriteRowItem('myTable0', put=put_row_items))
+        batch_list.add(TableInBatchWriteRowItem('myTable1', put=put_row_items))
 
         result = self.client_test.batch_write_row(batch_list)
 
-        put0 = result[0]['put']
-        put1 = result[1]['put']
+        self.assertEqual(True, result.is_all_succeed())
 
-        self.assertEqual(3, len(put0))
-        self.assertEqual(3, len(put1))
+        r0 = result.get_put_by_table('myTable0')
+        r1 = result.get_put_by_table('myTable1')
 
-        for i in put0:
+
+        self.assertEqual(3, len(r0))
+        self.assertEqual(3, len(r1))
+
+        for i in r0:
             self.assertTrue(i.is_ok)
             self.assertEqual(1, i.consumed.write)
             self.assertEqual(1, i.consumed.read)
 
-        for i in put1:
+        for i in r1:
             self.assertTrue(i.is_ok)
             self.assertEqual(1, i.consumed.write)
             self.assertEqual(1, i.consumed.read)
+
+        self.assertEqual(6, len(result.get_succeed_of_put()))
+        self.assertEqual(0, len(result.get_failed_of_put()))
 
         # update
         update_row_items = []
@@ -645,25 +651,33 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
             }))
 
 
-        batch_list = []
-        batch_list.append(TableInBatchWriteRowItem('myTable0', update=update_row_items))
-        batch_list.append(TableInBatchWriteRowItem('myTable1', update=update_row_items))
+        batch_list = MultiTableInBatchWriteRowItem()
+        batch_list.add(TableInBatchWriteRowItem('myTable0', update=update_row_items))
+        batch_list.add(TableInBatchWriteRowItem('myTable1', update=update_row_items))
 
         result = self.client_test.batch_write_row(batch_list)
 
-        update0 = result[0]['update']
-        update1 = result[1]['update']
+        self.assertEqual(False, result.is_all_succeed())
 
-        self.assertEqual(3, len(update0))
-        self.assertEqual(3, len(update1))
+        r0 = result.get_update_by_table('myTable0')
+        r1 = result.get_update_by_table('myTable1')
 
-        for i in update0:
+        self.assertEqual(3, len(r0))
+        self.assertEqual(3, len(r1))
+
+        for i in r0:
             self.assertFalse(i.is_ok)
-            self.assertEqual('OTSConditionCheckFail', i.error_code)
+            self.assertEqual("OTSConditionCheckFail", i.error_code)
+            self.assertEqual("Condition check failed.", i.error_message)
 
-        for i in update1:
+        for i in r1:
             self.assertFalse(i.is_ok)
-            self.assertEqual('OTSConditionCheckFail', i.error_code)
+            self.assertEqual("OTSConditionCheckFail", i.error_code)
+            self.assertEqual("Condition check failed.", i.error_message)
+
+
+        self.assertEqual(0, len(result.get_succeed_of_update()))
+        self.assertEqual(6, len(result.get_failed_of_update()))
 
         # delete
         delete_row_items = []
@@ -679,27 +693,34 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
             Condition(RowExistenceExpectation.IGNORE, RelationCondition("index", 5, ComparatorType.EQUAL, False)),  
             {'gid':0, 'uid':2}))
 
-        batch_list = []
-        batch_list.append(TableInBatchWriteRowItem('myTable0', delete=delete_row_items))
-        batch_list.append(TableInBatchWriteRowItem('myTable1', delete=delete_row_items))
+        batch_list = MultiTableInBatchWriteRowItem()
+        batch_list.add(TableInBatchWriteRowItem('myTable0', delete=delete_row_items))
+        batch_list.add(TableInBatchWriteRowItem('myTable1', delete=delete_row_items))
 
         result = self.client_test.batch_write_row(batch_list)
 
-        delete0 = result[0]['delete']
-        delete1 = result[1]['delete']
+        self.assertEqual(False, result.is_all_succeed())
 
-        self.assertEqual(3, len(delete0))
-        self.assertEqual(3, len(delete1))
+        r0 = result.get_delete_by_table('myTable0')
+        r1 = result.get_delete_by_table('myTable1')
 
-        for i in delete0:
+        self.assertEqual(3, len(r0))
+        self.assertEqual(3, len(r1))
+
+        for i in r0:
             self.assertFalse(i.is_ok)
             self.assertEqual("OTSConditionCheckFail", i.error_code)
- 
-        for i in delete1:
+            self.assertEqual("Condition check failed.", i.error_message)
+
+        for i in r1:
             self.assertFalse(i.is_ok)
             self.assertEqual("OTSConditionCheckFail", i.error_code)
+            self.assertEqual("Condition check failed.", i.error_message)
+
+        self.assertEqual(0, len(result.get_succeed_of_delete()))
+        self.assertEqual(6, len(result.get_failed_of_delete()))
        
-    def test_batch_get_row(self):
+    def _test_batch_get_row(self):
         """调用BatchGetRow API, 构造不同的Condition"""
         table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
         reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))

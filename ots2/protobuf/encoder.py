@@ -50,6 +50,12 @@ ROW_EXISTENCE_EXPECTATION_MAP = {
     RowExistenceExpectation.EXPECT_NOT_EXIST : pb2.EXPECT_NOT_EXIST ,
 }
 
+BATCH_WRITE_ROW_TYPE_MAP = {
+    BatchWriteRowType.PUT    : PutRowItem, 
+    BatchWriteRowType.UPDATE : UpdateRowItem, 
+    BatchWriteRowType.DELETE : DeleteRowItem
+}
+
 class OTSProtoBufferEncoder:
 
     def __init__(self, encoding):
@@ -441,95 +447,81 @@ class OTSProtoBufferEncoder:
         self._make_condition(proto.condition, delete_row_item.condition)
         self._make_columns_with_dict(proto.primary_key, delete_row_item.primary_key)
 
-    def _make_batch_get_write_deprecated(self, table_item, table_dict):
-        enum_map = {
-            'put': PutRowItem, 
-            'update': UpdateRowItem, 
-            'delete': DeleteRowItem
-        }
- 
-        table_name = table_dict.get('table_name')
-        table_item.table_name = self._get_unicode(table_name)
+    def _make_batch_write_row_deprecated(self, proto, batch_list):
+        global BATCH_WRITE_ROW_TYPE_MAP
+        enum_map = BATCH_WRITE_ROW_TYPE_MAP
 
-        for key,row_list in table_dict.iteritems():
-            if key is 'table_name':
-                continue
-            if not key in enum_map:
+        for table_dict in batch_list:
+            if not isinstance(table_dict, dict):
                 raise OTSClientError(
-                    "operation type must be one of [%s], not %s" % (
-                    ", ".join(enum_map.keys()), str(key))
+                    "every item in batch_list should be a dict, not %s" 
+                    % table_dict.__class__.__name__
                 )
-            if not isinstance(row_list, list):
-                raise OTSClientError(
-                    "rows to write should be a list, not %s" 
-                    % row_list.__class__.__name__
-                )
-            for row_item in row_list:
-                if not isinstance(row_item, enum_map[key]):
+
+            table_name = table_dict.get('table_name')
+            table_item = proto.tables.add()
+            table_item.table_name = self._get_unicode(table_name)
+
+            for key,row_list in table_dict.iteritems():
+                if key is 'table_name':
+                    continue
+                if not key in enum_map:
                     raise OTSClientError(
-                        "row should be an instance of %s, not %s" % (
-                        enum_map[key].__name__, row_item.__class__.__name__)
+                        "operation type must be one of [%s], not %s" % (
+                        ", ".join(enum_map.keys()), str(key))
                     )
-                if key is 'put':
+                if not isinstance(row_list, list):
+                    raise OTSClientError(
+                        "rows to write should be a list, not %s" 
+                        % row_list.__class__.__name__
+                    )
+                for row_item in row_list:
+                    if not isinstance(row_item, enum_map[key]):
+                        raise OTSClientError(
+                            "row should be an instance of %s, not %s" % (
+                            enum_map[key].__name__, row_item.__class__.__name__)
+                        )
+                    if key is 'put':
+                        row = table_item.put_rows.add()
+                        self._make_put_row_item(row, row_item)
+                    elif key is 'update':
+                        row = table_item.update_rows.add()
+                        self._make_update_row_item(row, row_item)
+                    elif key is 'delete':
+                        row = table_item.delete_rows.add()
+                        self._make_delete_row_item(row, row_item)
+ 
+    def _make_batch_write_row_internal(self, proto, request):
+        for table_name, item in request.items.items():
+            table_item = proto.tables.add()  
+            table_item.table_name = self._get_unicode(item.table_name)
+
+            if item.put != None:
+                for row_item in item.put:
                     row = table_item.put_rows.add()
                     self._make_put_row_item(row, row_item)
-                elif key is 'update':
+
+            if item.update != None:
+                for row_item in item.update:
                     row = table_item.update_rows.add()
                     self._make_update_row_item(row, row_item)
-                elif key is 'delete':
+
+            if item.delete != None:
+                for row_item in item.delete:
                     row = table_item.delete_rows.add()
                     self._make_delete_row_item(row, row_item)
 
 
-    def _make_batch_write_row_internal(self, table_item, item):
-        
-        table_item.table_name = self._get_unicode(item.table_name)
-
-        if item.put != None:
-            for row_item in item.put:
-                row = table_item.put_rows.add()
-                self._make_put_row_item(row, row_item)
-
-        if item.update != None:
-            for row_item in item.update:
-                row = table_item.update_rows.add()
-                self._make_update_row_item(row, row_item)
-
-        if item.delete != None:
-            for row_item in item.delete:
-                row = table_item.delete_rows.add()
-                self._make_delete_row_item(row, row_item)
-
-
     def _make_batch_write_row(self, proto, request):
-        if not isinstance(request, list):
-            raise OTSClientError(
-                "request should be a list, not %s" 
-                % request.__class__.__name__
-            )
-             
         deprecated = None
-        for item in request:
-            table_item = proto.tables.add()
-
-            if isinstance(item, TableInBatchWriteRowItem):
-                if deprecated == True:
-                    raise OTSClientError("The item of batch list should be aways TableInBatchWriteRowItem object.")
-
-                deprecated = False
-                self._make_batch_write_row_internal(table_item, item)
-
-            elif isinstance(item, dict):
-                if deprecated == False:
-                    raise OTSClientError("The item of batch list should be aways TableInBatchWriteRowItem object.")
-
-                deprecated = True
-                self._make_batch_get_write_deprecated(table_item, item)
-            else:
-                raise OTSClientError("The item of batch list should be aways TableInBatchWriteRowItem object, not %s"%
-                    item.__class__.__name__
-                )
-
+        if isinstance(request, list):
+            self._make_batch_write_row_deprecated(proto, request)
+        elif isinstance(request, MultiTableInBatchWriteRowItem):
+            self._make_batch_write_row_internal(proto, request) 
+        else:
+            raise OTSClientError("The request should be a instance of MultiTableInBatchWriteRowItem, not %d"%(len(request.__class__.__name__)))
+    
+             
     def _encode_create_table(self, table_meta, reserved_throughput):
         proto = pb2.CreateTableRequest()
         self._make_table_meta(proto.table_meta, table_meta)

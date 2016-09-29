@@ -21,8 +21,10 @@ __all__ = [
     'MultiTableInBatchGetRowItem',
     'TableInBatchGetRowItem',
     'MultiTableInBatchGetRowResult',
+    'BatchWriteRowType',
     'MultiTableInBatchWriteRowItem',
     'TableInBatchWriteRowItem',
+    'MultiTableInBatchWriteRowResult',
     'BatchWriteRowResponseItem',
     'LogicalOperator',
     'ComparatorType',
@@ -389,6 +391,11 @@ class MultiTableInBatchGetRowResult(object):
         else:
             return False
 
+class BatchWriteRowType(object):
+    PUT = "put"
+    UPDATE = "update"
+    DELETE = "delete"
+
 
 class TableInBatchWriteRowItem(object):
     
@@ -416,26 +423,112 @@ class MultiTableInBatchWriteRowItem(object):
 class MultiTableInBatchWriteRowResult(object):
 
     def __init__(self, response):
-        self.items = {}
+        self.table_of_put = {}
+        self.table_of_update = {}
+        self.table_of_delete = {}
 
-    def get_delete_by_table(self):
-        pass
+        for table in response:
+            for type, rows in table.items():
+                if len(rows) > 0:
+                    row = rows[0]
+                    if type == BatchWriteRowType.PUT:
+                        self.table_of_put[row.table_name] = rows
+                    elif type == BatchWriteRowType.UPDATE:
+                        self.table_of_update[row.table_name] = rows
+                    else:
+                        self.table_of_delete[row.table_name] = rows
+
+    def get_put(self):
+        succ = []
+        fail = []
+
+        for rows in self.table_of_put.values():
+            for row in rows:
+                if row.is_ok == True:
+                    succ.append(row)
+                else:
+                    fail.append(row)
+
+        return succ, fail
+
+    def get_put_by_table(self, table_name):
+        return self.table_of_put[table_name]
+
+    def get_failed_of_put(self):
+        succ, fail = self.get_put()
+        succ = None
+        return fail
+
+    def get_succeed_of_put(self):
+        succ, fail = self.get_put()
+        fail = None
+        return succ
+
+    def get_update(self):
+        succ = []
+        fail = []
+
+        for rows in self.table_of_update.values():
+            for row in rows:
+                if row.is_ok == True:
+                    succ.append(row)
+                else:
+                    fail.append(row)
+
+        return succ, fail
+
+    def get_update_by_table(self, table_name):
+        return self.table_of_update[table_name]
+
+    def get_failed_of_update(self):
+        succ, fail = self.get_update()
+        succ = None
+        return fail
+
+    def get_succeed_of_update(self):
+        succ, fail = self.get_update()
+        fail = None
+        return succ
+
+    def get_delete(self):
+        succ = []
+        fail = []
+
+        for rows in self.table_of_delete.values():
+            for row in rows:
+                if row.is_ok == True:
+                    succ.append(row)
+                else:
+                    fail.append(row)
+
+        return succ, fail
+
+    def get_delete_by_table(self, table_name):
+        return self.table_of_delete[table_name]
 
     def get_failed_of_delete(self):
-        pass
+        succ, fail = self.get_delete()
+        succ = None
+        return fail
 
     def get_succeed_of_delete(self):
-        pass
+        succ, fail = self.get_delete()
+        fail = None
+        return succ
 
     def is_all_succeed(self):
-        pass
+        if len(self.get_failed_of_put()) == 0 and len(self.get_failed_of_update()) == 0 and len(self.get_failed_of_delete()) == 0:
+            return True
+        else:
+            return False
 
 class BatchWriteRowResponseItem(object):
 
-    def __init__(self, is_ok, error_code, error_message, consumed):
+    def __init__(self, is_ok, error_code, error_message, table_name, consumed):
         self.is_ok = is_ok
         self.error_code = error_code
         self.error_message = error_message
+        self.table_name = table_name
         self.consumed = consumed
 
 
