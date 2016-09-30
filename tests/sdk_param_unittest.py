@@ -360,13 +360,6 @@ class SDKParamTest(unittest.TestCase):
 
 
     def test_column_condition(self):
-        try:
-            cond = ColumnCondition()
-            cond.get_type()
-            self.assertTrue(False)
-        except OTSClientError, e:
-            self.assertEqual("ColumnCondition is abstract class, can not be an instance obj.", str(e))
-
         cond = RelationCondition("uid", 100, ComparatorType.EQUAL)
         self.assertEqual(ColumnConditionType.RELATION_CONDITION, cond.get_type())
         
