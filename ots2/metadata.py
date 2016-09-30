@@ -157,9 +157,7 @@ class ColumnConditionType(object):
     RELATION_CONDITION = 1
 
 class ColumnCondition(object):
-    
-    def get_type(self):
-        raise OTSClientError("ColumnCondition is abstract class, can not be an instance obj.")
+    pass    
 
 class CompositeCondition(ColumnCondition):
     

@@ -39,7 +39,7 @@ def get_range(ots_client):
     cond.add_sub_condition(RelationCondition("age", 50, ComparatorType.LESS_THAN))
 
     consumed, next_start_primary_key, row_list = ots_client.get_range(
-                table_name, 'FORWARD', 
+                table_name, Direction.FORWARD, 
                 inclusive_start_primary_key, exclusive_end_primary_key,
                 columns_to_get, 10, 
                 column_filter = cond
@@ -50,7 +50,7 @@ def get_range(ots_client):
     while next_start_primary_key is not None:
         inclusive_start_primary_key = next_start_primary_key
         consumed, next_start_primary_key, row_list = ots_client.get_range(
-                table_name, 'FORWARD', 
+                table_name, Direction.FORWARD, 
                 inclusive_start_primary_key, exclusive_end_primary_key,
                 columns_to_get, 10, 
                 column_filter = cond
@@ -77,7 +77,7 @@ def xget_range(ots_client):
      
     columns_to_get = []
     range_iter = ots_client.xget_range(
-                table_name, 'FORWARD', 
+                table_name, Direction.FORWARD, 
                 inclusive_start_primary_key, exclusive_end_primary_key,
                 consumed_counter, columns_to_get, 100,
                 column_filter = cond
