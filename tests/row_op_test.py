@@ -42,22 +42,22 @@ class RowOpTest(OTS2APITestBase):
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
         
         response = self.client_test.batch_get_row([('XX', [wrong_pk], [])])
-        eresponse = [[RowDataItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None, None, None)]]
+        eresponse = [[RowDataItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None, None, None)]]
         self.assert_RowDataItem_equal(response, eresponse)
 
         wrong_pk_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'put': [wrong_pk_item]}])
-        eresponse = [{'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
+        eresponse = [{'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "",  None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
 
         wrong_pk_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put':{'C1': 'V'}})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [wrong_pk_item]}])
-        eresponse = [{'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
+        eresponse = [{'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         
         wrong_pk_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'delete': [wrong_pk_item]}])
-        eresponse = [{'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
+        eresponse = [{'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         
         get_range_end = {}
@@ -103,13 +103,13 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {})
         
         response = self.client_test.batch_get_row([('XX', [pks], [])])
-        eresponse = [[RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {})]]
+        eresponse = [[RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})]]
         self.assert_RowDataItem_equal(response, eresponse)
 
         pks_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks, cols)
         ewcu = self.sum_CU_from_row(pks, cols)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'put': [pks_item]}])
-        eresponse = [{'put': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'put': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -120,7 +120,7 @@ class RowOpTest(OTS2APITestBase):
         pks_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
         ewcu = self.sum_CU_from_row(pks, cols)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [pks_item]}])
-        eresponse = [{'update': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'update': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -131,7 +131,7 @@ class RowOpTest(OTS2APITestBase):
         pks_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pks)
         ewcu = self.sum_CU_from_row(pks, {})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'delete': [pks_item]}])
-        eresponse = [{'delete': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'delete': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -274,8 +274,8 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], []), 
             ('BB', [pks0, pks1], [])
         ])
-        rowdata_item0 = RowDataItem(True, '', '', CapacityUnit(1, 0), pks0, cols)
-        rowdata_item1 = RowDataItem(True, '', '', CapacityUnit(1, 0), pks1, cols)
+        rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), pks0, cols)
+        rowdata_item1 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), pks1, cols)
         eresponse = [[rowdata_item0, rowdata_item1], [rowdata_item0, rowdata_item1]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -283,7 +283,7 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['C1']), 
             ('BB', [pks0, pks1], ['C1'])
         ])
-        rowdata_item = RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {'C1': 'blah'})
+        rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {'C1': 'blah'})
         eresponse = [[rowdata_item, rowdata_item], [rowdata_item, rowdata_item]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -291,8 +291,8 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['PK1']), 
             ('BB', [pks0, pks1], ['PK1'])
         ])
-        rowdata_item0 = RowDataItem(True, '', '', CapacityUnit(1, 0), {'PK1': '0'}, {})
-        rowdata_item1 = RowDataItem(True, '', '', CapacityUnit(1, 0), {'PK1': '1'}, {})
+        rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {'PK1': '0'}, {})
+        rowdata_item1 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {'PK1': '1'}, {})
         eresponse = [[rowdata_item0, rowdata_item1], [rowdata_item0, rowdata_item1]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -300,7 +300,7 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['blah']), 
             ('BB', [pks0, pks1], ['blah'])
         ])
-        rowdata_item = RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {})
+        rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})
         eresponse = [[rowdata_item, rowdata_item], [rowdata_item, rowdata_item]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -635,7 +635,7 @@ class RowOpTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [pk], [])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk, columns)
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk, columns)
         eresponse = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, eresponse)
         #get_range
@@ -661,11 +661,11 @@ class RowOpTest(OTS2APITestBase):
         update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put':columns})
         delete_row_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pk)
         batches_list = [{'put':[put_row_item]}, {'update':[update_row_item]}, {'delete':[delete_row_item]}]
-        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
+        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
         response_list = [
-            {'put':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'update':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'delete':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]}, 
+            {'put':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
+            {'update':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
+            {'delete':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]}, 
         ]
         for i in range(len(batches_list)):
             write_batches = batches_list[i]
@@ -1068,10 +1068,10 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(columns, {})
 
         ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], None)])
-        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, CapacityUnit(1, 0), {'PK0' : 0}, {})]])
+        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {'PK0' : 0}, {})]])
         
         ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], ['Col'])])
-        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, CapacityUnit(1, 0), {}, {})]])
+        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {}, {})]])
 
         consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 1})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
@@ -1115,9 +1115,9 @@ class RowOpTest(OTS2APITestBase):
 
         response = self.client_test.batch_write_row(batches)
         expect_res = [{
-            'put':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
-            'update':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
-            'delete':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
+            'put':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'update':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'delete':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
 
         }]
         self.assert_BatchWriteRowResponseItem(response, expect_res)
@@ -1174,7 +1174,7 @@ class RowOpTest(OTS2APITestBase):
         update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete" : ["Col0"]})
         batches = [{'table_name' : table_name, 'update' : [update_item]}]
         response = self.client_test.batch_write_row(batches)
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, 1))]}])
+        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))]}])
     
         cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))
@@ -1202,7 +1202,7 @@ class RowOpTest(OTS2APITestBase):
         pk_size = 10 # 'PK' + int
         col_size = sum([len(col) for col in columns_to_delete])
         expect_write_cu = int(math.ceil((pk_size + col_size) * 1.0 / 4096))
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, expect_write_cu))]}])
+        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, expect_write_cu))]}])
     
         cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))

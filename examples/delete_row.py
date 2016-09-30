@@ -4,7 +4,7 @@ from example_config import *
 from ots2 import *
 import time
 
-table_name = 'DeleteRowExample'
+table_name = 'DeleteRowExamplezmvafw'
 
 def create_table(ots_client):
     schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
@@ -20,13 +20,13 @@ def delete_table(ots_client):
 def put_row(ots_client):
     primary_key = {'gid':1, 'uid':101}
     attribute_columns = {'name':'John', 'mobile':15100000000, 'address':'China', 'age':20}
-    condition = Condition('EXPECT_NOT_EXIST') # Expect not exist: put it into table only when this row is not exist.
+    condition = Condition(RowExistenceExpectation.EXPECT_NOT_EXIST) # Expect not exist: put it into table only when this row is not exist.
     consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
     print u'Write succeed, consume %s write cu.' % consumed.write
 
 def delete_row(ots_client):
     primary_key = {'gid':1, 'uid':101}
-    condition = Condition('IGNORE')
+    condition = Condition(RowExistenceExpectation.IGNORE, RelationCondition("age", 25, ComparatorType.LESS_THAN))
     consumed = ots_client.delete_row(table_name, condition, primary_key) 
     print u'Delete succeed, consume %s write cu.' % consumed.write
 
@@ -44,6 +44,10 @@ def get_row(ots_client):
 
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
+    try:
+        delete_table(ots_client)
+    except:
+        pass
     create_table(ots_client)
 
     time.sleep(3) # wait for table ready

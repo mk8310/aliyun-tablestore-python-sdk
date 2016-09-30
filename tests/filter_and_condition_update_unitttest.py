@@ -13,7 +13,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
 
     """ConditionUpdate"""
 
-    def _test_update_row(self):
+    def test_update_row(self):
         """调用UpdateRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -203,7 +203,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         condition = Condition(RowExistenceExpectation.IGNORE, cond)
         self.client_test.update_row(table_name, condition, primary_key, attribute_columns)
 
-    def _test_put_row(self):
+    def test_put_row(self):
         """调用PutRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -389,7 +389,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         condition = Condition(RowExistenceExpectation.IGNORE, cond)
         self.client_test.put_row(table_name, condition, primary_key, attribute_columns)
 
-    def _test_get_row(self):
+    def test_get_row(self):
         """调用GetRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -494,7 +494,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         cu, pk, attr = self.client_test.get_row(table_name, primary_key, column_filter=cond)
         self.assertEqual({}, pk)
 
-    def _test_delete_row(self):
+    def test_delete_row(self):
         """调用DeleteRow API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
@@ -720,7 +720,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         self.assertEqual(0, len(result.get_succeed_of_delete()))
         self.assertEqual(6, len(result.get_failed_of_delete()))
        
-    def _test_batch_get_row(self):
+    def test_batch_get_row(self):
         """调用BatchGetRow API, 构造不同的Condition"""
         table_meta = TableMeta('myTable0', [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])
         reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -882,7 +882,7 @@ class FilterAndConditionUpdateTest(OTS2APITestBase):
         self.assertEqual({'index': 2}, table1[2].attribute_columns)
 
 
-    def _test_get_range(self):
+    def test_get_range(self):
         """调用GetRange API, 构造不同的Condition"""
         table_name = FilterAndConditionUpdateTest.TABLE_NAME
         table_meta = TableMeta(table_name, [('gid', ColumnType.INTEGER), ('uid', ColumnType.INTEGER)])

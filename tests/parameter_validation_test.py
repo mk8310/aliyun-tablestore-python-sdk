@@ -163,7 +163,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [{"PK": "x"}], [])]
         response = client.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(1, 0), {}, {})
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(1, 0), {}, {})
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
         #get_range
@@ -188,7 +188,7 @@ class ParameterValidationTest(OTS2APITestBase):
         for op_type, item in op_list:
             write_batches = [item]
             response = client.batch_write_row(write_batches)
-            expect_write_data_item = BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, 1))
+            expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))
             expect_response = [{op_type : [expect_write_data_item]}]
             self.assert_BatchWriteRowResponseItem(response, expect_response)
         #delete_table
@@ -291,7 +291,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [pk], [columns_name])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(1, 0), {}, {})
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(1, 0), {}, {})
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
         #get_range
@@ -311,12 +311,12 @@ class ParameterValidationTest(OTS2APITestBase):
         update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put':{columns_name: 'x1'}})]}
         write_batches = [put_row_item]
         response = self.client_test.batch_write_row(write_batches)
-        expect_write_data_item = {"put": [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x"})))]}
+        expect_write_data_item = {"put": [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x"})))]}
         expect_response = [expect_write_data_item]
         self.assert_BatchWriteRowResponseItem(response, expect_response) 
         write_batches = [update_row_item]
         response = self.client_test.batch_write_row(write_batches)
-        expect_write_data_item = {"update": [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x1"})))]}
+        expect_write_data_item = {"update": [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x1"})))]}
         expect_response = [expect_write_data_item]
         self.assert_BatchWriteRowResponseItem(response, expect_response) 
 
@@ -478,7 +478,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #bacth_get_row
         batches = [(table_name, [{"PK": "x"}], [])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(False, "OTSObjectNotExist", "Requested table does not exist.", None, None, None) 
+        expect_row_data_item = RowDataItem(False, "OTSObjectNotExist", "Requested table does not exist.", "", None, None, None) 
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
        
@@ -491,7 +491,7 @@ class ParameterValidationTest(OTS2APITestBase):
         for item, key in zip(batch_write_items, resp_key):
             batches = [item]
             response = self.client_test.batch_write_row(batches)
-            expect_write_data_item = BatchWriteRowResponseItem(False, "OTSObjectNotExist", "Requested table does not exist.", None) 
+            expect_write_data_item = BatchWriteRowResponseItem(False, "OTSObjectNotExist", "Requested table does not exist.", "", None) 
             expect_response = [{key : [expect_write_data_item]}]
             self.assert_BatchWriteRowResponseItem(response, expect_response)
 
