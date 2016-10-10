@@ -414,7 +414,7 @@ class OTSClient(object):
 
         response = self._request_helper('BatchGetRow', request)
 
-        if deprecated == True:
+        if deprecated:
             return response
         else:
             return MultiTableInBatchGetRowResult(response)
@@ -559,7 +559,7 @@ class OTSClient(object):
 
         response = self._request_helper('BatchWriteRow', request)
 
-        if deprecated == True:
+        if deprecated:
             return response
         else:
             return MultiTableInBatchWriteRowResult(response)

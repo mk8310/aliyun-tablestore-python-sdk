@@ -33,9 +33,6 @@ def batch_get_row(ots_client):
         primary_key = {'gid':i, 'uid':i+1}
         rows_to_get.append(primary_key)
 
-    #batch_rows = (table_name, rows_to_get, columns_to_get)
-    #result = ots_client.batch_get_row([batch_rows, ('notExistTable', rows_to_get, [])])
-
     request = MultiTableInBatchGetRowItem()
     cond = CompositeCondition(LogicalOperator.AND)
     cond.add_sub_condition(RelationCondition("name", "John", ComparatorType.EQUAL))
@@ -47,7 +44,7 @@ def batch_get_row(ots_client):
     result = ots_client.batch_get_row(request)
 
     print 'Check first table\'s result:'
-    print 'Result statue: %s'%(result.is_all_succeed())
+    print 'Result status: %s'%(result.is_all_succeed())
     
     table_result_0 = result.get_result_by_table(table_name)
     table_result_1 = result.get_result_by_table('notExistTable')

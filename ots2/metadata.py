@@ -163,11 +163,10 @@ class CompositeCondition(ColumnCondition):
     
     def __init__(self, combinator):
         self.sub_conditions = []
-        self.type = ColumnConditionType.COMPOSITE_CONDITION
         self.set_combinator(combinator)
 
     def get_type(self):
-        return self.type
+        return ColumnConditionType.COMPOSITE_CONDITION
 
     def set_combinator(self, combinator):
         if combinator not in LogicalOperator.__values__:
@@ -194,7 +193,6 @@ class CompositeCondition(ColumnCondition):
 class RelationCondition(ColumnCondition):
    
     def __init__(self, column_name, column_value, comparator, pass_if_missing = True):
-        self.type = ColumnConditionType.RELATION_CONDITION
         self.column_name = column_name
         self.column_value = column_value
 
@@ -205,7 +203,7 @@ class RelationCondition(ColumnCondition):
         self.set_pass_if_missing(pass_if_missing)
 
     def get_type(self):
-        return self.type
+        return ColumnConditionType.RELATION_CONDITION
 
     def set_pass_if_missing(self, pass_if_missing):
         """
@@ -336,6 +334,11 @@ class MultiTableInBatchGetRowItem(object):
         self.items = {}
 
     def add(self, table_item):
+        """
+        说明：添加ots2.metadata.TableInBatchGetRowItem对象
+        注意：对象内部存储ots2.metadata.TableInBatchGetRowItem对象采用‘字典’的形式，Key是表
+              的名字，因此如果插入同表名的对象，那么之前的对象将被覆盖。
+        """
         if not isinstance(table_item, TableInBatchGetRowItem):
             raise OTSClientError(
                 "The input table_item should be an instance of TableInBatchGetRowItem, not %s"%
@@ -354,9 +357,7 @@ class MultiTableInBatchGetRowResult(object):
                 table_name = row.table_name
                 result_rows = self.items.get(table_name)
                 if result_rows == None:
-                    result_rows = []
-                    result_rows.append(row)
-                    self.items[table_name] = result_rows
+                    self.items[table_name] = [row]
                 else:
                     result_rows.append(row)
 
@@ -384,10 +385,7 @@ class MultiTableInBatchGetRowResult(object):
         return self.items.get(table_name)
 
     def is_all_succeed(self):
-        if len(self.get_failed_rows()) == 0:
-            return True
-        else:
-            return False
+        return len(self.get_failed_rows()) == 0
 
 class BatchWriteRowType(object):
     PUT = "put"
@@ -410,6 +408,11 @@ class MultiTableInBatchWriteRowItem(object):
         self.items = {}
 
     def add(self, table_item):
+        """
+        说明：添加ots2.metadata.TableInBatchWriteRowItem对象
+        注意：对象内部存储ots2.metadata.TableInBatchWriteRowItem对象采用‘字典’的形式，Key是表
+              的名字，因此如果插入同表名的对象，那么之前的对象将被覆盖。
+        """
         if not isinstance(table_item, TableInBatchWriteRowItem):
             raise OTSClientError(
                 "The input table_item should be an instance of TableInBatchWriteRowItem, not %s"%
@@ -442,7 +445,7 @@ class MultiTableInBatchWriteRowResult(object):
 
         for rows in self.table_of_put.values():
             for row in rows:
-                if row.is_ok == True:
+                if row.is_ok:
                     succ.append(row)
                 else:
                     fail.append(row)
@@ -468,7 +471,7 @@ class MultiTableInBatchWriteRowResult(object):
 
         for rows in self.table_of_update.values():
             for row in rows:
-                if row.is_ok == True:
+                if row.is_ok:
                     succ.append(row)
                 else:
                     fail.append(row)
@@ -494,7 +497,7 @@ class MultiTableInBatchWriteRowResult(object):
 
         for rows in self.table_of_delete.values():
             for row in rows:
-                if row.is_ok == True:
+                if row.is_ok:
                     succ.append(row)
                 else:
                     fail.append(row)
@@ -515,10 +518,7 @@ class MultiTableInBatchWriteRowResult(object):
         return succ
 
     def is_all_succeed(self):
-        if len(self.get_failed_of_put()) == 0 and len(self.get_failed_of_update()) == 0 and len(self.get_failed_of_delete()) == 0:
-            return True
-        else:
-            return False
+        return len(self.get_failed_of_put()) == 0 and len(self.get_failed_of_update()) == 0 and len(self.get_failed_of_delete()) == 0
 
 class BatchWriteRowResponseItem(object):
 

@@ -212,7 +212,7 @@ class OTSProtoBufferEncoder:
         global COLUMN_CONDITION_TYPE_MAP
         enum_map = COLUMN_CONDITION_TYPE_MAP
 
-        proto.type = enum_map.get(column_condition.type)
+        proto.type = enum_map.get(column_condition.get_type())
         if proto.type is None:
             raise OTSClientError(
                 "column_condition_type should be one of [%s], not %s" % (
@@ -425,7 +425,6 @@ class OTSProtoBufferEncoder:
 
 
     def _make_batch_get_row(self, proto, request):
-        deprecated = None
         if isinstance(request, list):
             self._make_batch_get_row_deprecated(proto, request)
         elif isinstance(request, MultiTableInBatchGetRowItem):
@@ -513,7 +512,6 @@ class OTSProtoBufferEncoder:
 
 
     def _make_batch_write_row(self, proto, request):
-        deprecated = None
         if isinstance(request, list):
             self._make_batch_write_row_deprecated(proto, request)
         elif isinstance(request, MultiTableInBatchWriteRowItem):
