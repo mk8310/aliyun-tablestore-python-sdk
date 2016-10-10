@@ -4,7 +4,7 @@ from example_config import *
 from ots2 import *
 import time
 
-table_name = 'UpdateRowExampleiqzlphs'
+table_name = 'OTSUpdateRowSimpleExample'
 
 def create_table(ots_client):
     schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
