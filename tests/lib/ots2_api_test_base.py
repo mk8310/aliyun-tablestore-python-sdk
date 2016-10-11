@@ -133,14 +133,14 @@ class OTS2APITestBase(TestCase):
             else:
                 columns['col0'] = 'X' * (column_value_size - all_pk_length - 10)
         if write is not 0:
-            consumed_update = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk_dict_exist, {'put':columns})
+            consumed_update = self.client_test.update_row(table_name, Condition("IGNORE"), pk_dict_exist, {'put':columns})
             expect_consumed = CapacityUnit(0, self.sum_CU_from_row(pk_dict_exist, columns))
             self.assert_consumed(consumed_update, expect_consumed)
             self.assert_equal(write, self.sum_CU_from_row(pk_dict_exist, columns))
         #consume(0, 1)
         if 1 == no_check_flag: 
             try:
-                consumed_update = self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk_dict_not_exist)
+                consumed_update = self.client_test.delete_row(table_name, Condition("IGNORE"), pk_dict_not_exist)
             except OTSServiceError as e:
                 self.assert_false()
         
@@ -164,7 +164,7 @@ class OTS2APITestBase(TestCase):
         if capacity_unit.write <= 1 and capacity_unit.read <= 1:
             #consume(0, 1)
             try:
-                consumed_update = self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk_dict_not_exist)
+                consumed_update = self.client_test.delete_row(table_name, Condition("IGNORE"), pk_dict_not_exist)
                 end_time = time.time()
                 if end_time - begin_time < 1:
                     self.assert_false()

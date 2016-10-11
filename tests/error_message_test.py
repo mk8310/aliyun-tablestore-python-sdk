@@ -884,23 +884,20 @@ class ErrorMessageTest(OTS2APITestBase):
 
     def test_batch_write_row_data_size_exceeded(self):
         """OTSParameterInvalid The total data size of single BatchWriteRow request exceeded the limit."""
-        cell_num = 4 * 1024 * 1024 / 64 
+        cell_num = 2 * 1024 / 64
         string = 'X' * 64 * 1024
         
-        put_rows = []
-        for i in range(0, cell_num):
-            put_rows.append(PutRowItem(Condition('IGNORE'), {'PK0' : 'XXXX%50d'%i}, {'Col' : string}))
-
         try:
             self.client_test.batch_write_row([
                 {
                     'table_name': 'T0', 
-                    'put' : put_rows,
+                    'put' : [
+                        PutRowItem(Condition('IGNORE'), {'PK0' : 'XXXX'}, {'Col' : string}),
+                    ] * cell_num,
                 },
             ])
             self.assert_false()
         except OTSServiceError as e:
-            print e
             self.assert_error(e, 400, 'OTSParameterInvalid', "The total data size of single BatchWriteRow request exceeded the limit.")
         except OTSClientError as e:
             self.assertEqual(e.http_status, 413)

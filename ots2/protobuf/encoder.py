@@ -9,53 +9,6 @@ import ots2.protobuf.ots_protocol_2_pb2 as pb2
 INT32_MAX = 2147483647
 INT32_MIN = -2147483648
 
-COLUMN_TYPE_MAP = {
-    ColumnType.INF_MIN   : pb2.INF_MIN,
-    ColumnType.INF_MAX   : pb2.INF_MAX,
-    ColumnType.INTEGER   : pb2.INTEGER,
-    ColumnType.STRING    : pb2.STRING,
-    ColumnType.BOOLEAN   : pb2.BOOLEAN,
-    ColumnType.DOUBLE    : pb2.DOUBLE,
-    ColumnType.BINARY    : pb2.BINARY,
-}
-
-LOGICAL_OPERATOR_MAP = {
-    LogicalOperator.NOT     : pb2.LO_NOT,
-    LogicalOperator.AND     : pb2.LO_AND,
-    LogicalOperator.OR      : pb2.LO_OR,
-}
-
-COMPARATOR_TYPE_MAP = {
-    ComparatorType.EQUAL          : pb2.CT_EQUAL,
-    ComparatorType.NOT_EQUAL      : pb2.CT_NOT_EQUAL,
-    ComparatorType.GREATER_THAN   : pb2.CT_GREATER_THAN,
-    ComparatorType.GREATER_EQUAL  : pb2.CT_GREATER_EQUAL,
-    ComparatorType.LESS_THAN      : pb2.CT_LESS_THAN,
-    ComparatorType.LESS_EQUAL     : pb2.CT_LESS_EQUAL,
-}
-
-COLUMN_CONDITION_TYPE_MAP = {
-    ColumnConditionType.COMPOSITE_CONDITION : pb2.CCT_COMPOSITE,
-    ColumnConditionType.RELATION_CONDITION  : pb2.CCT_RELATION,
-}
-
-DIRECTION_MAP = {
-    Direction.FORWARD           : pb2.FORWARD,
-    Direction.BACKWARD          : pb2.BACKWARD,
-}
-
-ROW_EXISTENCE_EXPECTATION_MAP = {
-    RowExistenceExpectation.IGNORE           : pb2.IGNORE,
-    RowExistenceExpectation.EXPECT_EXIST     : pb2.EXPECT_EXIST ,
-    RowExistenceExpectation.EXPECT_NOT_EXIST : pb2.EXPECT_NOT_EXIST ,
-}
-
-BATCH_WRITE_ROW_TYPE_MAP = {
-    BatchWriteRowType.PUT    : PutRowItem, 
-    BatchWriteRowType.UPDATE : UpdateRowItem, 
-    BatchWriteRowType.DELETE : DeleteRowItem
-}
-
 class OTSProtoBufferEncoder:
 
     def __init__(self, encoding):
@@ -143,92 +96,23 @@ class OTSProtoBufferEncoder:
             )
 
     def _get_column_type(self, type_str):
-        global COLUMN_TYPE_MAP
-        enum_map = COLUMN_TYPE_MAP
+        enum_map = {
+            'INF_MIN'   : pb2.INF_MIN,
+            'INF_MAX'   : pb2.INF_MAX,
+            'INTEGER'   : pb2.INTEGER,
+            'STRING'    : pb2.STRING,
+            'BOOLEAN'   : pb2.BOOLEAN,
+            'DOUBLE'    : pb2.DOUBLE,
+            'BINARY'    : pb2.BINARY,
+        }
 
-        proto_type = enum_map.get(type_str)
-
-        if proto_type != None:
-            return proto_type
+        if type_str in enum_map:
+            return enum_map[type_str]
         else:
             raise OTSClientError(
                 "column_type should be one of [%s], not %s" % (
                     ", ".join(enum_map.keys()), str(type_str)
                 )
-            )
-
-    def _make_composite_condition(self, condition):
-        proto = pb2.CompositeCondition()
-
-        # combinator
-        global LOGICAL_OPERATOR_MAP
-        enum_map = LOGICAL_OPERATOR_MAP
-
-        proto.combinator = enum_map.get(condition.combinator)
-        if proto.combinator is None:
-            raise OTSClientError(
-                "LogicalOperator should be one of [%s], not %s" % (
-                    ", ".join(enum_map.keys()), str(condition.combinator)
-                )
-            )
-
-        for sub in condition.sub_conditions:
-            self._make_column_condition(proto.sub_conditions.add(), sub)
-
-        return proto.SerializeToString()
-
-    def _make_relation_condition(self, condition):
-        proto = pb2.RelationCondition()
-
-        # comparator
-        global COMPARATOR_TYPE_MAP
-        enum_map = COMPARATOR_TYPE_MAP
-
-        proto.comparator = enum_map.get(condition.comparator)
-        if proto.comparator is None: 
-            raise OTSClientError(
-                "ComparatorType should be one of [%s], not %s" % (
-                    ", ".join(enum_map.keys()), str(condition.comparator)
-                )
-            )
-
-        proto.column_name = self._get_unicode(condition.column_name)
-        self._make_column_value(proto.column_value, condition.column_value)
-        proto.pass_if_missing = condition.pass_if_missing 
-
-        return proto.SerializeToString()
-
-    def _make_column_condition(self, proto, column_condition):
-        if column_condition == None:
-            return
-
-        if not isinstance(column_condition, ColumnCondition):
-            raise OTSClientError(
-                "column condition should be an instance of ColumnCondition, not %s" %
-                condition.__class__.__name__
-            )
-
-        # type
-        global COLUMN_CONDITION_TYPE_MAP
-        enum_map = COLUMN_CONDITION_TYPE_MAP
-
-        proto.type = enum_map.get(column_condition.get_type())
-        if proto.type is None:
-            raise OTSClientError(
-                "column_condition_type should be one of [%s], not %s" % (
-                    ", ".join(enum_map.keys()), str(column_condition.type)
-                )
-            )
-
-        # condition
-        if isinstance(column_condition, CompositeCondition):
-            proto.condition = self._make_composite_condition(column_condition)
-        elif isinstance(column_condition, RelationCondition):
-            proto.condition = self._make_relation_condition(column_condition)
-        else:
-            raise OTSClientError(
-                "expect CompositeCondition, RelationCondition but not %s"
-                % column_condition.__class__.__name__
             )
 
     def _make_condition(self, proto, condition):
@@ -238,29 +122,31 @@ class OTSProtoBufferEncoder:
                 "condition should be an instance of Condition, not %s" %
                 condition.__class__.__name__
             )
- 
-        global ROW_EXISTENCE_EXPECTATION_MAP
-        enum_map = ROW_EXISTENCE_EXPECTATION_MAP
+
+        enum_map = {
+            'IGNORE'            : pb2.IGNORE,
+            'EXPECT_EXIST'      : pb2.EXPECT_EXIST,
+            'EXPECT_NOT_EXIST'  : pb2.EXPECT_NOT_EXIST
+        }
 
         expectation_str = self._get_unicode(condition.row_existence_expectation) 
-        
-        proto.row_existence = enum_map.get(expectation_str)
-        if proto.row_existence is None:
+        if expectation_str in enum_map:
+            proto.row_existence = enum_map[expectation_str]
+        else:
             raise OTSClientError(
                 "row_existence_expectation should be one of [%s], not %s" % (
                     ", ".join(enum_map.keys()), str(expectation_str)
                 )
             )
 
-        self._make_column_condition(proto.column_condition, condition.column_condition)
-
     def _get_direction(self, direction_str):
-        global DIRECTION_MAP
-        enum_map = DIRECTION_MAP
+        enum_map = {
+            'FORWARD'           : pb2.FORWARD,
+            'BACKWARD'          : pb2.BACKWARD
+        }
 
-        proto_direction = enum_map.get(direction_str)
-        if proto_direction != None:
-            return proto_direction
+        if direction_str in enum_map:
+            return enum_map[direction_str]
         else:
             raise OTSClientError(
                 "direction should be one of [%s], not %s" % (
@@ -391,7 +277,13 @@ class OTSProtoBufferEncoder:
         
         self._make_update_capacity_unit(proto.capacity_unit, reserved_throughput.capacity_unit)
 
-    def _make_batch_get_row_deprecated(self, proto, batch_list):
+    def _make_batch_get_row(self, proto, batch_list):
+        if not isinstance(batch_list, list):
+            raise OTSClientError(
+                "batch_list should be a list, not %s" 
+                % batch_list.__class__.__name__
+            )
+        
         for (table_name, row_list, columns_to_get) in batch_list:
             table_item = proto.tables.add()
             table_item.table_name = self._get_unicode(table_name)
@@ -404,33 +296,7 @@ class OTSProtoBufferEncoder:
                     raise OTSClientError(
                         "The row should be a dict, not %s" 
                         % row_item.__class__.__name__
-                    ) 
-
-    def _make_batch_get_row_internal(self, proto, request):
-        for table_name, item in request.items.items():
-            table_item = proto.tables.add()
-            table_item.table_name = self._get_unicode(item.table_name)
-            self._make_repeated_column_names(table_item.columns_to_get, item.columns_to_get)
-            self._make_column_condition(table_item.filter, item.column_filter)
-
-            for primary_key in item.primary_keys:
-                if isinstance(primary_key, dict):
-                    row = table_item.rows.add()
-                    self._make_columns_with_dict(row.primary_key, primary_key)
-                else:
-                    raise OTSClientError(
-                        "The row should be a dict, not %s" 
-                        % row_item.__class__.__name__
                     )
-
-
-    def _make_batch_get_row(self, proto, request):
-        if isinstance(request, list):
-            self._make_batch_get_row_deprecated(proto, request)
-        elif isinstance(request, MultiTableInBatchGetRowItem):
-            self._make_batch_get_row_internal(proto, request) 
-        else:
-            raise OTSClientError("The request should be a instance of MultiTableInBatchGetRowItem, not %d"%(len(request.__class__.__name__)))
 
     def _make_put_row_item(self, proto, put_row_item):
         self._make_condition(proto.condition, put_row_item.condition)
@@ -446,10 +312,19 @@ class OTSProtoBufferEncoder:
         self._make_condition(proto.condition, delete_row_item.condition)
         self._make_columns_with_dict(proto.primary_key, delete_row_item.primary_key)
 
-    def _make_batch_write_row_deprecated(self, proto, batch_list):
-        global BATCH_WRITE_ROW_TYPE_MAP
-        enum_map = BATCH_WRITE_ROW_TYPE_MAP
-
+    def _make_batch_write_row(self, proto, batch_list):
+        if not isinstance(batch_list, list):
+            raise OTSClientError(
+                "batch_list should be a list, not %s" 
+                % batch_list.__class__.__name__
+            )
+        
+        enum_map = {
+            'put': PutRowItem, 
+            'update': UpdateRowItem, 
+            'delete': DeleteRowItem
+        }
+        
         for table_dict in batch_list:
             if not isinstance(table_dict, dict):
                 raise OTSClientError(
@@ -489,37 +364,7 @@ class OTSProtoBufferEncoder:
                     elif key is 'delete':
                         row = table_item.delete_rows.add()
                         self._make_delete_row_item(row, row_item)
- 
-    def _make_batch_write_row_internal(self, proto, request):
-        for table_name, item in request.items.items():
-            table_item = proto.tables.add()  
-            table_item.table_name = self._get_unicode(item.table_name)
 
-            if item.put != None:
-                for row_item in item.put:
-                    row = table_item.put_rows.add()
-                    self._make_put_row_item(row, row_item)
-
-            if item.update != None:
-                for row_item in item.update:
-                    row = table_item.update_rows.add()
-                    self._make_update_row_item(row, row_item)
-
-            if item.delete != None:
-                for row_item in item.delete:
-                    row = table_item.delete_rows.add()
-                    self._make_delete_row_item(row, row_item)
-
-
-    def _make_batch_write_row(self, proto, request):
-        if isinstance(request, list):
-            self._make_batch_write_row_deprecated(proto, request)
-        elif isinstance(request, MultiTableInBatchWriteRowItem):
-            self._make_batch_write_row_internal(proto, request) 
-        else:
-            raise OTSClientError("The request should be a instance of MultiTableInBatchWriteRowItem, not %d"%(len(request.__class__.__name__)))
-    
-             
     def _encode_create_table(self, table_meta, reserved_throughput):
         proto = pb2.CreateTableRequest()
         self._make_table_meta(proto.table_meta, table_meta)
@@ -546,12 +391,11 @@ class OTSProtoBufferEncoder:
         proto.table_name = self._get_unicode(table_name)
         return proto
 
-    def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter):
+    def _encode_get_row(self, table_name, primary_key, columns_to_get):
         proto = pb2.GetRowRequest()
         proto.table_name = self._get_unicode(table_name)
         self._make_columns_with_dict(proto.primary_key, primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
-        self._make_column_condition(proto.filter, column_filter)
         return proto
 
     def _encode_put_row(self, table_name, condition, primary_key, attribute_columns):
@@ -577,26 +421,25 @@ class OTSProtoBufferEncoder:
         self._make_columns_with_dict(proto.primary_key, primary_key)
         return proto
 
-    def _encode_batch_get_row(self, request):
+    def _encode_batch_get_row(self, batch_list):
         proto = pb2.BatchGetRowRequest()
-        self._make_batch_get_row(proto, request)
+        self._make_batch_get_row(proto, batch_list)
         return proto
 
-    def _encode_batch_write_row(self, request):
+    def _encode_batch_write_row(self, batch_list):
         proto = pb2.BatchWriteRowRequest()
-        self._make_batch_write_row(proto, request)
+        self._make_batch_write_row(proto, batch_list)
         return proto
 
     def _encode_get_range(self, table_name, direction, 
                 inclusive_start_primary_key, exclusive_end_primary_key, 
-                columns_to_get, limit, column_filter):
+                columns_to_get, limit):
         proto = pb2.GetRangeRequest()
         proto.table_name = self._get_unicode(table_name)
         proto.direction = self._get_direction(direction)
         self._make_columns_with_dict(proto.inclusive_start_primary_key, inclusive_start_primary_key)
         self._make_columns_with_dict(proto.exclusive_end_primary_key, exclusive_end_primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
-        self._make_column_condition(proto.filter, column_filter)
         if limit is not None:
             proto.limit = self._get_int32(limit)
         return proto
