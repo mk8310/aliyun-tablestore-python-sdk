@@ -4,7 +4,7 @@ from example_config import *
 from ots2 import *
 import time
 
-table_name = 'OTSGetRangeSimpleExample'
+table_name = 'GetRangeExample'
 
 def create_table(ots_client):
     schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
@@ -21,7 +21,7 @@ def put_row(ots_client):
     for i in range(0, 100):
         primary_key = {'gid':i, 'uid':i+1}
         attribute_columns = {'name':'John', 'mobile':i, 'address':'China', 'age':i}
-        condition = Condition(RowExistenceExpectation.EXPECT_NOT_EXIST) # Expect not exist: put it into table only when this row is not exist.
+        condition = Condition('EXPECT_NOT_EXIST') # Expect not exist: put it into table only when this row is not exist.
         consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
         print u'Write succeed, consume %s write cu.' % consumed.write
 
@@ -33,16 +33,10 @@ def get_range(ots_client):
     inclusive_start_primary_key = {'gid':INF_MIN, 'uid':INF_MIN} 
     exclusive_end_primary_key = {'gid':INF_MAX, 'uid':INF_MAX} 
     columns_to_get = []
-
-    cond = CompositeCondition(LogicalOperator.AND)
-    cond.add_sub_condition(RelationCondition("address", 'China', ComparatorType.EQUAL))
-    cond.add_sub_condition(RelationCondition("age", 50, ComparatorType.LESS_THAN))
-
     consumed, next_start_primary_key, row_list = ots_client.get_range(
-                table_name, Direction.FORWARD, 
+                table_name, 'FORWARD', 
                 inclusive_start_primary_key, exclusive_end_primary_key,
-                columns_to_get, 10, 
-                column_filter = cond
+                columns_to_get, 10
     )
 
     all_rows = []
@@ -50,17 +44,16 @@ def get_range(ots_client):
     while next_start_primary_key is not None:
         inclusive_start_primary_key = next_start_primary_key
         consumed, next_start_primary_key, row_list = ots_client.get_range(
-                table_name, Direction.FORWARD, 
+                table_name, 'FORWARD', 
                 inclusive_start_primary_key, exclusive_end_primary_key,
-                columns_to_get, 10, 
-                column_filter = cond
+                columns_to_get, 10
         )
         all_rows.extend(row_list)
         print 'Read succeed, consume %s read cu.' % consumed.read
 
     for row in all_rows:
         print row
-    print 'Total rows: ', len(all_rows)
+    print 'Total rows: ', len(row)
 
 def xget_range(ots_client):
     '''
@@ -68,19 +61,12 @@ def xget_range(ots_client):
     '''
     consumed_counter = CapacityUnit(0, 0)
     inclusive_start_primary_key = {'gid':INF_MIN, 'uid':INF_MIN} 
-    exclusive_end_primary_key = {'gid':INF_MAX, 'uid':INF_MAX}
-
-    cond = CompositeCondition(LogicalOperator.AND)
-    cond.add_sub_condition(RelationCondition("address", 'China', ComparatorType.EQUAL))
-    cond.add_sub_condition(RelationCondition("age", 50, ComparatorType.GREATER_EQUAL))
-
-     
+    exclusive_end_primary_key = {'gid':INF_MAX, 'uid':INF_MAX} 
     columns_to_get = []
     range_iter = ots_client.xget_range(
-                table_name, Direction.FORWARD, 
+                table_name, 'FORWARD', 
                 inclusive_start_primary_key, exclusive_end_primary_key,
-                consumed_counter, columns_to_get, 100,
-                column_filter = cond
+                consumed_counter, columns_to_get, 100
     )
 
     total_rows = 0
@@ -92,10 +78,6 @@ def xget_range(ots_client):
 
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
-    try:
-        delete_table(ots_client)
-    except:
-        pass
     create_table(ots_client)
 
     time.sleep(3) # wait for table ready

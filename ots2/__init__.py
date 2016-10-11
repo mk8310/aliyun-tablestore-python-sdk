@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-__version__ = '2.1.0'
+__version__ = '2.0.8'
 __all__ = [
     'OTSClient',
 
@@ -11,8 +11,6 @@ __all__ = [
     'CapacityUnit',
     'ReservedThroughput',
     'ReservedThroughputDetails',
-    'ColumnType',
-    'Direction',
     'UpdateTableResponse',
     'DescribeTableResponse',
     'RowDataItem',
@@ -20,24 +18,10 @@ __all__ = [
     'PutRowItem',
     'UpdateRowItem',
     'DeleteRowItem',
-    'MultiTableInBatchGetRowItem',
-    'TableInBatchGetRowItem',
-    'MultiTableInBatchGetRowResult',
-    'BatchWriteRowType',
-    'MultiTableInBatchWriteRowItem',
-    'TableInBatchWriteRowItem',
-    'MultiTableInBatchWriteRowResult',
     'BatchWriteRowResponseItem',
     'OTSClientError',
     'OTSServiceError',
     'DefaultRetryPolicy',
-    'LogicalOperator',
-    'ComparatorType',
-    'ColumnConditionType',
-    'ColumnCondition',
-    'CompositeCondition',
-    'RelationCondition',
-    'RowExistenceExpectation',
 ]
 
 

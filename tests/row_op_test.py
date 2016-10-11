@@ -24,40 +24,40 @@ class RowOpTest(OTS2APITestBase):
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
 
         try:
-            self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), wrong_pk, {})
+            self.client_test.put_row('XX', Condition("IGNORE"), wrong_pk, {})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
 
         try:
-            self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put':{'C1': 'V'}})
+            self.client_test.update_row('XX', Condition("IGNORE"), wrong_pk, {'put':{'C1': 'V'}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
 
         try:
-            self.client_test.delete_row('XX', Condition(RowExistenceExpectation.IGNORE), wrong_pk)
+            self.client_test.delete_row('XX', Condition("IGNORE"), wrong_pk)
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
         
         response = self.client_test.batch_get_row([('XX', [wrong_pk], [])])
-        eresponse = [[RowDataItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None, None, None)]]
+        eresponse = [[RowDataItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None, None, None)]]
         self.assert_RowDataItem_equal(response, eresponse)
 
-        wrong_pk_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {})
+        wrong_pk_item = PutRowItem(Condition("IGNORE"), wrong_pk, {})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'put': [wrong_pk_item]}])
-        eresponse = [{'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "",  None)]}]
+        eresponse = [{'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
 
-        wrong_pk_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put':{'C1': 'V'}})
+        wrong_pk_item = UpdateRowItem(Condition("IGNORE"), wrong_pk, {'put':{'C1': 'V'}})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [wrong_pk_item]}])
-        eresponse = [{'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
+        eresponse = [{'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         
-        wrong_pk_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk)
+        wrong_pk_item = DeleteRowItem(Condition("IGNORE"), wrong_pk)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'delete': [wrong_pk_item]}])
-        eresponse = [{'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
+        eresponse = [{'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         
         get_range_end = {}
@@ -77,7 +77,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {})
 
         ewcu = self.sum_CU_from_row(pks, cols)
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -86,7 +86,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, cols)
         
 
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        cu = self.client_test.update_row('XX', Condition("IGNORE"), pks, {'put':cols})
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -94,7 +94,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        cu = self.client_test.delete_row('XX', Condition(RowExistenceExpectation.IGNORE), pks)
+        cu = self.client_test.delete_row('XX', Condition("IGNORE"), pks)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         ercu = 1
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -103,13 +103,13 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {})
         
         response = self.client_test.batch_get_row([('XX', [pks], [])])
-        eresponse = [[RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})]]
+        eresponse = [[RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {})]]
         self.assert_RowDataItem_equal(response, eresponse)
 
-        pks_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        pks_item = PutRowItem(Condition("IGNORE"), pks, cols)
         ewcu = self.sum_CU_from_row(pks, cols)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'put': [pks_item]}])
-        eresponse = [{'put': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'put': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -117,10 +117,10 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        pks_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        pks_item = UpdateRowItem(Condition("IGNORE"), pks, {'put':cols})
         ewcu = self.sum_CU_from_row(pks, cols)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [pks_item]}])
-        eresponse = [{'update': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'update': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -128,10 +128,10 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        pks_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pks)
+        pks_item = DeleteRowItem(Condition("IGNORE"), pks)
         ewcu = self.sum_CU_from_row(pks, {})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'delete': [pks_item]}])
-        eresponse = [{'delete': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
+        eresponse = [{'delete': [BatchWriteRowResponseItem(True, '', '', CapacityUnit(0, ewcu))]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -243,8 +243,8 @@ class RowOpTest(OTS2APITestBase):
         pks0 = {'PK1': '0', 'PK2': 123}
         pks1 = {'PK1': '1', 'PK2': 123}
         cols = {'C1': 'blah', 'C2': 123, 'C3': True, 'C4': False, 'C5': 3.14, 'C6': bytearray(1)}
-        putrow_item0 = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks0, cols)
-        putrow_item1 = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks1, cols)
+        putrow_item0 = PutRowItem(Condition("IGNORE"), pks0, cols)
+        putrow_item1 = PutRowItem(Condition("IGNORE"), pks1, cols)
         self.client_test.batch_write_row([
             {'table_name': 'AA', 'put': [putrow_item0, putrow_item1]}, 
             {'table_name': 'BB', 'put': [putrow_item0, putrow_item1]}
@@ -274,8 +274,8 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], []), 
             ('BB', [pks0, pks1], [])
         ])
-        rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), pks0, cols)
-        rowdata_item1 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), pks1, cols)
+        rowdata_item0 = RowDataItem(True, '', '', CapacityUnit(1, 0), pks0, cols)
+        rowdata_item1 = RowDataItem(True, '', '', CapacityUnit(1, 0), pks1, cols)
         eresponse = [[rowdata_item0, rowdata_item1], [rowdata_item0, rowdata_item1]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -283,7 +283,7 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['C1']), 
             ('BB', [pks0, pks1], ['C1'])
         ])
-        rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {'C1': 'blah'})
+        rowdata_item = RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {'C1': 'blah'})
         eresponse = [[rowdata_item, rowdata_item], [rowdata_item, rowdata_item]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -291,8 +291,8 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['PK1']), 
             ('BB', [pks0, pks1], ['PK1'])
         ])
-        rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {'PK1': '0'}, {})
-        rowdata_item1 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {'PK1': '1'}, {})
+        rowdata_item0 = RowDataItem(True, '', '', CapacityUnit(1, 0), {'PK1': '0'}, {})
+        rowdata_item1 = RowDataItem(True, '', '', CapacityUnit(1, 0), {'PK1': '1'}, {})
         eresponse = [[rowdata_item0, rowdata_item1], [rowdata_item0, rowdata_item1]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -300,7 +300,7 @@ class RowOpTest(OTS2APITestBase):
             ('AA', [pks0, pks1], ['blah']), 
             ('BB', [pks0, pks1], ['blah'])
         ])
-        rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})
+        rowdata_item = RowDataItem(True, '', '', CapacityUnit(1, 0), {}, {})
         eresponse = [[rowdata_item, rowdata_item], [rowdata_item, rowdata_item]]
         self.assert_RowDataItem_equal(response, eresponse)
 
@@ -361,7 +361,7 @@ class RowOpTest(OTS2APITestBase):
 
         pks = {'PK0': 'blah'}
         cols = {'C1': 'V' * 512, 'C2': 'X' * 512}
-        self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
 
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(1, 0))
@@ -416,10 +416,10 @@ class RowOpTest(OTS2APITestBase):
 
         pks = {'PK1': '0' * 20}
         cols = {'C0': 'V' * 2048, 'C1': 'B' * 2048}
-        self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
 
         #EXIST+COVER
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'put' : cols })
+        cu = self.client_test.update_row('XX', Condition("EXPECT_EXIST"), pks, { 'put' : cols })
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -428,7 +428,7 @@ class RowOpTest(OTS2APITestBase):
 
         #EXIST+ADD
         cols = {'C2': 'V' * 2048, 'C3': 'B' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'put' : cols })
+        cu = self.client_test.update_row('XX', Condition("EXPECT_EXIST"), pks, { 'put' : cols })
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(3, 0))
@@ -436,7 +436,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {'C0': 'V' * 2048, 'C1': 'B' * 2048, 'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
         #EXIST+DELETE
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'delete' : ['C0', 'C1'] })
+        cu = self.client_test.update_row('XX', Condition("EXPECT_EXIST"), pks, { 'delete' : ['C0', 'C1'] })
         self.assert_consumed(cu, CapacityUnit(1, 1))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -445,7 +445,7 @@ class RowOpTest(OTS2APITestBase):
 
         #EXIST+MIX
         cols = {'C0': 'V' * 2048, 'C1': None, 'C2': 'V' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, {'put' : {'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete' : ['C1']})
+        cu = self.client_test.update_row('XX', Condition("EXPECT_EXIST"), pks, {'put' : {'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete' : ['C1']})
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -454,10 +454,10 @@ class RowOpTest(OTS2APITestBase):
 
         pks = {'PK1': '0' * 20}
         cols = {'C0': 'V' * 2048, 'C1': 'B' * 2048}
-        self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
 
         #IGNORE+COVER
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        cu = self.client_test.update_row('XX', Condition("IGNORE"), pks, {'put':cols})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -466,7 +466,7 @@ class RowOpTest(OTS2APITestBase):
 
         #IGNORE+ADD
         cols = {'C2': 'V' * 2048, 'C3': 'B' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        cu = self.client_test.update_row('XX', Condition("IGNORE"), pks, {'put':cols})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(3, 0))
@@ -474,7 +474,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {'C0': 'V' * 2048, 'C1': 'B' * 2048, 'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
         #IGNORE+DELETE
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'delete':['C0', 'C1']})
+        cu = self.client_test.update_row('XX', Condition("IGNORE"), pks, {'delete':['C0', 'C1']})
         self.assert_consumed(cu, CapacityUnit(0, 1))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -482,7 +482,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, {'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
         #IGNORE+MIX
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':{'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete':['C1']})
+        cu = self.client_test.update_row('XX', Condition("IGNORE"), pks, {'put':{'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete':['C1']})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -504,7 +504,7 @@ class RowOpTest(OTS2APITestBase):
         for i in range(0, restriction.MaxColumnCountForRow):
             cols['C' + str(i)] = 1
         ewcu = self.sum_CU_from_row(pks, cols)
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(ewcu, 0))
@@ -513,7 +513,7 @@ class RowOpTest(OTS2APITestBase):
 
         for k in cols.keys():
             cols[k] = 1.0
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(ewcu, 0))
@@ -522,7 +522,7 @@ class RowOpTest(OTS2APITestBase):
 
         for k in cols.keys():
             cols[k] = 'V' * 8 
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(ewcu, 0))
@@ -532,7 +532,7 @@ class RowOpTest(OTS2APITestBase):
         for k in cols.keys():
             cols[k] = True 
         ewcu = self.sum_CU_from_row(pks, cols)
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(ewcu, 0))
@@ -542,7 +542,7 @@ class RowOpTest(OTS2APITestBase):
         for k in cols.keys():
             cols[k] = bytearray('V' * 8) 
         ewcu = self.sum_CU_from_row(pks, cols)
-        cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
+        cu = self.client_test.put_row('XX', Condition("IGNORE"), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(ewcu, 0))
@@ -560,7 +560,7 @@ class RowOpTest(OTS2APITestBase):
         self.wait_for_partition_load('XX')
 
         try:
-            self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_NOT_EXIST), {'PK1': '0'}, {'put':{'Col0' : 'XXXX'}})
+            self.client_test.update_row('XX', Condition("EXPECT_NOT_EXIST"), {'PK1': '0'}, {'put':{'Col0' : 'XXXX'}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSParameterInvalid", "Invalid condition: EXPECT_NOT_EXIST while updating row.")
@@ -574,7 +574,7 @@ class RowOpTest(OTS2APITestBase):
         ))
 
         try:
-            self.client_test.delete_row('XX', Condition(RowExistenceExpectation.EXPECT_NOT_EXIST), {'PK1': '0'})
+            self.client_test.delete_row('XX', Condition("EXPECT_NOT_EXIST"), {'PK1': '0'})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSParameterInvalid", "Invalid condition: EXPECT_NOT_EXIST while deleting row.")
@@ -593,7 +593,7 @@ class RowOpTest(OTS2APITestBase):
         for i in range(0, 9):
             pk = {'PK1': str(i)}
             col = {'C': 'V' * 400}
-            putrow_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk, col)
+            putrow_item = PutRowItem(Condition("IGNORE"), pk, col)
             rowitems.append(putrow_item)
         self.client_test.batch_write_row([{'table_name': 'XX', 'put': rowitems}])
 
@@ -610,7 +610,7 @@ class RowOpTest(OTS2APITestBase):
         for i in range(0, 9):
             pk = {'PK1': str(i)}
             col = {'C': 'V' * 800}
-            putrow_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk, col)
+            putrow_item = PutRowItem(Condition("IGNORE"), pk, col)
             rowitems.append(putrow_item)
         self.client_test.batch_write_row([{'table_name': 'XX', 'put': rowitems}])
 
@@ -625,7 +625,7 @@ class RowOpTest(OTS2APITestBase):
 
     def _valid_column_name_test(self, table_name, pk, columns):
         #put_row
-        consumed = self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, columns)
+        consumed = self.client_test.put_row(table_name, Condition("IGNORE"), pk, columns)
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
         #get_row
         consumed, primary_keys, columns_res = self.client_test.get_row(table_name, pk)
@@ -635,7 +635,7 @@ class RowOpTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [pk], [])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk, columns)
+        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk, columns)
         eresponse = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, eresponse)
         #get_range
@@ -650,22 +650,22 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rows, [(pk, columns)])
 
         #update_row
-        consumed = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, {'put':columns})
+        consumed = self.client_test.update_row(table_name, Condition("IGNORE"), pk, {'put':columns})
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
 
         #delete_row
-        consumed = self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk)
+        consumed = self.client_test.delete_row(table_name, Condition("IGNORE"), pk)
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, {})))
         #batch_write_row
-        put_row_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk, columns)
-        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put':columns})
-        delete_row_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pk)
+        put_row_item = PutRowItem(Condition("IGNORE"), pk, columns)
+        update_row_item = UpdateRowItem(Condition("IGNORE"), pk, {'put':columns})
+        delete_row_item = DeleteRowItem(Condition("IGNORE"), pk)
         batches_list = [{'put':[put_row_item]}, {'update':[update_row_item]}, {'delete':[delete_row_item]}]
-        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
+        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
         response_list = [
-            {'put':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'update':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'delete':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]}, 
+            {'put':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
+            {'update':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
+            {'delete':[BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]}, 
         ]
         for i in range(len(batches_list)):
             write_batches = batches_list[i]
@@ -731,7 +731,7 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test_batch_get_on_the_same_row')
 
-        consumed = self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk_dict, column_dict)
+        consumed = self.client_test.put_row(table_name, Condition("IGNORE"), pk_dict, column_dict)
         consumed_expect = CapacityUnit(0, 1)
         self.assert_consumed(consumed, consumed_expect)
 
@@ -759,9 +759,9 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test_batch_write_on_the_same_row')
 
-        put_row_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'col1':150})
-        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'put':{'col1':200}})
-        delete_row_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict)
+        put_row_item = PutRowItem(Condition("IGNORE"), pk_dict, {'col1':150})
+        update_row_item = UpdateRowItem(Condition("IGNORE"), pk_dict, {'put':{'col1':200}})
+        delete_row_item = DeleteRowItem(Condition("IGNORE"), pk_dict)
         test_batch_write_row_list = [{'put':[put_row_item], 'update':[update_row_item]}, {'put':[put_row_item], 'delete':[delete_row_item]}, {'update':[update_row_item], 'delete':[delete_row_item]}]
 
         for i in range(len(test_batch_write_row_list)):
@@ -773,7 +773,7 @@ class RowOpTest(OTS2APITestBase):
             except OTSServiceError as e:
                 self.assert_error(e, 400, "OTSParameterInvalid", "The input parameter is invalid.")
 
-        update_row_item_2 = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict_2, {'put':{'col1':200}})
+        update_row_item_2 = UpdateRowItem(Condition("IGNORE"), pk_dict_2, {'put':{'col1':200}})
         try:
             write_response = self.client_test.batch_write_row([{'table_name':table_name, 'put':[put_row_item]}, {'table_name':table_name, 'update':[update_row_item_2]}])
             self.assert_false()
@@ -892,7 +892,7 @@ class RowOpTest(OTS2APITestBase):
                 for first_pk_value in [a, b, c]:
                     for second_pk_value in [x, y]:
                         row_list.append(({'PK0' : first_pk_value, 'PK1' : second_pk_value}, {}))
-                        self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), {'PK0' : first_pk_value, 'PK1' : second_pk_value}, {})
+                        self.client_test.put_row(table_name, Condition("IGNORE"), {'PK0' : first_pk_value, 'PK1' : second_pk_value}, {})
 
                 def get_range(begin_pk0, begin_pk1, end_pk0, end_pk1):
                     return [{'PK0' : begin_pk0, 'PK1' : begin_pk1}, {'PK0' : end_pk0, 'PK1' : end_pk1}]
@@ -966,7 +966,7 @@ class RowOpTest(OTS2APITestBase):
         row_list = []
         putrow_list = []
         for pk_dict in pk_dict_list:
-            putrow_list.append(PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {}))
+            putrow_list.append(PutRowItem(Condition("IGNORE"), pk_dict, {}))
             row_list.append((pk_dict, {}))
         reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
         self.client_test.create_table(table_meta, reserved_throughput)
@@ -1051,10 +1051,10 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, ReservedThroughput(CapacityUnit(20, 20)))
         self.wait_for_partition_load('T')
 
-        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0' : 0}, {})
+        consumed = self.client_test.put_row('T', Condition('IGNORE'), {'PK0' : 0}, {})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
 
-        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0' : 1}, {'Col' : 1})
+        consumed = self.client_test.put_row('T', Condition('IGNORE'), {'PK0' : 1}, {'Col' : 1})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
 
         consumed, pks, columns = self.client_test.get_row('T', {'PK0' : 0})
@@ -1068,10 +1068,10 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(columns, {})
 
         ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], None)])
-        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {'PK0' : 0}, {})]])
+        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, CapacityUnit(1, 0), {'PK0' : 0}, {})]])
         
         ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], ['Col'])])
-        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {}, {})]])
+        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, CapacityUnit(1, 0), {}, {})]])
 
         consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 1})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
@@ -1102,9 +1102,9 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta1, reserved_throughput)
 
         self.wait_for_partition_load('table1')
-        put_table1 = PutRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 11}, {"COL": "table1_11"})
-        update_table1 = UpdateRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 12}, {"put" : {"COL": "table1_12"}})
-        delete_table1 = DeleteRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 13})
+        put_table1 = PutRowItem(Condition("EXPECT_EXIST"), {"PK": 11}, {"COL": "table1_11"})
+        update_table1 = UpdateRowItem(Condition("EXPECT_EXIST"), {"PK": 12}, {"put" : {"COL": "table1_12"}})
+        delete_table1 = DeleteRowItem(Condition("EXPECT_EXIST"), {"PK": 13})
 
         batches = [{
             'table_name':table1, 
@@ -1115,9 +1115,9 @@ class RowOpTest(OTS2APITestBase):
 
         response = self.client_test.batch_write_row(batches)
         expect_res = [{
-            'put':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
-            'update':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
-            'delete':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'put':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
+            'update':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
+            'delete':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", None)],
 
         }]
         self.assert_BatchWriteRowResponseItem(response, expect_res)
@@ -1132,7 +1132,7 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
 
-        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK" : 11}, {"delete" : ["Col0"]})
+        cu = self.client_test.update_row(table_name, Condition('IGNORE'), {"PK" : 11}, {"delete" : ["Col0"]})
         self.assert_consumed(cu, CapacityUnit(0, 1))
         
     def test_all_delete_in_update(self):
@@ -1149,7 +1149,7 @@ class RowOpTest(OTS2APITestBase):
         for i in range(restriction.MaxColumnCountForRow):
             columns_to_delete.append('Col' + str(i))
 
-        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK" : 11}, {"delete" : columns_to_delete})
+        cu = self.client_test.update_row(table_name, Condition('IGNORE'), {"PK" : 11}, {"delete" : columns_to_delete})
         pk_size = 10 # 'PK' + int
         col_size = sum([len(col) for col in columns_to_delete])
         expect_write_cu = int(math.ceil((pk_size + col_size) * 1.0 / 4096))
@@ -1171,10 +1171,10 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
 
-        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete" : ["Col0"]})
+        update_item = UpdateRowItem(Condition("IGNORE"), {"PK": 12}, {"delete" : ["Col0"]})
         batches = [{'table_name' : table_name, 'update' : [update_item]}]
         response = self.client_test.batch_write_row(batches)
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))]}])
+        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, 1))]}])
     
         cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))
@@ -1196,13 +1196,13 @@ class RowOpTest(OTS2APITestBase):
         for i in range(restriction.MaxColumnCountForRow):
             columns_to_delete.append('Col' + str(i))
     
-        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete" : columns_to_delete})
+        update_item = UpdateRowItem(Condition("IGNORE"), {"PK": 12}, {"delete" : columns_to_delete})
         batches = [{'table_name' : table_name, 'update' : [update_item]}]
         response = self.client_test.batch_write_row(batches)
         pk_size = 10 # 'PK' + int
         col_size = sum([len(col) for col in columns_to_delete])
         expect_write_cu = int(math.ceil((pk_size + col_size) * 1.0 / 4096))
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, expect_write_cu))]}])
+        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, expect_write_cu))]}])
     
         cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))
