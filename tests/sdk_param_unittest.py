@@ -138,13 +138,13 @@ class SDKParamTest(unittest.TestCase):
         try:
             primary_key = {'PK1':'hello', 'PK2':100}
             attribute_columns = {'COL1':'world', 'COL2':1000}
-            consumed = self.ots_client.put_row('test_table', ['IGNORE'], primary_key, attribute_columns)
+            consumed = self.ots_client.put_row('test_table', [RowExistenceExpectation.IGNORE], primary_key, attribute_columns)
             self.assertTrue(False)
         except:
             pass
     
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.put_row('test_table', condition, 'primary_key', 'attribute_columns')
             self.assertTrue(False)
         except:
@@ -171,28 +171,28 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, 'update_of_attribute_columns')
             self.assertTrue(False)
         except OTSClientError as e:
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'ncv' : 1})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
             
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'put' : []})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
             
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'delete' : {}})
             self.assertTrue(False)
         except OTSClientError as e:
@@ -206,7 +206,7 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            condition = Condition('IGNORE')
+            condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.delete_row('test_table', condition, 'primary_key')
             self.assertTrue(False)
         except:
@@ -331,6 +331,74 @@ class SDKParamTest(unittest.TestCase):
             self.assertTrue(False)
         except OTSClientError:
             pass
+
+    def assert_client_error(self, error, message):
+        self.assertEqual(str(error), message)
+
+    def test_condition(self):
+        Condition(RowExistenceExpectation.IGNORE)
+        Condition(RowExistenceExpectation.EXPECT_EXIST)
+        Condition(RowExistenceExpectation.EXPECT_NOT_EXIST)
+
+        try:
+            cond = Condition('errr')
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input row_existence_expectation should be one of ['RowExistenceExpectation.IGNORE', 'RowExistenceExpectation.EXPECT_EXIST', 'RowExistenceExpectation.EXPECT_NOT_EXIST'], but 'errr'", str(e))
+
+        try:
+            cond = Condition(RowExistenceExpectation.IGNORE, "")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("The input column_condition should be an instance of ColumnCondition, not str", str(e))
+
+        try:
+            cond = Condition(RowExistenceExpectation.IGNORE, RelationCondition("", "", ""))
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
+
+
+    def test_column_condition(self):
+        cond = RelationCondition("uid", 100, ComparatorType.EQUAL)
+        self.assertEqual(ColumnConditionType.RELATION_CONDITION, cond.get_type())
+        
+        cond = CompositeCondition(LogicalOperator.AND)
+        self.assertEqual(ColumnConditionType.COMPOSITE_CONDITION, cond.get_type())
+       
+
+    def test_relation_condition(self):
+        RelationCondition("uid", 100, ComparatorType.EQUAL)
+        RelationCondition("uid", 100, ComparatorType.NOT_EQUAL)
+        RelationCondition("uid", 100, ComparatorType.GREATER_THAN)
+        RelationCondition("uid", 100, ComparatorType.GREATER_EQUAL)
+        RelationCondition("uid", 100, ComparatorType.LESS_THAN)
+        RelationCondition("uid", 100, ComparatorType.LESS_EQUAL)
+
+        try:
+            cond = RelationCondition("uid", 100, "")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
+       
+        try:
+            cond = RelationCondition("uid", 100, ComparatorType.LESS_EQUAL, "True")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("The input pass_if_missing should be an instance of Bool, not str", str(e))
+       
+
+    def test_composite_condition(self):
+        CompositeCondition(LogicalOperator.NOT)
+        CompositeCondition(LogicalOperator.AND)
+        CompositeCondition(LogicalOperator.OR)
+
+        try:
+            cond = CompositeCondition("")
+            self.assertTrue(False)
+        except OTSClientError, e:
+            self.assertEqual("Expect input combinator should be one of ['LogicalOperator.NOT', 'LogicalOperator.AND', 'LogicalOperator.OR'], but ''", str(e))
+ 
 
 if __name__ == '__main__':
     unittest.main()

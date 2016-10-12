@@ -10,12 +10,12 @@ from google.protobuf import descriptor_pb2
 
 DESCRIPTOR = descriptor.FileDescriptor(
   name='ots_protocol_2.proto',
-  package='com.aliyun.cloudservice.ots2',
-  serialized_pb='\n\x14ots_protocol_2.proto\x12\x1c\x63om.aliyun.cloudservice.ots2\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x02(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"T\n\x0c\x43olumnSchema\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x36\n\x04type\x18\x02 \x02(\x0e\x32(.com.aliyun.cloudservice.ots2.ColumnType\"\x9a\x01\n\x0b\x43olumnValue\x12\x36\n\x04type\x18\x01 \x02(\x0e\x32(.com.aliyun.cloudservice.ots2.ColumnType\x12\r\n\x05v_int\x18\x02 \x01(\x03\x12\x10\n\x08v_string\x18\x03 \x01(\t\x12\x0e\n\x06v_bool\x18\x04 \x01(\x08\x12\x10\n\x08v_double\x18\x05 \x01(\x01\x12\x10\n\x08v_binary\x18\x06 \x01(\x0c\"P\n\x06\x43olumn\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x38\n\x05value\x18\x02 \x02(\x0b\x32).com.aliyun.cloudservice.ots2.ColumnValue\"\x89\x01\n\x03Row\x12\x41\n\x13primary_key_columns\x18\x01 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12?\n\x11\x61ttribute_columns\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"`\n\tTableMeta\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12?\n\x0bprimary_key\x18\x02 \x03(\x0b\x32*.com.aliyun.cloudservice.ots2.ColumnSchema\"Y\n\tCondition\x12L\n\rrow_existence\x18\x01 \x02(\x0e\x32\x35.com.aliyun.cloudservice.ots2.RowExistenceExpectation\"+\n\x0c\x43\x61pacityUnit\x12\x0c\n\x04read\x18\x01 \x01(\x05\x12\r\n\x05write\x18\x02 \x01(\x05\"\xb9\x01\n\x19ReservedThroughputDetails\x12\x41\n\rcapacity_unit\x18\x01 \x02(\x0b\x32*.com.aliyun.cloudservice.ots2.CapacityUnit\x12\x1a\n\x12last_increase_time\x18\x02 \x02(\x03\x12\x1a\n\x12last_decrease_time\x18\x03 \x01(\x03\x12!\n\x19number_of_decreases_today\x18\x04 \x02(\x05\"W\n\x12ReservedThroughput\x12\x41\n\rcapacity_unit\x18\x01 \x02(\x0b\x32*.com.aliyun.cloudservice.ots2.CapacityUnit\"U\n\x10\x43onsumedCapacity\x12\x41\n\rcapacity_unit\x18\x01 \x02(\x0b\x32*.com.aliyun.cloudservice.ots2.CapacityUnit\"\xa0\x01\n\x12\x43reateTableRequest\x12;\n\ntable_meta\x18\x01 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.TableMeta\x12M\n\x13reserved_throughput\x18\x02 \x02(\x0b\x32\x30.com.aliyun.cloudservice.ots2.ReservedThroughput\"\x15\n\x13\x43reateTableResponse\"w\n\x12UpdateTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12M\n\x13reserved_throughput\x18\x02 \x02(\x0b\x32\x30.com.aliyun.cloudservice.ots2.ReservedThroughput\"s\n\x13UpdateTableResponse\x12\\\n\x1breserved_throughput_details\x18\x01 \x02(\x0b\x32\x37.com.aliyun.cloudservice.ots2.ReservedThroughputDetails\"*\n\x14\x44\x65scribeTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\"\xb2\x01\n\x15\x44\x65scribeTableResponse\x12;\n\ntable_meta\x18\x01 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.TableMeta\x12\\\n\x1breserved_throughput_details\x18\x02 \x02(\x0b\x32\x37.com.aliyun.cloudservice.ots2.ReservedThroughputDetails\"\x12\n\x10ListTableRequest\"(\n\x11ListTableResponse\x12\x13\n\x0btable_names\x18\x01 \x03(\t\"(\n\x12\x44\x65leteTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\"\x15\n\x13\x44\x65leteTableResponse\"v\n\rGetRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x39\n\x0bprimary_key\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\"\x82\x01\n\x0eGetRowResponse\x12@\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\x12.\n\x03row\x18\x02 \x02(\x0b\x32!.com.aliyun.cloudservice.ots2.Row\"\x91\x01\n\x0c\x43olumnUpdate\x12\x39\n\x04type\x18\x01 \x02(\x0e\x32+.com.aliyun.cloudservice.ots2.OperationType\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x38\n\x05value\x18\x03 \x01(\x0b\x32).com.aliyun.cloudservice.ots2.ColumnValue\"\xe4\x01\n\x10UpdateRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12:\n\tcondition\x18\x02 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x03 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12\x45\n\x11\x61ttribute_columns\x18\x04 \x03(\x0b\x32*.com.aliyun.cloudservice.ots2.ColumnUpdate\"U\n\x11UpdateRowResponse\x12@\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\"\xdb\x01\n\rPutRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12:\n\tcondition\x18\x02 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x03 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12?\n\x11\x61ttribute_columns\x18\x04 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"R\n\x0ePutRowResponse\x12@\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\"\x9d\x01\n\x10\x44\x65leteRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12:\n\tcondition\x18\x02 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x03 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"U\n\x11\x44\x65leteRowResponse\x12@\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\"T\n\x17RowInBatchGetRowRequest\x12\x39\n\x0bprimary_key\x18\x01 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"\x8c\x01\n\x19TableInBatchGetRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x43\n\x04rows\x18\x02 \x03(\x0b\x32\x35.com.aliyun.cloudservice.ots2.RowInBatchGetRowRequest\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\"]\n\x12\x42\x61tchGetRowRequest\x12G\n\x06tables\x18\x01 \x03(\x0b\x32\x37.com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest\"\xd5\x01\n\x18RowInBatchGetRowResponse\x12\x13\n\x05is_ok\x18\x01 \x02(\x08:\x04true\x12\x32\n\x05\x65rror\x18\x02 \x01(\x0b\x32#.com.aliyun.cloudservice.ots2.Error\x12@\n\x08\x63onsumed\x18\x03 \x01(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\x12.\n\x03row\x18\x04 \x01(\x0b\x32!.com.aliyun.cloudservice.ots2.Row\"v\n\x1aTableInBatchGetRowResponse\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x44\n\x04rows\x18\x02 \x03(\x0b\x32\x36.com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse\"_\n\x13\x42\x61tchGetRowResponse\x12H\n\x06tables\x18\x01 \x03(\x0b\x32\x38.com.aliyun.cloudservice.ots2.TableInBatchGetRowResponse\"\xd6\x01\n\x1cPutRowInBatchWriteRowRequest\x12:\n\tcondition\x18\x01 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12?\n\x11\x61ttribute_columns\x18\x03 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"\xdf\x01\n\x1fUpdateRowInBatchWriteRowRequest\x12:\n\tcondition\x18\x01 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12\x45\n\x11\x61ttribute_columns\x18\x03 \x03(\x0b\x32*.com.aliyun.cloudservice.ots2.ColumnUpdate\"\x98\x01\n\x1f\x44\x65leteRowInBatchWriteRowRequest\x12:\n\tcondition\x18\x01 \x02(\x0b\x32\'.com.aliyun.cloudservice.ots2.Condition\x12\x39\n\x0bprimary_key\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"\xa7\x02\n\x1bTableInBatchWriteRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12L\n\x08put_rows\x18\x02 \x03(\x0b\x32:.com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest\x12R\n\x0bupdate_rows\x18\x03 \x03(\x0b\x32=.com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest\x12R\n\x0b\x64\x65lete_rows\x18\x04 \x03(\x0b\x32=.com.aliyun.cloudservice.ots2.DeleteRowInBatchWriteRowRequest\"a\n\x14\x42\x61tchWriteRowRequest\x12I\n\x06tables\x18\x01 \x03(\x0b\x32\x39.com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest\"\xa7\x01\n\x1aRowInBatchWriteRowResponse\x12\x13\n\x05is_ok\x18\x01 \x02(\x08:\x04true\x12\x32\n\x05\x65rror\x18\x02 \x01(\x0b\x32#.com.aliyun.cloudservice.ots2.Error\x12@\n\x08\x63onsumed\x18\x03 \x01(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\"\x9c\x02\n\x1cTableInBatchWriteRowResponse\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12J\n\x08put_rows\x18\x02 \x03(\x0b\x32\x38.com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse\x12M\n\x0bupdate_rows\x18\x03 \x03(\x0b\x32\x38.com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse\x12M\n\x0b\x64\x65lete_rows\x18\x04 \x03(\x0b\x32\x38.com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse\"c\n\x15\x42\x61tchWriteRowResponse\x12J\n\x06tables\x18\x01 \x03(\x0b\x32:.com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse\"\x9c\x02\n\x0fGetRangeRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12:\n\tdirection\x18\x02 \x02(\x0e\x32\'.com.aliyun.cloudservice.ots2.Direction\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\x12\r\n\x05limit\x18\x04 \x01(\x05\x12I\n\x1binclusive_start_primary_key\x18\x05 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12G\n\x19\x65xclusive_end_primary_key\x18\x06 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\"\xcb\x01\n\x10GetRangeResponse\x12@\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32..com.aliyun.cloudservice.ots2.ConsumedCapacity\x12\x44\n\x16next_start_primary_key\x18\x02 \x03(\x0b\x32$.com.aliyun.cloudservice.ots2.Column\x12/\n\x04rows\x18\x03 \x03(\x0b\x32!.com.aliyun.cloudservice.ots2.Row*d\n\nColumnType\x12\x0b\n\x07INF_MIN\x10\x00\x12\x0b\n\x07INF_MAX\x10\x01\x12\x0b\n\x07INTEGER\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0b\n\x07\x42OOLEAN\x10\x04\x12\n\n\x06\x44OUBLE\x10\x05\x12\n\n\x06\x42INARY\x10\x06*M\n\x17RowExistenceExpectation\x12\n\n\x06IGNORE\x10\x00\x12\x10\n\x0c\x45XPECT_EXIST\x10\x01\x12\x14\n\x10\x45XPECT_NOT_EXIST\x10\x02*$\n\rOperationType\x12\x07\n\x03PUT\x10\x01\x12\n\n\x06\x44\x45LETE\x10\x02*&\n\tDirection\x12\x0b\n\x07\x46ORWARD\x10\x00\x12\x0c\n\x08\x42\x41\x43KWARD\x10\x01')
+  package='com.aliyun.openservices.ots.protocol',
+  serialized_pb='\n\x14ots_protocol_2.proto\x12$com.aliyun.openservices.ots.protocol\"&\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x02(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"\\\n\x0c\x43olumnSchema\x12\x0c\n\x04name\x18\x01 \x02(\t\x12>\n\x04type\x18\x02 \x02(\x0e\x32\x30.com.aliyun.openservices.ots.protocol.ColumnType\"\xa2\x01\n\x0b\x43olumnValue\x12>\n\x04type\x18\x01 \x02(\x0e\x32\x30.com.aliyun.openservices.ots.protocol.ColumnType\x12\r\n\x05v_int\x18\x02 \x01(\x03\x12\x10\n\x08v_string\x18\x03 \x01(\t\x12\x0e\n\x06v_bool\x18\x04 \x01(\x08\x12\x10\n\x08v_double\x18\x05 \x01(\x01\x12\x10\n\x08v_binary\x18\x06 \x01(\x0c\"X\n\x06\x43olumn\x12\x0c\n\x04name\x18\x01 \x02(\t\x12@\n\x05value\x18\x02 \x02(\x0b\x32\x31.com.aliyun.openservices.ots.protocol.ColumnValue\"\x99\x01\n\x03Row\x12I\n\x13primary_key_columns\x18\x01 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12G\n\x11\x61ttribute_columns\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"h\n\tTableMeta\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12G\n\x0bprimary_key\x18\x02 \x03(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.ColumnSchema\"\xd4\x01\n\x11RelationCondition\x12H\n\ncomparator\x18\x01 \x02(\x0e\x32\x34.com.aliyun.openservices.ots.protocol.ComparatorType\x12\x13\n\x0b\x63olumn_name\x18\x02 \x02(\t\x12G\n\x0c\x63olumn_value\x18\x03 \x02(\x0b\x32\x31.com.aliyun.openservices.ots.protocol.ColumnValue\x12\x17\n\x0fpass_if_missing\x18\x04 \x02(\x08\"\xae\x01\n\x12\x43ompositeCondition\x12I\n\ncombinator\x18\x01 \x02(\x0e\x32\x35.com.aliyun.openservices.ots.protocol.LogicalOperator\x12M\n\x0esub_conditions\x18\x02 \x03(\x0b\x32\x35.com.aliyun.openservices.ots.protocol.ColumnCondition\"m\n\x0f\x43olumnCondition\x12G\n\x04type\x18\x01 \x02(\x0e\x32\x39.com.aliyun.openservices.ots.protocol.ColumnConditionType\x12\x11\n\tcondition\x18\x02 \x02(\x0c\"\xb2\x01\n\tCondition\x12T\n\rrow_existence\x18\x01 \x02(\x0e\x32=.com.aliyun.openservices.ots.protocol.RowExistenceExpectation\x12O\n\x10\x63olumn_condition\x18\x02 \x01(\x0b\x32\x35.com.aliyun.openservices.ots.protocol.ColumnCondition\"+\n\x0c\x43\x61pacityUnit\x12\x0c\n\x04read\x18\x01 \x01(\x05\x12\r\n\x05write\x18\x02 \x01(\x05\"\xc1\x01\n\x19ReservedThroughputDetails\x12I\n\rcapacity_unit\x18\x01 \x02(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.CapacityUnit\x12\x1a\n\x12last_increase_time\x18\x02 \x02(\x03\x12\x1a\n\x12last_decrease_time\x18\x03 \x01(\x03\x12!\n\x19number_of_decreases_today\x18\x04 \x02(\x05\"_\n\x12ReservedThroughput\x12I\n\rcapacity_unit\x18\x01 \x02(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.CapacityUnit\"]\n\x10\x43onsumedCapacity\x12I\n\rcapacity_unit\x18\x01 \x02(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.CapacityUnit\"\xb0\x01\n\x12\x43reateTableRequest\x12\x43\n\ntable_meta\x18\x01 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.TableMeta\x12U\n\x13reserved_throughput\x18\x02 \x02(\x0b\x32\x38.com.aliyun.openservices.ots.protocol.ReservedThroughput\"\x15\n\x13\x43reateTableResponse\"\x7f\n\x12UpdateTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12U\n\x13reserved_throughput\x18\x02 \x02(\x0b\x32\x38.com.aliyun.openservices.ots.protocol.ReservedThroughput\"{\n\x13UpdateTableResponse\x12\x64\n\x1breserved_throughput_details\x18\x01 \x02(\x0b\x32?.com.aliyun.openservices.ots.protocol.ReservedThroughputDetails\"*\n\x14\x44\x65scribeTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\"\xc2\x01\n\x15\x44\x65scribeTableResponse\x12\x43\n\ntable_meta\x18\x01 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.TableMeta\x12\x64\n\x1breserved_throughput_details\x18\x02 \x02(\x0b\x32?.com.aliyun.openservices.ots.protocol.ReservedThroughputDetails\"\x12\n\x10ListTableRequest\"(\n\x11ListTableResponse\x12\x13\n\x0btable_names\x18\x01 \x03(\t\"(\n\x12\x44\x65leteTableRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\"\x15\n\x13\x44\x65leteTableResponse\"\xc5\x01\n\rGetRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x41\n\x0bprimary_key\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\x12\x45\n\x06\x66ilter\x18\x04 \x01(\x0b\x32\x35.com.aliyun.openservices.ots.protocol.ColumnCondition\"\x92\x01\n\x0eGetRowResponse\x12H\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\x12\x36\n\x03row\x18\x02 \x02(\x0b\x32).com.aliyun.openservices.ots.protocol.Row\"\xa1\x01\n\x0c\x43olumnUpdate\x12\x41\n\x04type\x18\x01 \x02(\x0e\x32\x33.com.aliyun.openservices.ots.protocol.OperationType\x12\x0c\n\x04name\x18\x02 \x02(\t\x12@\n\x05value\x18\x03 \x01(\x0b\x32\x31.com.aliyun.openservices.ots.protocol.ColumnValue\"\xfc\x01\n\x10UpdateRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x42\n\tcondition\x18\x02 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x03 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12M\n\x11\x61ttribute_columns\x18\x04 \x03(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.ColumnUpdate\"]\n\x11UpdateRowResponse\x12H\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\"\xf3\x01\n\rPutRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x42\n\tcondition\x18\x02 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x03 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12G\n\x11\x61ttribute_columns\x18\x04 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"Z\n\x0ePutRowResponse\x12H\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\"\xad\x01\n\x10\x44\x65leteRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x42\n\tcondition\x18\x02 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x03 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"]\n\x11\x44\x65leteRowResponse\x12H\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\"\\\n\x17RowInBatchGetRowRequest\x12\x41\n\x0bprimary_key\x18\x01 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"\xdb\x01\n\x19TableInBatchGetRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12K\n\x04rows\x18\x02 \x03(\x0b\x32=.com.aliyun.openservices.ots.protocol.RowInBatchGetRowRequest\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\x12\x45\n\x06\x66ilter\x18\x04 \x01(\x0b\x32\x35.com.aliyun.openservices.ots.protocol.ColumnCondition\"e\n\x12\x42\x61tchGetRowRequest\x12O\n\x06tables\x18\x01 \x03(\x0b\x32?.com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest\"\xed\x01\n\x18RowInBatchGetRowResponse\x12\x13\n\x05is_ok\x18\x01 \x02(\x08:\x04true\x12:\n\x05\x65rror\x18\x02 \x01(\x0b\x32+.com.aliyun.openservices.ots.protocol.Error\x12H\n\x08\x63onsumed\x18\x03 \x01(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\x12\x36\n\x03row\x18\x04 \x01(\x0b\x32).com.aliyun.openservices.ots.protocol.Row\"~\n\x1aTableInBatchGetRowResponse\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12L\n\x04rows\x18\x02 \x03(\x0b\x32>.com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse\"g\n\x13\x42\x61tchGetRowResponse\x12P\n\x06tables\x18\x01 \x03(\x0b\x32@.com.aliyun.openservices.ots.protocol.TableInBatchGetRowResponse\"\xee\x01\n\x1cPutRowInBatchWriteRowRequest\x12\x42\n\tcondition\x18\x01 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12G\n\x11\x61ttribute_columns\x18\x03 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"\xf7\x01\n\x1fUpdateRowInBatchWriteRowRequest\x12\x42\n\tcondition\x18\x01 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12M\n\x11\x61ttribute_columns\x18\x03 \x03(\x0b\x32\x32.com.aliyun.openservices.ots.protocol.ColumnUpdate\"\xa8\x01\n\x1f\x44\x65leteRowInBatchWriteRowRequest\x12\x42\n\tcondition\x18\x01 \x02(\x0b\x32/.com.aliyun.openservices.ots.protocol.Condition\x12\x41\n\x0bprimary_key\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\"\xbf\x02\n\x1bTableInBatchWriteRowRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12T\n\x08put_rows\x18\x02 \x03(\x0b\x32\x42.com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest\x12Z\n\x0bupdate_rows\x18\x03 \x03(\x0b\x32\x45.com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest\x12Z\n\x0b\x64\x65lete_rows\x18\x04 \x03(\x0b\x32\x45.com.aliyun.openservices.ots.protocol.DeleteRowInBatchWriteRowRequest\"i\n\x14\x42\x61tchWriteRowRequest\x12Q\n\x06tables\x18\x01 \x03(\x0b\x32\x41.com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest\"\xb7\x01\n\x1aRowInBatchWriteRowResponse\x12\x13\n\x05is_ok\x18\x01 \x02(\x08:\x04true\x12:\n\x05\x65rror\x18\x02 \x01(\x0b\x32+.com.aliyun.openservices.ots.protocol.Error\x12H\n\x08\x63onsumed\x18\x03 \x01(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\"\xb4\x02\n\x1cTableInBatchWriteRowResponse\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12R\n\x08put_rows\x18\x02 \x03(\x0b\x32@.com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse\x12U\n\x0bupdate_rows\x18\x03 \x03(\x0b\x32@.com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse\x12U\n\x0b\x64\x65lete_rows\x18\x04 \x03(\x0b\x32@.com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse\"k\n\x15\x42\x61tchWriteRowResponse\x12R\n\x06tables\x18\x01 \x03(\x0b\x32\x42.com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse\"\xfb\x02\n\x0fGetRangeRequest\x12\x12\n\ntable_name\x18\x01 \x02(\t\x12\x42\n\tdirection\x18\x02 \x02(\x0e\x32/.com.aliyun.openservices.ots.protocol.Direction\x12\x16\n\x0e\x63olumns_to_get\x18\x03 \x03(\t\x12\r\n\x05limit\x18\x04 \x01(\x05\x12Q\n\x1binclusive_start_primary_key\x18\x05 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12O\n\x19\x65xclusive_end_primary_key\x18\x06 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12\x45\n\x06\x66ilter\x18\x07 \x01(\x0b\x32\x35.com.aliyun.openservices.ots.protocol.ColumnCondition\"\xe3\x01\n\x10GetRangeResponse\x12H\n\x08\x63onsumed\x18\x01 \x02(\x0b\x32\x36.com.aliyun.openservices.ots.protocol.ConsumedCapacity\x12L\n\x16next_start_primary_key\x18\x02 \x03(\x0b\x32,.com.aliyun.openservices.ots.protocol.Column\x12\x37\n\x04rows\x18\x03 \x03(\x0b\x32).com.aliyun.openservices.ots.protocol.Row*d\n\nColumnType\x12\x0b\n\x07INF_MIN\x10\x00\x12\x0b\n\x07INF_MAX\x10\x01\x12\x0b\n\x07INTEGER\x10\x02\x12\n\n\x06STRING\x10\x03\x12\x0b\n\x07\x42OOLEAN\x10\x04\x12\n\n\x06\x44OUBLE\x10\x05\x12\n\n\x06\x42INARY\x10\x06*M\n\x17RowExistenceExpectation\x12\n\n\x06IGNORE\x10\x00\x12\x10\n\x0c\x45XPECT_EXIST\x10\x01\x12\x14\n\x10\x45XPECT_NOT_EXIST\x10\x02*:\n\x13\x43olumnConditionType\x12\x10\n\x0c\x43\x43T_RELATION\x10\x01\x12\x11\n\rCCT_COMPOSITE\x10\x02*\x80\x01\n\x0e\x43omparatorType\x12\x0c\n\x08\x43T_EQUAL\x10\x01\x12\x10\n\x0c\x43T_NOT_EQUAL\x10\x02\x12\x13\n\x0f\x43T_GREATER_THAN\x10\x03\x12\x14\n\x10\x43T_GREATER_EQUAL\x10\x04\x12\x10\n\x0c\x43T_LESS_THAN\x10\x05\x12\x11\n\rCT_LESS_EQUAL\x10\x06*4\n\x0fLogicalOperator\x12\n\n\x06LO_NOT\x10\x01\x12\n\n\x06LO_AND\x10\x02\x12\t\n\x05LO_OR\x10\x03*$\n\rOperationType\x12\x07\n\x03PUT\x10\x01\x12\n\n\x06\x44\x45LETE\x10\x02*&\n\tDirection\x12\x0b\n\x07\x46ORWARD\x10\x00\x12\x0c\n\x08\x42\x41\x43KWARD\x10\x01')
 
 _COLUMNTYPE = descriptor.EnumDescriptor(
   name='ColumnType',
-  full_name='com.aliyun.cloudservice.ots2.ColumnType',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -50,14 +50,14 @@ _COLUMNTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6008,
-  serialized_end=6108,
+  serialized_start=7327,
+  serialized_end=7427,
 )
 
 
 _ROWEXISTENCEEXPECTATION = descriptor.EnumDescriptor(
   name='RowExistenceExpectation',
-  full_name='com.aliyun.cloudservice.ots2.RowExistenceExpectation',
+  full_name='com.aliyun.openservices.ots.protocol.RowExistenceExpectation',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -76,14 +76,100 @@ _ROWEXISTENCEEXPECTATION = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6110,
-  serialized_end=6187,
+  serialized_start=7429,
+  serialized_end=7506,
+)
+
+
+_COLUMNCONDITIONTYPE = descriptor.EnumDescriptor(
+  name='ColumnConditionType',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnConditionType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='CCT_RELATION', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CCT_COMPOSITE', index=1, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=7508,
+  serialized_end=7566,
+)
+
+
+_COMPARATORTYPE = descriptor.EnumDescriptor(
+  name='ComparatorType',
+  full_name='com.aliyun.openservices.ots.protocol.ComparatorType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='CT_EQUAL', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CT_NOT_EQUAL', index=1, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CT_GREATER_THAN', index=2, number=3,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CT_GREATER_EQUAL', index=3, number=4,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CT_LESS_THAN', index=4, number=5,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='CT_LESS_EQUAL', index=5, number=6,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=7569,
+  serialized_end=7697,
+)
+
+
+_LOGICALOPERATOR = descriptor.EnumDescriptor(
+  name='LogicalOperator',
+  full_name='com.aliyun.openservices.ots.protocol.LogicalOperator',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='LO_NOT', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='LO_AND', index=1, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='LO_OR', index=2, number=3,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=7699,
+  serialized_end=7751,
 )
 
 
 _OPERATIONTYPE = descriptor.EnumDescriptor(
   name='OperationType',
-  full_name='com.aliyun.cloudservice.ots2.OperationType',
+  full_name='com.aliyun.openservices.ots.protocol.OperationType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -98,14 +184,14 @@ _OPERATIONTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6189,
-  serialized_end=6225,
+  serialized_start=7753,
+  serialized_end=7789,
 )
 
 
 _DIRECTION = descriptor.EnumDescriptor(
   name='Direction',
-  full_name='com.aliyun.cloudservice.ots2.Direction',
+  full_name='com.aliyun.openservices.ots.protocol.Direction',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -120,8 +206,8 @@ _DIRECTION = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6227,
-  serialized_end=6265,
+  serialized_start=7791,
+  serialized_end=7829,
 )
 
 
@@ -135,6 +221,17 @@ BINARY = 6
 IGNORE = 0
 EXPECT_EXIST = 1
 EXPECT_NOT_EXIST = 2
+CCT_RELATION = 1
+CCT_COMPOSITE = 2
+CT_EQUAL = 1
+CT_NOT_EQUAL = 2
+CT_GREATER_THAN = 3
+CT_GREATER_EQUAL = 4
+CT_LESS_THAN = 5
+CT_LESS_EQUAL = 6
+LO_NOT = 1
+LO_AND = 2
+LO_OR = 3
 PUT = 1
 DELETE = 2
 FORWARD = 0
@@ -144,20 +241,20 @@ BACKWARD = 1
 
 _ERROR = descriptor.Descriptor(
   name='Error',
-  full_name='com.aliyun.cloudservice.ots2.Error',
+  full_name='com.aliyun.openservices.ots.protocol.Error',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='code', full_name='com.aliyun.cloudservice.ots2.Error.code', index=0,
+      name='code', full_name='com.aliyun.openservices.ots.protocol.Error.code', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='message', full_name='com.aliyun.cloudservice.ots2.Error.message', index=1,
+      name='message', full_name='com.aliyun.openservices.ots.protocol.Error.message', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
@@ -172,27 +269,27 @@ _ERROR = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=54,
-  serialized_end=92,
+  serialized_start=62,
+  serialized_end=100,
 )
 
 
 _COLUMNSCHEMA = descriptor.Descriptor(
   name='ColumnSchema',
-  full_name='com.aliyun.cloudservice.ots2.ColumnSchema',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnSchema',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='name', full_name='com.aliyun.cloudservice.ots2.ColumnSchema.name', index=0,
+      name='name', full_name='com.aliyun.openservices.ots.protocol.ColumnSchema.name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='type', full_name='com.aliyun.cloudservice.ots2.ColumnSchema.type', index=1,
+      name='type', full_name='com.aliyun.openservices.ots.protocol.ColumnSchema.type', index=1,
       number=2, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -207,55 +304,55 @@ _COLUMNSCHEMA = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=94,
-  serialized_end=178,
+  serialized_start=102,
+  serialized_end=194,
 )
 
 
 _COLUMNVALUE = descriptor.Descriptor(
   name='ColumnValue',
-  full_name='com.aliyun.cloudservice.ots2.ColumnValue',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnValue',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='type', full_name='com.aliyun.cloudservice.ots2.ColumnValue.type', index=0,
+      name='type', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.type', index=0,
       number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='v_int', full_name='com.aliyun.cloudservice.ots2.ColumnValue.v_int', index=1,
+      name='v_int', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.v_int', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='v_string', full_name='com.aliyun.cloudservice.ots2.ColumnValue.v_string', index=2,
+      name='v_string', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.v_string', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='v_bool', full_name='com.aliyun.cloudservice.ots2.ColumnValue.v_bool', index=3,
+      name='v_bool', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.v_bool', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='v_double', full_name='com.aliyun.cloudservice.ots2.ColumnValue.v_double', index=4,
+      name='v_double', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.v_double', index=4,
       number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='v_binary', full_name='com.aliyun.cloudservice.ots2.ColumnValue.v_binary', index=5,
+      name='v_binary', full_name='com.aliyun.openservices.ots.protocol.ColumnValue.v_binary', index=5,
       number=6, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value="",
       message_type=None, enum_type=None, containing_type=None,
@@ -270,27 +367,27 @@ _COLUMNVALUE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=181,
-  serialized_end=335,
+  serialized_start=197,
+  serialized_end=359,
 )
 
 
 _COLUMN = descriptor.Descriptor(
   name='Column',
-  full_name='com.aliyun.cloudservice.ots2.Column',
+  full_name='com.aliyun.openservices.ots.protocol.Column',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='name', full_name='com.aliyun.cloudservice.ots2.Column.name', index=0,
+      name='name', full_name='com.aliyun.openservices.ots.protocol.Column.name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='value', full_name='com.aliyun.cloudservice.ots2.Column.value', index=1,
+      name='value', full_name='com.aliyun.openservices.ots.protocol.Column.value', index=1,
       number=2, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -305,27 +402,27 @@ _COLUMN = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=337,
-  serialized_end=417,
+  serialized_start=361,
+  serialized_end=449,
 )
 
 
 _ROW = descriptor.Descriptor(
   name='Row',
-  full_name='com.aliyun.cloudservice.ots2.Row',
+  full_name='com.aliyun.openservices.ots.protocol.Row',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='primary_key_columns', full_name='com.aliyun.cloudservice.ots2.Row.primary_key_columns', index=0,
+      name='primary_key_columns', full_name='com.aliyun.openservices.ots.protocol.Row.primary_key_columns', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='attribute_columns', full_name='com.aliyun.cloudservice.ots2.Row.attribute_columns', index=1,
+      name='attribute_columns', full_name='com.aliyun.openservices.ots.protocol.Row.attribute_columns', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -340,27 +437,27 @@ _ROW = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=420,
-  serialized_end=557,
+  serialized_start=452,
+  serialized_end=605,
 )
 
 
 _TABLEMETA = descriptor.Descriptor(
   name='TableMeta',
-  full_name='com.aliyun.cloudservice.ots2.TableMeta',
+  full_name='com.aliyun.openservices.ots.protocol.TableMeta',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.TableMeta.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.TableMeta.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.TableMeta.primary_key', index=1,
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.TableMeta.primary_key', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -375,22 +472,43 @@ _TABLEMETA = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=559,
-  serialized_end=655,
+  serialized_start=607,
+  serialized_end=711,
 )
 
 
-_CONDITION = descriptor.Descriptor(
-  name='Condition',
-  full_name='com.aliyun.cloudservice.ots2.Condition',
+_RELATIONCONDITION = descriptor.Descriptor(
+  name='RelationCondition',
+  full_name='com.aliyun.openservices.ots.protocol.RelationCondition',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='row_existence', full_name='com.aliyun.cloudservice.ots2.Condition.row_existence', index=0,
+      name='comparator', full_name='com.aliyun.openservices.ots.protocol.RelationCondition.comparator', index=0,
       number=1, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='column_name', full_name='com.aliyun.openservices.ots.protocol.RelationCondition.column_name', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='column_value', full_name='com.aliyun.openservices.ots.protocol.RelationCondition.column_value', index=2,
+      number=3, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='pass_if_missing', full_name='com.aliyun.openservices.ots.protocol.RelationCondition.pass_if_missing', index=3,
+      number=4, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -403,27 +521,132 @@ _CONDITION = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=657,
-  serialized_end=746,
+  serialized_start=714,
+  serialized_end=926,
 )
 
 
-_CAPACITYUNIT = descriptor.Descriptor(
-  name='CapacityUnit',
-  full_name='com.aliyun.cloudservice.ots2.CapacityUnit',
+_COMPOSITECONDITION = descriptor.Descriptor(
+  name='CompositeCondition',
+  full_name='com.aliyun.openservices.ots.protocol.CompositeCondition',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='read', full_name='com.aliyun.cloudservice.ots2.CapacityUnit.read', index=0,
+      name='combinator', full_name='com.aliyun.openservices.ots.protocol.CompositeCondition.combinator', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='sub_conditions', full_name='com.aliyun.openservices.ots.protocol.CompositeCondition.sub_conditions', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=929,
+  serialized_end=1103,
+)
+
+
+_COLUMNCONDITION = descriptor.Descriptor(
+  name='ColumnCondition',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnCondition',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='com.aliyun.openservices.ots.protocol.ColumnCondition.type', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.ColumnCondition.condition', index=1,
+      number=2, type=12, cpp_type=9, label=2,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=1105,
+  serialized_end=1214,
+)
+
+
+_CONDITION = descriptor.Descriptor(
+  name='Condition',
+  full_name='com.aliyun.openservices.ots.protocol.Condition',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='row_existence', full_name='com.aliyun.openservices.ots.protocol.Condition.row_existence', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='column_condition', full_name='com.aliyun.openservices.ots.protocol.Condition.column_condition', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=1217,
+  serialized_end=1395,
+)
+
+
+_CAPACITYUNIT = descriptor.Descriptor(
+  name='CapacityUnit',
+  full_name='com.aliyun.openservices.ots.protocol.CapacityUnit',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='read', full_name='com.aliyun.openservices.ots.protocol.CapacityUnit.read', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='write', full_name='com.aliyun.cloudservice.ots2.CapacityUnit.write', index=1,
+      name='write', full_name='com.aliyun.openservices.ots.protocol.CapacityUnit.write', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -438,41 +661,41 @@ _CAPACITYUNIT = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=748,
-  serialized_end=791,
+  serialized_start=1397,
+  serialized_end=1440,
 )
 
 
 _RESERVEDTHROUGHPUTDETAILS = descriptor.Descriptor(
   name='ReservedThroughputDetails',
-  full_name='com.aliyun.cloudservice.ots2.ReservedThroughputDetails',
+  full_name='com.aliyun.openservices.ots.protocol.ReservedThroughputDetails',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='capacity_unit', full_name='com.aliyun.cloudservice.ots2.ReservedThroughputDetails.capacity_unit', index=0,
+      name='capacity_unit', full_name='com.aliyun.openservices.ots.protocol.ReservedThroughputDetails.capacity_unit', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='last_increase_time', full_name='com.aliyun.cloudservice.ots2.ReservedThroughputDetails.last_increase_time', index=1,
+      name='last_increase_time', full_name='com.aliyun.openservices.ots.protocol.ReservedThroughputDetails.last_increase_time', index=1,
       number=2, type=3, cpp_type=2, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='last_decrease_time', full_name='com.aliyun.cloudservice.ots2.ReservedThroughputDetails.last_decrease_time', index=2,
+      name='last_decrease_time', full_name='com.aliyun.openservices.ots.protocol.ReservedThroughputDetails.last_decrease_time', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='number_of_decreases_today', full_name='com.aliyun.cloudservice.ots2.ReservedThroughputDetails.number_of_decreases_today', index=3,
+      name='number_of_decreases_today', full_name='com.aliyun.openservices.ots.protocol.ReservedThroughputDetails.number_of_decreases_today', index=3,
       number=4, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -487,20 +710,20 @@ _RESERVEDTHROUGHPUTDETAILS = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=794,
-  serialized_end=979,
+  serialized_start=1443,
+  serialized_end=1636,
 )
 
 
 _RESERVEDTHROUGHPUT = descriptor.Descriptor(
   name='ReservedThroughput',
-  full_name='com.aliyun.cloudservice.ots2.ReservedThroughput',
+  full_name='com.aliyun.openservices.ots.protocol.ReservedThroughput',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='capacity_unit', full_name='com.aliyun.cloudservice.ots2.ReservedThroughput.capacity_unit', index=0,
+      name='capacity_unit', full_name='com.aliyun.openservices.ots.protocol.ReservedThroughput.capacity_unit', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -515,20 +738,20 @@ _RESERVEDTHROUGHPUT = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=981,
-  serialized_end=1068,
+  serialized_start=1638,
+  serialized_end=1733,
 )
 
 
 _CONSUMEDCAPACITY = descriptor.Descriptor(
   name='ConsumedCapacity',
-  full_name='com.aliyun.cloudservice.ots2.ConsumedCapacity',
+  full_name='com.aliyun.openservices.ots.protocol.ConsumedCapacity',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='capacity_unit', full_name='com.aliyun.cloudservice.ots2.ConsumedCapacity.capacity_unit', index=0,
+      name='capacity_unit', full_name='com.aliyun.openservices.ots.protocol.ConsumedCapacity.capacity_unit', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -543,27 +766,27 @@ _CONSUMEDCAPACITY = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1070,
-  serialized_end=1155,
+  serialized_start=1735,
+  serialized_end=1828,
 )
 
 
 _CREATETABLEREQUEST = descriptor.Descriptor(
   name='CreateTableRequest',
-  full_name='com.aliyun.cloudservice.ots2.CreateTableRequest',
+  full_name='com.aliyun.openservices.ots.protocol.CreateTableRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_meta', full_name='com.aliyun.cloudservice.ots2.CreateTableRequest.table_meta', index=0,
+      name='table_meta', full_name='com.aliyun.openservices.ots.protocol.CreateTableRequest.table_meta', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='reserved_throughput', full_name='com.aliyun.cloudservice.ots2.CreateTableRequest.reserved_throughput', index=1,
+      name='reserved_throughput', full_name='com.aliyun.openservices.ots.protocol.CreateTableRequest.reserved_throughput', index=1,
       number=2, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -578,14 +801,14 @@ _CREATETABLEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1158,
-  serialized_end=1318,
+  serialized_start=1831,
+  serialized_end=2007,
 )
 
 
 _CREATETABLERESPONSE = descriptor.Descriptor(
   name='CreateTableResponse',
-  full_name='com.aliyun.cloudservice.ots2.CreateTableResponse',
+  full_name='com.aliyun.openservices.ots.protocol.CreateTableResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -599,27 +822,27 @@ _CREATETABLERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1320,
-  serialized_end=1341,
+  serialized_start=2009,
+  serialized_end=2030,
 )
 
 
 _UPDATETABLEREQUEST = descriptor.Descriptor(
   name='UpdateTableRequest',
-  full_name='com.aliyun.cloudservice.ots2.UpdateTableRequest',
+  full_name='com.aliyun.openservices.ots.protocol.UpdateTableRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.UpdateTableRequest.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.UpdateTableRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='reserved_throughput', full_name='com.aliyun.cloudservice.ots2.UpdateTableRequest.reserved_throughput', index=1,
+      name='reserved_throughput', full_name='com.aliyun.openservices.ots.protocol.UpdateTableRequest.reserved_throughput', index=1,
       number=2, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -634,20 +857,20 @@ _UPDATETABLEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1343,
-  serialized_end=1462,
+  serialized_start=2032,
+  serialized_end=2159,
 )
 
 
 _UPDATETABLERESPONSE = descriptor.Descriptor(
   name='UpdateTableResponse',
-  full_name='com.aliyun.cloudservice.ots2.UpdateTableResponse',
+  full_name='com.aliyun.openservices.ots.protocol.UpdateTableResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='reserved_throughput_details', full_name='com.aliyun.cloudservice.ots2.UpdateTableResponse.reserved_throughput_details', index=0,
+      name='reserved_throughput_details', full_name='com.aliyun.openservices.ots.protocol.UpdateTableResponse.reserved_throughput_details', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -662,20 +885,20 @@ _UPDATETABLERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1464,
-  serialized_end=1579,
+  serialized_start=2161,
+  serialized_end=2284,
 )
 
 
 _DESCRIBETABLEREQUEST = descriptor.Descriptor(
   name='DescribeTableRequest',
-  full_name='com.aliyun.cloudservice.ots2.DescribeTableRequest',
+  full_name='com.aliyun.openservices.ots.protocol.DescribeTableRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.DescribeTableRequest.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.DescribeTableRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
@@ -690,27 +913,27 @@ _DESCRIBETABLEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1581,
-  serialized_end=1623,
+  serialized_start=2286,
+  serialized_end=2328,
 )
 
 
 _DESCRIBETABLERESPONSE = descriptor.Descriptor(
   name='DescribeTableResponse',
-  full_name='com.aliyun.cloudservice.ots2.DescribeTableResponse',
+  full_name='com.aliyun.openservices.ots.protocol.DescribeTableResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_meta', full_name='com.aliyun.cloudservice.ots2.DescribeTableResponse.table_meta', index=0,
+      name='table_meta', full_name='com.aliyun.openservices.ots.protocol.DescribeTableResponse.table_meta', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='reserved_throughput_details', full_name='com.aliyun.cloudservice.ots2.DescribeTableResponse.reserved_throughput_details', index=1,
+      name='reserved_throughput_details', full_name='com.aliyun.openservices.ots.protocol.DescribeTableResponse.reserved_throughput_details', index=1,
       number=2, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -725,14 +948,14 @@ _DESCRIBETABLERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1626,
-  serialized_end=1804,
+  serialized_start=2331,
+  serialized_end=2525,
 )
 
 
 _LISTTABLEREQUEST = descriptor.Descriptor(
   name='ListTableRequest',
-  full_name='com.aliyun.cloudservice.ots2.ListTableRequest',
+  full_name='com.aliyun.openservices.ots.protocol.ListTableRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -746,20 +969,20 @@ _LISTTABLEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1806,
-  serialized_end=1824,
+  serialized_start=2527,
+  serialized_end=2545,
 )
 
 
 _LISTTABLERESPONSE = descriptor.Descriptor(
   name='ListTableResponse',
-  full_name='com.aliyun.cloudservice.ots2.ListTableResponse',
+  full_name='com.aliyun.openservices.ots.protocol.ListTableResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_names', full_name='com.aliyun.cloudservice.ots2.ListTableResponse.table_names', index=0,
+      name='table_names', full_name='com.aliyun.openservices.ots.protocol.ListTableResponse.table_names', index=0,
       number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -774,20 +997,20 @@ _LISTTABLERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1826,
-  serialized_end=1866,
+  serialized_start=2547,
+  serialized_end=2587,
 )
 
 
 _DELETETABLEREQUEST = descriptor.Descriptor(
   name='DeleteTableRequest',
-  full_name='com.aliyun.cloudservice.ots2.DeleteTableRequest',
+  full_name='com.aliyun.openservices.ots.protocol.DeleteTableRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.DeleteTableRequest.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.DeleteTableRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
@@ -802,14 +1025,14 @@ _DELETETABLEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1868,
-  serialized_end=1908,
+  serialized_start=2589,
+  serialized_end=2629,
 )
 
 
 _DELETETABLERESPONSE = descriptor.Descriptor(
   name='DeleteTableResponse',
-  full_name='com.aliyun.cloudservice.ots2.DeleteTableResponse',
+  full_name='com.aliyun.openservices.ots.protocol.DeleteTableResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -823,482 +1046,41 @@ _DELETETABLERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1910,
-  serialized_end=1931,
+  serialized_start=2631,
+  serialized_end=2652,
 )
 
 
 _GETROWREQUEST = descriptor.Descriptor(
   name='GetRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.GetRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.GetRowRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.GetRowRequest.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.GetRowRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.GetRowRequest.primary_key', index=1,
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.GetRowRequest.primary_key', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='columns_to_get', full_name='com.aliyun.cloudservice.ots2.GetRowRequest.columns_to_get', index=2,
+      name='columns_to_get', full_name='com.aliyun.openservices.ots.protocol.GetRowRequest.columns_to_get', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=1933,
-  serialized_end=2051,
-)
-
-
-_GETROWRESPONSE = descriptor.Descriptor(
-  name='GetRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.GetRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
     descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.GetRowResponse.consumed', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='row', full_name='com.aliyun.cloudservice.ots2.GetRowResponse.row', index=1,
-      number=2, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2054,
-  serialized_end=2184,
-)
-
-
-_COLUMNUPDATE = descriptor.Descriptor(
-  name='ColumnUpdate',
-  full_name='com.aliyun.cloudservice.ots2.ColumnUpdate',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='type', full_name='com.aliyun.cloudservice.ots2.ColumnUpdate.type', index=0,
-      number=1, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=1,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='name', full_name='com.aliyun.cloudservice.ots2.ColumnUpdate.name', index=1,
-      number=2, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='value', full_name='com.aliyun.cloudservice.ots2.ColumnUpdate.value', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2187,
-  serialized_end=2332,
-)
-
-
-_UPDATEROWREQUEST = descriptor.Descriptor(
-  name='UpdateRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.UpdateRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.UpdateRowRequest.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.UpdateRowRequest.condition', index=1,
-      number=2, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.UpdateRowRequest.primary_key', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='attribute_columns', full_name='com.aliyun.cloudservice.ots2.UpdateRowRequest.attribute_columns', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2335,
-  serialized_end=2563,
-)
-
-
-_UPDATEROWRESPONSE = descriptor.Descriptor(
-  name='UpdateRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.UpdateRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.UpdateRowResponse.consumed', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2565,
-  serialized_end=2650,
-)
-
-
-_PUTROWREQUEST = descriptor.Descriptor(
-  name='PutRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.PutRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.PutRowRequest.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.PutRowRequest.condition', index=1,
-      number=2, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.PutRowRequest.primary_key', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='attribute_columns', full_name='com.aliyun.cloudservice.ots2.PutRowRequest.attribute_columns', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2653,
-  serialized_end=2872,
-)
-
-
-_PUTROWRESPONSE = descriptor.Descriptor(
-  name='PutRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.PutRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.PutRowResponse.consumed', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2874,
-  serialized_end=2956,
-)
-
-
-_DELETEROWREQUEST = descriptor.Descriptor(
-  name='DeleteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.DeleteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.DeleteRowRequest.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.DeleteRowRequest.condition', index=1,
-      number=2, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.DeleteRowRequest.primary_key', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=2959,
-  serialized_end=3116,
-)
-
-
-_DELETEROWRESPONSE = descriptor.Descriptor(
-  name='DeleteRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.DeleteRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.DeleteRowResponse.consumed', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3118,
-  serialized_end=3203,
-)
-
-
-_ROWINBATCHGETROWREQUEST = descriptor.Descriptor(
-  name='RowInBatchGetRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowRequest.primary_key', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3205,
-  serialized_end=3289,
-)
-
-
-_TABLEINBATCHGETROWREQUEST = descriptor.Descriptor(
-  name='TableInBatchGetRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest.rows', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='columns_to_get', full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest.columns_to_get', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3292,
-  serialized_end=3432,
-)
-
-
-_BATCHGETROWREQUEST = descriptor.Descriptor(
-  name='BatchGetRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.BatchGetRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='tables', full_name='com.aliyun.cloudservice.ots2.BatchGetRowRequest.tables', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3434,
-  serialized_end=3527,
-)
-
-
-_ROWINBATCHGETROWRESPONSE = descriptor.Descriptor(
-  name='RowInBatchGetRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='is_ok', full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse.is_ok', index=0,
-      number=1, type=8, cpp_type=7, label=2,
-      has_default_value=True, default_value=True,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='error', full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse.error', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse.consumed', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='row', full_name='com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse.row', index=3,
+      name='filter', full_name='com.aliyun.openservices.ots.protocol.GetRowRequest.filter', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1313,293 +1095,69 @@ _ROWINBATCHGETROWRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=3530,
-  serialized_end=3743,
+  serialized_start=2655,
+  serialized_end=2852,
 )
 
 
-_TABLEINBATCHGETROWRESPONSE = descriptor.Descriptor(
-  name='TableInBatchGetRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowResponse',
+_GETROWRESPONSE = descriptor.Descriptor(
+  name='GetRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.GetRowResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowResponse.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.GetRowResponse.consumed', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='row', full_name='com.aliyun.openservices.ots.protocol.GetRowResponse.row', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=2855,
+  serialized_end=3001,
+)
+
+
+_COLUMNUPDATE = descriptor.Descriptor(
+  name='ColumnUpdate',
+  full_name='com.aliyun.openservices.ots.protocol.ColumnUpdate',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='com.aliyun.openservices.ots.protocol.ColumnUpdate.type', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='name', full_name='com.aliyun.openservices.ots.protocol.ColumnUpdate.name', index=1,
+      number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchGetRowResponse.rows', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3745,
-  serialized_end=3863,
-)
-
-
-_BATCHGETROWRESPONSE = descriptor.Descriptor(
-  name='BatchGetRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.BatchGetRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='tables', full_name='com.aliyun.cloudservice.ots2.BatchGetRowResponse.tables', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3865,
-  serialized_end=3960,
-)
-
-
-_PUTROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
-  name='PutRowInBatchWriteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest.condition', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest.primary_key', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='attribute_columns', full_name='com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest.attribute_columns', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=3963,
-  serialized_end=4177,
-)
-
-
-_UPDATEROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
-  name='UpdateRowInBatchWriteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest.condition', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest.primary_key', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='attribute_columns', full_name='com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest.attribute_columns', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=4180,
-  serialized_end=4403,
-)
-
-
-_DELETEROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
-  name='DeleteRowInBatchWriteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.DeleteRowInBatchWriteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='condition', full_name='com.aliyun.cloudservice.ots2.DeleteRowInBatchWriteRowRequest.condition', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='primary_key', full_name='com.aliyun.cloudservice.ots2.DeleteRowInBatchWriteRowRequest.primary_key', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=4406,
-  serialized_end=4558,
-)
-
-
-_TABLEINBATCHWRITEROWREQUEST = descriptor.Descriptor(
-  name='TableInBatchWriteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest.table_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='put_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest.put_rows', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='update_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest.update_rows', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='delete_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest.delete_rows', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=4561,
-  serialized_end=4856,
-)
-
-
-_BATCHWRITEROWREQUEST = descriptor.Descriptor(
-  name='BatchWriteRowRequest',
-  full_name='com.aliyun.cloudservice.ots2.BatchWriteRowRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='tables', full_name='com.aliyun.cloudservice.ots2.BatchWriteRowRequest.tables', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=4858,
-  serialized_end=4955,
-)
-
-
-_ROWINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
-  name='RowInBatchWriteRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='is_ok', full_name='com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse.is_ok', index=0,
-      number=1, type=8, cpp_type=7, label=2,
-      has_default_value=True, default_value=True,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='error', full_name='com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse.error', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse.consumed', index=2,
+      name='value', full_name='com.aliyun.openservices.ots.protocol.ColumnUpdate.value', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1614,41 +1172,41 @@ _ROWINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=4958,
-  serialized_end=5125,
+  serialized_start=3004,
+  serialized_end=3165,
 )
 
 
-_TABLEINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
-  name='TableInBatchWriteRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse',
+_UPDATEROWREQUEST = descriptor.Descriptor(
+  name='UpdateRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.UpdateRowRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.UpdateRowRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='put_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse.put_rows', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.UpdateRowRequest.condition', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='update_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse.update_rows', index=2,
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.UpdateRowRequest.primary_key', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='delete_rows', full_name='com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse.delete_rows', index=3,
+      name='attribute_columns', full_name='com.aliyun.openservices.ots.protocol.UpdateRowRequest.attribute_columns', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1663,22 +1221,22 @@ _TABLEINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=5128,
-  serialized_end=5412,
+  serialized_start=3168,
+  serialized_end=3420,
 )
 
 
-_BATCHWRITEROWRESPONSE = descriptor.Descriptor(
-  name='BatchWriteRowResponse',
-  full_name='com.aliyun.cloudservice.ots2.BatchWriteRowResponse',
+_UPDATEROWRESPONSE = descriptor.Descriptor(
+  name='UpdateRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.UpdateRowResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='tables', full_name='com.aliyun.cloudservice.ots2.BatchWriteRowResponse.tables', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.UpdateRowResponse.consumed', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1691,56 +1249,42 @@ _BATCHWRITEROWRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=5414,
-  serialized_end=5513,
+  serialized_start=3422,
+  serialized_end=3515,
 )
 
 
-_GETRANGEREQUEST = descriptor.Descriptor(
-  name='GetRangeRequest',
-  full_name='com.aliyun.cloudservice.ots2.GetRangeRequest',
+_PUTROWREQUEST = descriptor.Descriptor(
+  name='PutRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.PutRowRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='table_name', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.table_name', index=0,
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.PutRowRequest.table_name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='direction', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.direction', index=1,
-      number=2, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.PutRowRequest.condition', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='columns_to_get', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.columns_to_get', index=2,
-      number=3, type=9, cpp_type=9, label=3,
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.PutRowRequest.primary_key', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='limit', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.limit', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='inclusive_start_primary_key', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.inclusive_start_primary_key', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='exclusive_end_primary_key', full_name='com.aliyun.cloudservice.ots2.GetRangeRequest.exclusive_end_primary_key', index=5,
-      number=6, type=11, cpp_type=10, label=3,
+      name='attribute_columns', full_name='com.aliyun.openservices.ots.protocol.PutRowRequest.attribute_columns', index=3,
+      number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1754,34 +1298,62 @@ _GETRANGEREQUEST = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=5516,
-  serialized_end=5800,
+  serialized_start=3518,
+  serialized_end=3761,
 )
 
 
-_GETRANGERESPONSE = descriptor.Descriptor(
-  name='GetRangeResponse',
-  full_name='com.aliyun.cloudservice.ots2.GetRangeResponse',
+_PUTROWRESPONSE = descriptor.Descriptor(
+  name='PutRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.PutRowResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     descriptor.FieldDescriptor(
-      name='consumed', full_name='com.aliyun.cloudservice.ots2.GetRangeResponse.consumed', index=0,
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.PutRowResponse.consumed', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=3763,
+  serialized_end=3853,
+)
+
+
+_DELETEROWREQUEST = descriptor.Descriptor(
+  name='DeleteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.DeleteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
     descriptor.FieldDescriptor(
-      name='next_start_primary_key', full_name='com.aliyun.cloudservice.ots2.GetRangeResponse.next_start_primary_key', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.DeleteRowRequest.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='rows', full_name='com.aliyun.cloudservice.ots2.GetRangeResponse.rows', index=2,
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.DeleteRowRequest.condition', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.DeleteRowRequest.primary_key', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1796,8 +1368,680 @@ _GETRANGERESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=5803,
-  serialized_end=6006,
+  serialized_start=3856,
+  serialized_end=4029,
+)
+
+
+_DELETEROWRESPONSE = descriptor.Descriptor(
+  name='DeleteRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.DeleteRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.DeleteRowResponse.consumed', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4031,
+  serialized_end=4124,
+)
+
+
+_ROWINBATCHGETROWREQUEST = descriptor.Descriptor(
+  name='RowInBatchGetRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowRequest.primary_key', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4126,
+  serialized_end=4218,
+)
+
+
+_TABLEINBATCHGETROWREQUEST = descriptor.Descriptor(
+  name='TableInBatchGetRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest.rows', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='columns_to_get', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest.columns_to_get', index=2,
+      number=3, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='filter', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest.filter', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4221,
+  serialized_end=4440,
+)
+
+
+_BATCHGETROWREQUEST = descriptor.Descriptor(
+  name='BatchGetRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.BatchGetRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='tables', full_name='com.aliyun.openservices.ots.protocol.BatchGetRowRequest.tables', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4442,
+  serialized_end=4543,
+)
+
+
+_ROWINBATCHGETROWRESPONSE = descriptor.Descriptor(
+  name='RowInBatchGetRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='is_ok', full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse.is_ok', index=0,
+      number=1, type=8, cpp_type=7, label=2,
+      has_default_value=True, default_value=True,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='error', full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse.error', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse.consumed', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='row', full_name='com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse.row', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4546,
+  serialized_end=4783,
+)
+
+
+_TABLEINBATCHGETROWRESPONSE = descriptor.Descriptor(
+  name='TableInBatchGetRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowResponse.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchGetRowResponse.rows', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4785,
+  serialized_end=4911,
+)
+
+
+_BATCHGETROWRESPONSE = descriptor.Descriptor(
+  name='BatchGetRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.BatchGetRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='tables', full_name='com.aliyun.openservices.ots.protocol.BatchGetRowResponse.tables', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4913,
+  serialized_end=5016,
+)
+
+
+_PUTROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
+  name='PutRowInBatchWriteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest.condition', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest.primary_key', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='attribute_columns', full_name='com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest.attribute_columns', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=5019,
+  serialized_end=5257,
+)
+
+
+_UPDATEROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
+  name='UpdateRowInBatchWriteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest.condition', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest.primary_key', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='attribute_columns', full_name='com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest.attribute_columns', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=5260,
+  serialized_end=5507,
+)
+
+
+_DELETEROWINBATCHWRITEROWREQUEST = descriptor.Descriptor(
+  name='DeleteRowInBatchWriteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.DeleteRowInBatchWriteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='condition', full_name='com.aliyun.openservices.ots.protocol.DeleteRowInBatchWriteRowRequest.condition', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='primary_key', full_name='com.aliyun.openservices.ots.protocol.DeleteRowInBatchWriteRowRequest.primary_key', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=5510,
+  serialized_end=5678,
+)
+
+
+_TABLEINBATCHWRITEROWREQUEST = descriptor.Descriptor(
+  name='TableInBatchWriteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='put_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest.put_rows', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='update_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest.update_rows', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='delete_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest.delete_rows', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=5681,
+  serialized_end=6000,
+)
+
+
+_BATCHWRITEROWREQUEST = descriptor.Descriptor(
+  name='BatchWriteRowRequest',
+  full_name='com.aliyun.openservices.ots.protocol.BatchWriteRowRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='tables', full_name='com.aliyun.openservices.ots.protocol.BatchWriteRowRequest.tables', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=6002,
+  serialized_end=6107,
+)
+
+
+_ROWINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
+  name='RowInBatchWriteRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='is_ok', full_name='com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse.is_ok', index=0,
+      number=1, type=8, cpp_type=7, label=2,
+      has_default_value=True, default_value=True,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='error', full_name='com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse.error', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse.consumed', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=6110,
+  serialized_end=6293,
+)
+
+
+_TABLEINBATCHWRITEROWRESPONSE = descriptor.Descriptor(
+  name='TableInBatchWriteRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='put_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse.put_rows', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='update_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse.update_rows', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='delete_rows', full_name='com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse.delete_rows', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=6296,
+  serialized_end=6604,
+)
+
+
+_BATCHWRITEROWRESPONSE = descriptor.Descriptor(
+  name='BatchWriteRowResponse',
+  full_name='com.aliyun.openservices.ots.protocol.BatchWriteRowResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='tables', full_name='com.aliyun.openservices.ots.protocol.BatchWriteRowResponse.tables', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=6606,
+  serialized_end=6713,
+)
+
+
+_GETRANGEREQUEST = descriptor.Descriptor(
+  name='GetRangeRequest',
+  full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='table_name', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.table_name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='direction', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.direction', index=1,
+      number=2, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='columns_to_get', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.columns_to_get', index=2,
+      number=3, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='limit', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.limit', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='inclusive_start_primary_key', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.inclusive_start_primary_key', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='exclusive_end_primary_key', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.exclusive_end_primary_key', index=5,
+      number=6, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='filter', full_name='com.aliyun.openservices.ots.protocol.GetRangeRequest.filter', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=6716,
+  serialized_end=7095,
+)
+
+
+_GETRANGERESPONSE = descriptor.Descriptor(
+  name='GetRangeResponse',
+  full_name='com.aliyun.openservices.ots.protocol.GetRangeResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='consumed', full_name='com.aliyun.openservices.ots.protocol.GetRangeResponse.consumed', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='next_start_primary_key', full_name='com.aliyun.openservices.ots.protocol.GetRangeResponse.next_start_primary_key', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='rows', full_name='com.aliyun.openservices.ots.protocol.GetRangeResponse.rows', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=7098,
+  serialized_end=7325,
 )
 
 _COLUMNSCHEMA.fields_by_name['type'].enum_type = _COLUMNTYPE
@@ -1806,7 +2050,13 @@ _COLUMN.fields_by_name['value'].message_type = _COLUMNVALUE
 _ROW.fields_by_name['primary_key_columns'].message_type = _COLUMN
 _ROW.fields_by_name['attribute_columns'].message_type = _COLUMN
 _TABLEMETA.fields_by_name['primary_key'].message_type = _COLUMNSCHEMA
+_RELATIONCONDITION.fields_by_name['comparator'].enum_type = _COMPARATORTYPE
+_RELATIONCONDITION.fields_by_name['column_value'].message_type = _COLUMNVALUE
+_COMPOSITECONDITION.fields_by_name['combinator'].enum_type = _LOGICALOPERATOR
+_COMPOSITECONDITION.fields_by_name['sub_conditions'].message_type = _COLUMNCONDITION
+_COLUMNCONDITION.fields_by_name['type'].enum_type = _COLUMNCONDITIONTYPE
 _CONDITION.fields_by_name['row_existence'].enum_type = _ROWEXISTENCEEXPECTATION
+_CONDITION.fields_by_name['column_condition'].message_type = _COLUMNCONDITION
 _RESERVEDTHROUGHPUTDETAILS.fields_by_name['capacity_unit'].message_type = _CAPACITYUNIT
 _RESERVEDTHROUGHPUT.fields_by_name['capacity_unit'].message_type = _CAPACITYUNIT
 _CONSUMEDCAPACITY.fields_by_name['capacity_unit'].message_type = _CAPACITYUNIT
@@ -1817,6 +2067,7 @@ _UPDATETABLERESPONSE.fields_by_name['reserved_throughput_details'].message_type 
 _DESCRIBETABLERESPONSE.fields_by_name['table_meta'].message_type = _TABLEMETA
 _DESCRIBETABLERESPONSE.fields_by_name['reserved_throughput_details'].message_type = _RESERVEDTHROUGHPUTDETAILS
 _GETROWREQUEST.fields_by_name['primary_key'].message_type = _COLUMN
+_GETROWREQUEST.fields_by_name['filter'].message_type = _COLUMNCONDITION
 _GETROWRESPONSE.fields_by_name['consumed'].message_type = _CONSUMEDCAPACITY
 _GETROWRESPONSE.fields_by_name['row'].message_type = _ROW
 _COLUMNUPDATE.fields_by_name['type'].enum_type = _OPERATIONTYPE
@@ -1834,6 +2085,7 @@ _DELETEROWREQUEST.fields_by_name['primary_key'].message_type = _COLUMN
 _DELETEROWRESPONSE.fields_by_name['consumed'].message_type = _CONSUMEDCAPACITY
 _ROWINBATCHGETROWREQUEST.fields_by_name['primary_key'].message_type = _COLUMN
 _TABLEINBATCHGETROWREQUEST.fields_by_name['rows'].message_type = _ROWINBATCHGETROWREQUEST
+_TABLEINBATCHGETROWREQUEST.fields_by_name['filter'].message_type = _COLUMNCONDITION
 _BATCHGETROWREQUEST.fields_by_name['tables'].message_type = _TABLEINBATCHGETROWREQUEST
 _ROWINBATCHGETROWRESPONSE.fields_by_name['error'].message_type = _ERROR
 _ROWINBATCHGETROWRESPONSE.fields_by_name['consumed'].message_type = _CONSUMEDCAPACITY
@@ -1861,6 +2113,7 @@ _BATCHWRITEROWRESPONSE.fields_by_name['tables'].message_type = _TABLEINBATCHWRIT
 _GETRANGEREQUEST.fields_by_name['direction'].enum_type = _DIRECTION
 _GETRANGEREQUEST.fields_by_name['inclusive_start_primary_key'].message_type = _COLUMN
 _GETRANGEREQUEST.fields_by_name['exclusive_end_primary_key'].message_type = _COLUMN
+_GETRANGEREQUEST.fields_by_name['filter'].message_type = _COLUMNCONDITION
 _GETRANGERESPONSE.fields_by_name['consumed'].message_type = _CONSUMEDCAPACITY
 _GETRANGERESPONSE.fields_by_name['next_start_primary_key'].message_type = _COLUMN
 _GETRANGERESPONSE.fields_by_name['rows'].message_type = _ROW
@@ -1870,6 +2123,9 @@ DESCRIPTOR.message_types_by_name['ColumnValue'] = _COLUMNVALUE
 DESCRIPTOR.message_types_by_name['Column'] = _COLUMN
 DESCRIPTOR.message_types_by_name['Row'] = _ROW
 DESCRIPTOR.message_types_by_name['TableMeta'] = _TABLEMETA
+DESCRIPTOR.message_types_by_name['RelationCondition'] = _RELATIONCONDITION
+DESCRIPTOR.message_types_by_name['CompositeCondition'] = _COMPOSITECONDITION
+DESCRIPTOR.message_types_by_name['ColumnCondition'] = _COLUMNCONDITION
 DESCRIPTOR.message_types_by_name['Condition'] = _CONDITION
 DESCRIPTOR.message_types_by_name['CapacityUnit'] = _CAPACITYUNIT
 DESCRIPTOR.message_types_by_name['ReservedThroughputDetails'] = _RESERVEDTHROUGHPUTDETAILS
@@ -1915,276 +2171,294 @@ class Error(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _ERROR
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.Error)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.Error)
 
 class ColumnSchema(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _COLUMNSCHEMA
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ColumnSchema)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ColumnSchema)
 
 class ColumnValue(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _COLUMNVALUE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ColumnValue)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ColumnValue)
 
 class Column(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _COLUMN
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.Column)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.Column)
 
 class Row(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _ROW
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.Row)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.Row)
 
 class TableMeta(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _TABLEMETA
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.TableMeta)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.TableMeta)
+
+class RelationCondition(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _RELATIONCONDITION
+  
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.RelationCondition)
+
+class CompositeCondition(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _COMPOSITECONDITION
+  
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.CompositeCondition)
+
+class ColumnCondition(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _COLUMNCONDITION
+  
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ColumnCondition)
 
 class Condition(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CONDITION
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.Condition)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.Condition)
 
 class CapacityUnit(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CAPACITYUNIT
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.CapacityUnit)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.CapacityUnit)
 
 class ReservedThroughputDetails(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _RESERVEDTHROUGHPUTDETAILS
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ReservedThroughputDetails)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ReservedThroughputDetails)
 
 class ReservedThroughput(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _RESERVEDTHROUGHPUT
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ReservedThroughput)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ReservedThroughput)
 
 class ConsumedCapacity(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CONSUMEDCAPACITY
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ConsumedCapacity)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ConsumedCapacity)
 
 class CreateTableRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CREATETABLEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.CreateTableRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.CreateTableRequest)
 
 class CreateTableResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CREATETABLERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.CreateTableResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.CreateTableResponse)
 
 class UpdateTableRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _UPDATETABLEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.UpdateTableRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.UpdateTableRequest)
 
 class UpdateTableResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _UPDATETABLERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.UpdateTableResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.UpdateTableResponse)
 
 class DescribeTableRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DESCRIBETABLEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DescribeTableRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DescribeTableRequest)
 
 class DescribeTableResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DESCRIBETABLERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DescribeTableResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DescribeTableResponse)
 
 class ListTableRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _LISTTABLEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ListTableRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ListTableRequest)
 
 class ListTableResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _LISTTABLERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ListTableResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ListTableResponse)
 
 class DeleteTableRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DELETETABLEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DeleteTableRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DeleteTableRequest)
 
 class DeleteTableResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DELETETABLERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DeleteTableResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DeleteTableResponse)
 
 class GetRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _GETROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.GetRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.GetRowRequest)
 
 class GetRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _GETROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.GetRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.GetRowResponse)
 
 class ColumnUpdate(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _COLUMNUPDATE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.ColumnUpdate)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.ColumnUpdate)
 
 class UpdateRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _UPDATEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.UpdateRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.UpdateRowRequest)
 
 class UpdateRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _UPDATEROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.UpdateRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.UpdateRowResponse)
 
 class PutRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _PUTROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.PutRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.PutRowRequest)
 
 class PutRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _PUTROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.PutRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.PutRowResponse)
 
 class DeleteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DELETEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DeleteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DeleteRowRequest)
 
 class DeleteRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DELETEROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DeleteRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DeleteRowResponse)
 
 class RowInBatchGetRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _ROWINBATCHGETROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.RowInBatchGetRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.RowInBatchGetRowRequest)
 
 class TableInBatchGetRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _TABLEINBATCHGETROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.TableInBatchGetRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.TableInBatchGetRowRequest)
 
 class BatchGetRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _BATCHGETROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.BatchGetRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.BatchGetRowRequest)
 
 class RowInBatchGetRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _ROWINBATCHGETROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.RowInBatchGetRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.RowInBatchGetRowResponse)
 
 class TableInBatchGetRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _TABLEINBATCHGETROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.TableInBatchGetRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.TableInBatchGetRowResponse)
 
 class BatchGetRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _BATCHGETROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.BatchGetRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.BatchGetRowResponse)
 
 class PutRowInBatchWriteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _PUTROWINBATCHWRITEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.PutRowInBatchWriteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.PutRowInBatchWriteRowRequest)
 
 class UpdateRowInBatchWriteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _UPDATEROWINBATCHWRITEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.UpdateRowInBatchWriteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.UpdateRowInBatchWriteRowRequest)
 
 class DeleteRowInBatchWriteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _DELETEROWINBATCHWRITEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.DeleteRowInBatchWriteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.DeleteRowInBatchWriteRowRequest)
 
 class TableInBatchWriteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _TABLEINBATCHWRITEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.TableInBatchWriteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.TableInBatchWriteRowRequest)
 
 class BatchWriteRowRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _BATCHWRITEROWREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.BatchWriteRowRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.BatchWriteRowRequest)
 
 class RowInBatchWriteRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _ROWINBATCHWRITEROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.RowInBatchWriteRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.RowInBatchWriteRowResponse)
 
 class TableInBatchWriteRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _TABLEINBATCHWRITEROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.TableInBatchWriteRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.TableInBatchWriteRowResponse)
 
 class BatchWriteRowResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _BATCHWRITEROWRESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.BatchWriteRowResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.BatchWriteRowResponse)
 
 class GetRangeRequest(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _GETRANGEREQUEST
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.GetRangeRequest)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.GetRangeRequest)
 
 class GetRangeResponse(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _GETRANGERESPONSE
   
-  # @@protoc_insertion_point(class_scope:com.aliyun.cloudservice.ots2.GetRangeResponse)
+  # @@protoc_insertion_point(class_scope:com.aliyun.openservices.ots.protocol.GetRangeResponse)
 
 # @@protoc_insertion_point(module_scope)
