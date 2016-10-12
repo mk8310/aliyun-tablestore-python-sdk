@@ -37,18 +37,7 @@ class RetryUtil:
 
     @classmethod
     def is_repeatable_api(cls, api_name):
-        if (api_name == "/ListTable" or
-            api_name == "/DescribeTable" or
-            api_name == "/GetRow" or
-            api_name == "/BatchGetRow" or
-            api_name == "/GetRange" or
-            api_name == "/DescrieStream" or
-            api_name == "/GetShardIterator" or
-            api_name == "/GetStreamRecord" or
-            api_name == "/ListStream"):
-            return True
-
-        return False
+        return api_name in ['ListTable', 'DescribeTable', 'GetRow', 'BatchGetRow', 'GetRange']
 
     @classmethod
     def should_retry_when_api_repeatable(cls, retry_times, exception, api_name):
