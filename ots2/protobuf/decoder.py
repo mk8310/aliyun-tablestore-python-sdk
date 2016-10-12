@@ -105,7 +105,7 @@ class OTSProtoBufferDecoder:
         )
         return reserved_throughput_details
 
-    def _parse_get_row_item(self, proto):
+    def _parse_get_row_item(self, proto, table_name):
         row_list = []
         for row_item in proto:
             if row_item.is_ok:
@@ -126,6 +126,7 @@ class OTSProtoBufferDecoder:
 
             row_data_item = RowDataItem(
                 row_item.is_ok, error_code, error_message,
+                table_name,
                 capacity_unit, primary_key_columns, attribute_columns
             )
             row_list.append(row_data_item)
@@ -135,10 +136,10 @@ class OTSProtoBufferDecoder:
     def _parse_batch_get_row(self, proto):
         rows = []
         for table_item in proto:
-            rows.append(self._parse_get_row_item(table_item.rows)) 
+            rows.append(self._parse_get_row_item(table_item.rows, table_item.table_name)) 
         return rows
 
-    def _parse_write_row_item(self, proto):
+    def _parse_write_row_item(self, proto, table_name):
         row_list = []
         for row_item in proto:
             if row_item.is_ok:
@@ -154,7 +155,7 @@ class OTSProtoBufferDecoder:
                     consumed = None
 
             write_row_item = BatchWriteRowResponseItem(
-                row_item.is_ok, error_code, error_message, consumed
+                row_item.is_ok, error_code, error_message, table_name, consumed
             )
             row_list.append(write_row_item)
         
@@ -165,13 +166,13 @@ class OTSProtoBufferDecoder:
         for table_item in proto:
             table_dict = {}
             if table_item.put_rows:
-                put_list = self._parse_write_row_item(table_item.put_rows)
+                put_list = self._parse_write_row_item(table_item.put_rows, table_item.table_name)
                 table_dict['put'] = put_list
             if table_item.update_rows:
-                update_list = self._parse_write_row_item(table_item.update_rows)
+                update_list = self._parse_write_row_item(table_item.update_rows, table_item.table_name)
                 table_dict['update'] = update_list
             if table_item.delete_rows:
-                delete_list = self._parse_write_row_item(table_item.delete_rows)
+                delete_list = self._parse_write_row_item(table_item.delete_rows, table_item.table_name)
                 table_dict['delete'] = delete_list
             result_list.append(table_dict)
         return result_list

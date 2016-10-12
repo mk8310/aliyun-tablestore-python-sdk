@@ -66,19 +66,19 @@ class ParameterValidationTest(OTS2APITestBase):
             self.assert_error(e, 400, error_code, error_message)
         #put_row
         try:
-            client.put_row(table_name, Condition("IGNORE"), {"PK": "x"}, {"COL": "x"})
+            client.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {"COL": "x"})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
         #update_row
         try:
-            client.update_row(table_name, Condition("IGNORE"), {"PK": "x"}, {'put':{"COL": "x"}})
+            client.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{"COL": "x"}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
         #delete_row
         try:
-            client.delete_row(table_name, Condition("IGNORE"), {"PK": "x"})
+            client.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
@@ -92,9 +92,9 @@ class ParameterValidationTest(OTS2APITestBase):
             self.assert_error(e, 400, error_code, error_message)
 
         #batch_write_row
-        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition("IGNORE"), {"PK": "x"}, {"COL": "x"})]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), {"PK": "x"}, {'put':{"COL": "x"}})]}
-        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition("IGNORE"), {"PK": "x"})]}
+        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {"COL": "x"})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{"COL": "x"}})]}
+        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})]}
         batch_write_items = [put_row_item, update_row_item, delete_row_item]
         for item in batch_write_items:
             batches = [item]
@@ -123,12 +123,12 @@ class ParameterValidationTest(OTS2APITestBase):
         
         #update_row
         try:
-            self.client_test.update_row(table_name, Condition("IGNORE"), primary_keys, {})
+            self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSParameterInvalid", "No column specified while updating row.")
         #batch_write_row
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), primary_keys, {})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {})]}
         write_batches = [update_row_item]
         try:
             self.client_test.batch_write_row(write_batches)
@@ -163,7 +163,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [{"PK": "x"}], [])]
         response = client.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(1, 0), {}, {})
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(1, 0), {}, {})
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
         #get_range
@@ -172,23 +172,23 @@ class ParameterValidationTest(OTS2APITestBase):
         self.assert_equal(next_start_primary_keys, None)
         self.assert_equal(rows, [])
         #put_row
-        consumed = client.put_row(table_name, Condition("IGNORE"), {"PK": "x"}, {'COL': 'x'})
+        consumed = client.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'COL': 'x'})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
         #update_row
-        consumed = client.update_row(table_name, Condition("IGNORE"), {"PK": "x"}, {'put':{"COL": "x1"}})
+        consumed = client.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{"COL": "x1"}})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
         #delete_row
-        consumed = client.delete_row(table_name, Condition("IGNORE"), {"PK": "x"})
+        consumed = client.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
         #batch_write_row
-        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition("IGNORE"), {"PK": "x"}, {'COL': 'x'})]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), {"PK": "x"}, {'put':{'COL': 'x1'}})]}
-        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition("IGNORE"), {"PK": "x"})]}
+        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'COL': 'x'})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{'COL': 'x1'}})]}
+        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})]}
         op_list = [('put', put_row_item), ('update', update_row_item), ('delete', delete_row_item)]
         for op_type, item in op_list:
             write_batches = [item]
             response = client.batch_write_row(write_batches)
-            expect_write_data_item = BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, 1))
+            expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))
             expect_response = [{op_type : [expect_write_data_item]}]
             self.assert_BatchWriteRowResponseItem(response, expect_response)
         #delete_table
@@ -233,13 +233,13 @@ class ParameterValidationTest(OTS2APITestBase):
 
         #put_row
         try:
-            self.client_test.put_row(table_name, Condition("IGNORE"), primary_keys, {columns_name: "x"})
+            self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {columns_name: "x"})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
         #update_row
         try:
-            self.client_test.update_row(table_name, Condition("IGNORE"), primary_keys, {'put':{columns_name: "x1"}})
+            self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':{columns_name: "x1"}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
@@ -251,8 +251,8 @@ class ParameterValidationTest(OTS2APITestBase):
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
 
-        put_row_item = {"table_name": table_name, "put":[PutRowItem(Condition("IGNORE"), primary_keys, {columns_name: "x"})]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), primary_keys, {'put':{columns_name: "x"}})]}
+        put_row_item = {"table_name": table_name, "put":[PutRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {columns_name: "x"})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':{columns_name: "x"}})]}
         batches_list = [put_row_item, update_row_item]
         for item in batches_list:
             write_batches = [item]
@@ -291,7 +291,7 @@ class ParameterValidationTest(OTS2APITestBase):
         #batch_get_row
         batches = [(table_name, [pk], [columns_name])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", CapacityUnit(1, 0), {}, {})
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(1, 0), {}, {})
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
         #get_range
@@ -300,23 +300,23 @@ class ParameterValidationTest(OTS2APITestBase):
         self.assert_equal(next_start_primary_keys, None)
         self.assert_equal(rows, [])
         #put_row
-        consumed = self.client_test.put_row(table_name, Condition("IGNORE"), pk, {columns_name: 'x'})
+        consumed = self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, {columns_name: 'x'})
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: 'x'})))
         #update_row
-        consumed = self.client_test.update_row(table_name, Condition("IGNORE"), pk, {'put':{columns_name: "x1"}})
+        consumed = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, {'put':{columns_name: "x1"}})
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x1"})))
 
         #batch_write_row
-        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition("IGNORE"), pk, {columns_name: 'x'})]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), pk, {'put':{columns_name: 'x1'}})]}
+        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {columns_name: 'x'})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put':{columns_name: 'x1'}})]}
         write_batches = [put_row_item]
         response = self.client_test.batch_write_row(write_batches)
-        expect_write_data_item = {"put": [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x"})))]}
+        expect_write_data_item = {"put": [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x"})))]}
         expect_response = [expect_write_data_item]
         self.assert_BatchWriteRowResponseItem(response, expect_response) 
         write_batches = [update_row_item]
         response = self.client_test.batch_write_row(write_batches)
-        expect_write_data_item = {"update": [BatchWriteRowResponseItem(True, "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x1"})))]}
+        expect_write_data_item = {"update": [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {columns_name: "x1"})))]}
         expect_response = [expect_write_data_item]
         self.assert_BatchWriteRowResponseItem(response, expect_response) 
 
@@ -364,19 +364,19 @@ class ParameterValidationTest(OTS2APITestBase):
                 self.assert_error(e, 400, error_code, error_message)
             #put_row
             try:
-                self.client_test.put_row(table_name, Condition("IGNORE"), primary_keys, {'COL': 'x'})
+                self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {'COL': 'x'})
                 self.assert_false()
             except OTSServiceError as e:
                 self.assert_error(e, 400, error_code, error_message)
             #update_row
             try:
-                self.client_test.update_row(table_name, Condition("IGNORE"), primary_keys, {'put':{'COL': 'x'}})
+                self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':{'COL': 'x'}})
                 self.assert_false()
             except OTSServiceError as e:
                 self.assert_error(e, 400, error_code, error_message)
             #delete_row
             try:
-                self.client_test.delete_row(table_name, Condition("IGNORE"), primary_keys)
+                self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys)
                 self.assert_false()
             except OTSServiceError as e:
                 self.assert_error(e, 400, error_code, error_message)
@@ -388,9 +388,9 @@ class ParameterValidationTest(OTS2APITestBase):
             except OTSServiceError as e:
                 self.assert_error(e, 400, error_code, error_message)
             #batch_write_row
-            put_row_item = {"table_name": table_name, "put":[PutRowItem(Condition("IGNORE"), primary_keys, {'COL': 'x'})]}
-            update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), primary_keys, {'put':{'COL': 'x'}})]}
-            delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition("IGNORE"), primary_keys)]}
+            put_row_item = {"table_name": table_name, "put":[PutRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {'COL': 'x'})]}
+            update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':{'COL': 'x'}})]}
+            delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys)]}
             batches_list = [put_row_item, update_row_item, delete_row_item]
             for item in batches_list:
                 write_batches = [item]
@@ -459,39 +459,39 @@ class ParameterValidationTest(OTS2APITestBase):
             self.assert_error(e, 404, "OTSObjectNotExist", "Requested table does not exist.")
         #put_row
         try:
-            self.client_test.put_row(table_name, Condition("IGNORE"), {"PK": "x"}, {"COL": "x"})
+            self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {"COL": "x"})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 404, "OTSObjectNotExist", "Requested table does not exist.")
         #update_row
         try:
-            self.client_test.update_row(table_name, Condition("IGNORE"), {"PK": "x"}, {'put':{"COL": "x"}})
+            self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{"COL": "x"}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 404, "OTSObjectNotExist", "Requested table does not exist.")
         #delete_row
         try:
-            self.client_test.delete_row(table_name, Condition("IGNORE"), {"PK": "x"})
+            self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 404, "OTSObjectNotExist", "Requested table does not exist.")
         #bacth_get_row
         batches = [(table_name, [{"PK": "x"}], [])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(False, "OTSObjectNotExist", "Requested table does not exist.", None, None, None) 
+        expect_row_data_item = RowDataItem(False, "OTSObjectNotExist", "Requested table does not exist.", "", None, None, None) 
         expect_response = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, expect_response)
        
         #batch_write_row
-        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition("IGNORE"), {"PK": "x"}, {"COL": "x"})]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), {"PK": "x"}, {'put':{"COL": "x"}})]}
-        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition("IGNORE"), {"PK": "x"})]}
+        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {"COL": "x"})]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"}, {'put':{"COL": "x"}})]}
+        delete_row_item = {"table_name": table_name, "delete": [DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": "x"})]}
         batch_write_items = [put_row_item, update_row_item, delete_row_item]
         resp_key = ["put", "update", "delete"]
         for item, key in zip(batch_write_items, resp_key):
             batches = [item]
             response = self.client_test.batch_write_row(batches)
-            expect_write_data_item = BatchWriteRowResponseItem(False, "OTSObjectNotExist", "Requested table does not exist.", None) 
+            expect_write_data_item = BatchWriteRowResponseItem(False, "OTSObjectNotExist", "Requested table does not exist.", "", None) 
             expect_response = [{key : [expect_write_data_item]}]
             self.assert_BatchWriteRowResponseItem(response, expect_response)
 
@@ -515,19 +515,19 @@ class ParameterValidationTest(OTS2APITestBase):
 
         #put_row
         try:
-            self.client_test.put_row(table_name, Condition("IGNORE"), primary_keys, columns)
+            self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, columns)
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
         #update_row
         try:
-            self.client_test.update_row(table_name, Condition("IGNORE"), primary_keys, {'put':columns})
+            self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':columns})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_message)
 
-        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition("IGNORE"), primary_keys, columns)]}
-        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition("IGNORE"), primary_keys, {'put':columns})]}
+        put_row_item = {"table_name": table_name, "put": [PutRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, columns)]}
+        update_row_item = {"table_name": table_name, "update": [UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), primary_keys, {'put':columns})]}
         batches_list = [put_row_item, update_row_item]
         for item in batches_list:
             write_batches = [item]
