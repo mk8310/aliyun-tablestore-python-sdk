@@ -900,7 +900,6 @@ class ErrorMessageTest(OTS2APITestBase):
             ])
             self.assert_false()
         except OTSServiceError as e:
-            print e
             self.assert_error(e, 400, 'OTSParameterInvalid', "The total data size of single BatchWriteRow request exceeded the limit.")
         except OTSClientError as e:
             self.assertEqual(e.http_status, 413)
