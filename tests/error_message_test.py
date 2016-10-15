@@ -882,7 +882,7 @@ class ErrorMessageTest(OTS2APITestBase):
         """503 OTSPartitionUnavailable The partition is not available."""
         raise NotImplementedError
 
-    def test_batch_write_row_data_size_exceeded(self):
+    def _test_batch_write_row_data_size_exceeded(self):
         """OTSParameterInvalid The total data size of single BatchWriteRow request exceeded the limit."""
         cell_num = 4 * 1024 * 1024 / 64 
         string = 'X' * 64 * 1024
@@ -900,12 +900,8 @@ class ErrorMessageTest(OTS2APITestBase):
             ])
             self.assert_false()
         except OTSServiceError as e:
-            print 'OTSServiceError'
-            print e
             self.assert_error(e, 400, 'OTSParameterInvalid', "The total data size of single BatchWriteRow request exceeded the limit.")
         except OTSClientError as e:
-            print 'OTSClientError'
-            print e
             self.assertEqual(e.http_status, 413)
 
 
