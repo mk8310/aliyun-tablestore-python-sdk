@@ -65,7 +65,8 @@ def batch_get_row(ots_client):
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
     try:
-        delete_table(ots_client)
+        pass
+        # delete_table(ots_client)
     except:
         pass
 
@@ -74,5 +75,5 @@ if __name__ == '__main__':
     time.sleep(3) # wait for table ready
     put_row(ots_client)
     batch_get_row(ots_client)
-    delete_table(ots_client)
+    # delete_table(ots_client)
 

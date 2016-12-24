@@ -45,7 +45,8 @@ def get_row(ots_client):
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
     try:
-        delete_table(ots_client)
+        pass
+        # delete_table(ots_client)
     except:
         pass
     create_table(ots_client)
@@ -57,5 +58,5 @@ if __name__ == '__main__':
     delete_row(ots_client)
     print '#### row after delete ####'
     get_row(ots_client)
-    delete_table(ots_client)
+    # delete_table(ots_client)
 

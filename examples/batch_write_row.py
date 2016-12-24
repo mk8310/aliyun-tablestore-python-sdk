@@ -72,12 +72,13 @@ def batch_write_row(ots_client):
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
     try:
-        delete_table(ots_client)
+        pass 
+        # delete_table(ots_client)
     except:
         pass
     create_table(ots_client)
 
     time.sleep(3) # wait for table ready
     batch_write_row(ots_client)
-    delete_table(ots_client)
+    # delete_table(ots_client)
 

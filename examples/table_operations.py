@@ -49,5 +49,5 @@ if __name__ == '__main__':
     list_table(ots_client)
     describe_table(ots_client)
     update_table(ots_client)
-    delete_table(ots_client)
+    # delete_table(ots_client)
 
