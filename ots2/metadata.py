@@ -5,11 +5,13 @@ from ots2.error import *
 __all__ = [
     'INF_MIN',
     'INF_MAX',
+    'PK_AUTO_INCR',
     'TableMeta',
     'CapacityUnit',
     'ReservedThroughput',
     'ReservedThroughputDetails',
     'ColumnType',
+    'Column',
     'Direction',
     'UpdateTableResponse',
     'DescribeTableResponse',
@@ -73,7 +75,25 @@ class ColumnType(object):
     BINARY = "BINARY"
     INF_MIN = "INF_MIN"
     INF_MAX = "INF_MAX"
+    PK_AUTO_INCR = 'PK_AUTO_INCR'
 
+class Column(object):
+    def __init__(self, name, value = None, timestamp = None):
+        self.name = name
+        self.value = value
+        self.timestamp = timestamp
+
+    def set_timestamp(self, timestamp):
+        self.timestamp = timestamp
+
+    def get_name(self):
+        return self.name
+
+    def get_value(self):
+        return self.value
+
+    def get_timestamp(self):
+        return self.timestamp
 
 class Direction(object):
     FORWARD = "FORWARD"
@@ -153,8 +173,8 @@ class ComparatorType(object):
 
 
 class ColumnConditionType(object):
-    COMPOSITE_CONDITION = 0
-    RELATION_CONDITION = 1
+    COMPOSITE_COLUMN_CONDITION = 0
+    SINGLE_COLUMN_CONDITION = 1
 
 class ColumnCondition(object):
     pass    
@@ -166,7 +186,7 @@ class CompositeCondition(ColumnCondition):
         self.set_combinator(combinator)
 
     def get_type(self):
-        return ColumnConditionType.COMPOSITE_CONDITION
+        return ColumnConditionType.COMPOSITE_COLUMN_CONDITION
 
     def set_combinator(self, combinator):
         if combinator not in LogicalOperator.__values__:
@@ -192,18 +212,20 @@ class CompositeCondition(ColumnCondition):
 
 class RelationCondition(ColumnCondition):
    
-    def __init__(self, column_name, column_value, comparator, pass_if_missing = True):
+    def __init__(self, column_name, column_value, comparator, pass_if_missing = True, latest_version_only = True):
         self.column_name = column_name
         self.column_value = column_value
 
         self.comparator = None
         self.pass_if_missing = None
+        self.latest_version_only = None
 
         self.set_comparator(comparator)
         self.set_pass_if_missing(pass_if_missing)
+        self.set_latest_version_only(latest_version_only)
 
     def get_type(self):
-        return ColumnConditionType.RELATION_CONDITION
+        return ColumnConditionType.SINGLE_COLUMN_CONDITION
 
     def set_pass_if_missing(self, pass_if_missing):
         """
@@ -224,6 +246,17 @@ class RelationCondition(ColumnCondition):
 
     def get_pass_if_missing(self):
         return self.pass_if_missing
+
+    def set_latest_version_only(self, latest_version_only):
+        if not isinstance(latest_version_only, bool):
+            raise OTSClientError(
+                "The input latest_version_only should be an instance of Bool, not %s"%
+                latest_version_only.__class__.__name__
+            )
+        self.latest_version_only = latest_version_only
+
+    def get_latest_version_only(self):
+        return self.latest_version_only
 
     def set_column_name(self, column_name):
         self.column_name = column_name
@@ -537,5 +570,9 @@ class INF_MIN(object):
 
 class INF_MAX(object):
     # for get_range
+    pass
+
+class PK_AUTO_INCR(object):
+    # for put_row
     pass
 

@@ -3,7 +3,9 @@
 import google.protobuf.text_format as text_format
 
 from ots2.metadata import *
-import ots2.protobuf.ots_protocol_2_pb2 as pb2
+from ots2.plainbuffer.plain_buffer_builder import *
+import ots2.protobuf.table_store_pb2 as pb2
+import ots2.protobuf.table_store_filter_pb2 as filter_pb2
 
 class OTSProtoBufferDecoder:
 
@@ -217,20 +219,45 @@ class OTSProtoBufferDecoder:
 
         return update_table_response, proto
 
+    # def _decode_get_row(self, body):
+    #     proto = pb2.GetRowResponse()
+    #     proto.ParseFromString(body)
+
+    #     primary_key_columns, attribute_columns = self._parse_row(proto.row)
+    #     consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
+    #     return (consumed, primary_key_columns, attribute_columns), proto
+
     def _decode_get_row(self, body):
         proto = pb2.GetRowResponse()
         proto.ParseFromString(body)
 
-        primary_key_columns, attribute_columns = self._parse_row(proto.row)
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
-        return (consumed, primary_key_columns, attribute_columns), proto
+
+        primary_key = None 
+        attribute_columns = None
+
+        if len(proto.row) != 0:
+            inputStream = PlainBufferInputStream(proto.row)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            primary_key, attribute_columns = codedInputStream.read_row()
+
+        return (consumed, primary_key, attribute_columns), proto
 
     def _decode_put_row(self, body):
         proto = pb2.PutRowResponse()
         proto.ParseFromString(body)
 
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
-        return consumed, proto
+
+        primary_key = None 
+        attribute_columns = None
+
+        if len(proto.row) != 0:
+            inputStream = PlainBufferInputStream(proto.row)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            primary_key, attribute_columns = codedInputStream.read_row()
+
+        return (consumed, primary_key, attribute_columns), proto
 
     def _decode_update_row(self, body):
         proto = pb2.UpdateRowResponse()

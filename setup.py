@@ -24,7 +24,7 @@ setup(
     version=version,
     description='Aliyun TableStore(OTS) SDK',
     long_description=readme,
-    packages=['ots2', 'ots2.protobuf'],
+    packages=['ots2', 'ots2.protobuf', 'ots2.plainbuffer'],
     install_requires=['protobuf-py3>=2.5.1', 'urllib3>=1.14', 'certifi>=2016.2.28'],
     include_package_data=True,
     url='http://ots.aliyun.com',

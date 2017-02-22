@@ -10,7 +10,7 @@ import calendar
 import logging
 import sys
 import platform
-from email.utils import formatdate
+import datetime 
 from email.utils import parsedate 
 
 import google.protobuf.text_format as text_format
@@ -19,12 +19,13 @@ import ots2
 from ots2.error import *
 from ots2.protobuf.encoder import OTSProtoBufferEncoder
 from ots2.protobuf.decoder import OTSProtoBufferDecoder
-import ots2.protobuf.ots_protocol_2_pb2 as pb2
+import ots2.protobuf.table_store_pb2 as pb2
+import ots2.protobuf.table_store_filter_pb2 as filter_pb2
 
 
 class OTSProtocol:
 
-    api_version = '2014-08-08'
+    api_version = '2015-12-31'
 
     encoder_class = OTSProtoBufferEncoder
     decoder_class = OTSProtoBufferDecoder
@@ -33,18 +34,18 @@ class OTSProtocol:
     user_agent = 'aliyun-tablestore-sdk-python/%s(%s/%s/%s;%s)' % (ots2.__version__, platform.system(), platform.release(), platform.machine(), python_version)
 
     api_list = {
-        'CreateTable',
-        'ListTable',
-        'DeleteTable',
-        'DescribeTable',
-        'UpdateTable',
+        # 'CreateTable',
+        # 'ListTable',
+        # 'DeleteTable',
+        # 'DescribeTable',
+        # 'UpdateTable',
         'GetRow',
         'PutRow',
-        'UpdateRow',
-        'DeleteRow',
-        'BatchGetRow',
-        'BatchWriteRow',
-        'GetRange'
+        # 'UpdateRow',
+        # 'DeleteRow',
+        # 'BatchGetRow',
+        # 'BatchWriteRow',
+        # 'GetRange'
     }
 
     def __init__(self, user_id, user_key, instance_name, encoding, logger):
@@ -87,7 +88,8 @@ class OTSProtocol:
 
         md5 = base64.b64encode(hashlib.md5(body).digest())
 
-        date = formatdate(time.time(), usegmt=True)
+        #date = datetime.datetime.utcnow().isoformat()
+        date = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.000Z')
         
         headers = {
             'x-ots-date' : date,
@@ -149,13 +151,13 @@ class OTSProtocol:
         # 3, check date 
         if 'x-ots-date' in headers:
             try:
-                server_time = parsedate(headers['x-ots-date'])
+                server_time = datetime.datetime.strptime(headers['x-ots-date'], "%Y-%m-%dT%H:%M:%S.%fZ")
             except ValueError:
                 raise OTSClientError('Invalid date format in response.')
         
             # 4, check date range
-            server_unix_time = calendar.timegm(server_time)
-            now_unix_time = time.time()
+            server_unix_time = time.mktime(server_time.timetuple())
+            now_unix_time = time.mktime(datetime.datetime.utcnow().timetuple())
             if abs(server_unix_time - now_unix_time) > 15 * 60:
                 raise OTSClientError('The difference between date in response and system time is more than 15 minutes.')
 
@@ -181,7 +183,6 @@ class OTSProtocol:
             raise OTSClientError('Invalid signature in response.')
 
     def make_request(self, api_name, *args, **kwargs):
-        
         if api_name not in self.api_list:
             raise OTSClientError('API %s is not supported.' % api_name)
 

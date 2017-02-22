@@ -231,7 +231,7 @@ class OTSClient(object):
 
         return self._request_helper('DescribeTable', table_name)
 
-    def get_row(self, table_name, primary_key, columns_to_get=None, column_filter=None):
+    def get_row(self, table_name, primary_key, columns_to_get=None, column_filter=None, max_version=None, time_range=None):
         """
         说明：获取一行数据。
 
@@ -239,6 +239,8 @@ class OTSClient(object):
         ``primary_key``是主键，类型为dict。
         ``columns_to_get``是可选参数，表示要获取的列的名称列表，类型为list；如果不填，表示获取所有列。
         ``column_filter``是可选参数，表示读取指定条件的行
+        ``max_version``是可选参数，表示最多读取的版本数
+        ``time_range``是可选参数，表示读取额版本范围或特定版本，和max_version至少存在一个
 
         返回：本次操作消耗的CapacityUnit、主键列和属性列。
 
@@ -254,10 +256,10 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'GetRow', table_name, primary_key, columns_to_get, column_filter
+                    'GetRow', table_name, primary_key, columns_to_get, column_filter, max_version, time_range
         )
 
-    def put_row(self, table_name, condition, primary_key, attribute_columns):
+    def put_row(self, table_name, condition, primary_key, attribute_columns, return_type = None):
         """
         说明：写入一行数据。返回本次操作消耗的CapacityUnit。
 
@@ -280,7 +282,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'PutRow', table_name, condition, primary_key, attribute_columns
+                    'PutRow', table_name, condition, primary_key, attribute_columns, return_type
         )
     
     def update_row(self, table_name, condition, primary_key, update_of_attribute_columns):

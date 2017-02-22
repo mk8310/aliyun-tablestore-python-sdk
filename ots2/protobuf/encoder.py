@@ -4,39 +4,31 @@ import google.protobuf.text_format as text_format
 
 from ots2.error import *
 from ots2.metadata import *
-import ots2.protobuf.ots_protocol_2_pb2 as pb2
+from ots2.plainbuffer.plain_buffer_builder import *
+import ots2.protobuf.table_store_pb2 as pb2
+import ots2.protobuf.table_store_filter_pb2 as filter_pb2
 
 INT32_MAX = 2147483647
 INT32_MIN = -2147483648
 
-COLUMN_TYPE_MAP = {
-    ColumnType.INF_MIN   : pb2.INF_MIN,
-    ColumnType.INF_MAX   : pb2.INF_MAX,
-    ColumnType.INTEGER   : pb2.INTEGER,
-    ColumnType.STRING    : pb2.STRING,
-    ColumnType.BOOLEAN   : pb2.BOOLEAN,
-    ColumnType.DOUBLE    : pb2.DOUBLE,
-    ColumnType.BINARY    : pb2.BINARY,
-}
-
 LOGICAL_OPERATOR_MAP = {
-    LogicalOperator.NOT     : pb2.LO_NOT,
-    LogicalOperator.AND     : pb2.LO_AND,
-    LogicalOperator.OR      : pb2.LO_OR,
+    LogicalOperator.NOT     : filter_pb2.LO_NOT,
+    LogicalOperator.AND     : filter_pb2.LO_AND,
+    LogicalOperator.OR      : filter_pb2.LO_OR,
 }
 
 COMPARATOR_TYPE_MAP = {
-    ComparatorType.EQUAL          : pb2.CT_EQUAL,
-    ComparatorType.NOT_EQUAL      : pb2.CT_NOT_EQUAL,
-    ComparatorType.GREATER_THAN   : pb2.CT_GREATER_THAN,
-    ComparatorType.GREATER_EQUAL  : pb2.CT_GREATER_EQUAL,
-    ComparatorType.LESS_THAN      : pb2.CT_LESS_THAN,
-    ComparatorType.LESS_EQUAL     : pb2.CT_LESS_EQUAL,
+    ComparatorType.EQUAL          : filter_pb2.CT_EQUAL,
+    ComparatorType.NOT_EQUAL      : filter_pb2.CT_NOT_EQUAL,
+    ComparatorType.GREATER_THAN   : filter_pb2.CT_GREATER_THAN,
+    ComparatorType.GREATER_EQUAL  : filter_pb2.CT_GREATER_EQUAL,
+    ComparatorType.LESS_THAN      : filter_pb2.CT_LESS_THAN,
+    ComparatorType.LESS_EQUAL     : filter_pb2.CT_LESS_EQUAL,
 }
 
 COLUMN_CONDITION_TYPE_MAP = {
-    ColumnConditionType.COMPOSITE_CONDITION : pb2.CCT_COMPOSITE,
-    ColumnConditionType.RELATION_CONDITION  : pb2.CCT_RELATION,
+    ColumnConditionType.COMPOSITE_COLUMN_CONDITION : filter_pb2.FT_COMPOSITE_COLUMN_VALUE,
+    ColumnConditionType.SINGLE_COLUMN_CONDITION  : filter_pb2.FT_SINGLE_COLUMN_VALUE,
 }
 
 DIRECTION_MAP = {
@@ -158,7 +150,7 @@ class OTSProtoBufferEncoder:
             )
 
     def _make_composite_condition(self, condition):
-        proto = pb2.CompositeCondition()
+        proto = filter_pb2.CompositeColumnValueFilter()
 
         # combinator
         global LOGICAL_OPERATOR_MAP
@@ -173,12 +165,12 @@ class OTSProtoBufferEncoder:
             )
 
         for sub in condition.sub_conditions:
-            self._make_column_condition(proto.sub_conditions.add(), sub)
+            self._make_column_condition(proto.sub_filters.add(), sub)
 
         return proto.SerializeToString()
 
     def _make_relation_condition(self, condition):
-        proto = pb2.RelationCondition()
+        proto = filter_pb2.SingleColumnValueFilter()
 
         # comparator
         global COMPARATOR_TYPE_MAP
@@ -193,8 +185,10 @@ class OTSProtoBufferEncoder:
             )
 
         proto.column_name = self._get_unicode(condition.column_name)
-        self._make_column_value(proto.column_value, condition.column_value)
-        proto.pass_if_missing = condition.pass_if_missing 
+        #self._make_column_value(proto.column_value, condition.column_value)
+        proto.column_value = str(PlainBufferBuilder.serialize_column_value(condition.column_value))
+        proto.filter_if_missing = not condition.pass_if_missing 
+        proto.latest_version_only = condition.latest_version_only
 
         return proto.SerializeToString()
 
@@ -222,9 +216,9 @@ class OTSProtoBufferEncoder:
 
         # condition
         if isinstance(column_condition, CompositeCondition):
-            proto.condition = self._make_composite_condition(column_condition)
+            proto.filter = self._make_composite_condition(column_condition)
         elif isinstance(column_condition, RelationCondition):
-            proto.condition = self._make_relation_condition(column_condition)
+            proto.filter = self._make_relation_condition(column_condition)
         else:
             raise OTSClientError(
                 "expect CompositeCondition, RelationCondition but not %s"
@@ -252,7 +246,10 @@ class OTSProtoBufferEncoder:
                 )
             )
 
-        self._make_column_condition(proto.column_condition, condition.column_condition)
+        if condition.column_condition is not None:
+            pb_filter = filter_pb2.Filter()
+            self._make_column_condition(pb_filter, condition.column_condition)
+            proto.column_condition = pb_filter.SerializeToString()
 
     def _get_direction(self, direction_str):
         global DIRECTION_MAP
@@ -546,20 +543,43 @@ class OTSProtoBufferEncoder:
         proto.table_name = self._get_unicode(table_name)
         return proto
 
-    def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter):
+    # def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter):
+    #     proto = pb2.GetRowRequest()
+    #     proto.table_name = self._get_unicode(table_name)
+    #     self._make_columns_with_dict(proto.primary_key, primary_key)
+    #     self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
+    #     self._make_column_condition(proto.filter, column_filter)
+    #     return proto
+
+    def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter, max_version, time_range):
         proto = pb2.GetRowRequest()
         proto.table_name = self._get_unicode(table_name)
-        self._make_columns_with_dict(proto.primary_key, primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
-        self._make_column_condition(proto.filter, column_filter)
+
+        if column_filter is not None:
+            pb_filter = filter_pb2.Filter()
+            self._make_column_condition(pb_filter, column_filter)
+            proto.filter = pb_filter.SerializeToString()
+
+        proto.primary_key = str(PlainBufferBuilder.serialize_primary_key(primary_key))
+        if max_version is not None:
+            proto.max_versions = max_version
+        if time_range is not None:
+            if isinstance(time_range, tuple):
+                proto.time_range.start_time = time_range[0]
+                proto.time_range.end_time = time_range[1]
+            elif isinstance(time_range, int) or isinstance(time_range, long):
+                proto.time_range.specific_time = time_range
         return proto
 
-    def _encode_put_row(self, table_name, condition, primary_key, attribute_columns):
+    def _encode_put_row(self, table_name, condition, primary_key, attribute_columns, return_type):
         proto = pb2.PutRowRequest()
         proto.table_name = self._get_unicode(table_name)
         self._make_condition(proto.condition, condition)
-        self._make_columns_with_dict(proto.primary_key, primary_key)
-        self._make_columns_with_dict(proto.attribute_columns, attribute_columns)
+        if return_type == pb2.RT_NONE or return_type == pb2.RT_PK:
+            proto.return_content.return_type = return_type
+
+        proto.row = str(PlainBufferBuilder.serialize_for_put_row(primary_key, attribute_columns))
         return proto
 
     def _encode_update_row(self, table_name, condition, primary_key, update_of_attribute_columns):
