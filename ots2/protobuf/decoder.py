@@ -234,14 +234,14 @@ class OTSProtoBufferDecoder:
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
 
         primary_key = None 
-        attribute_columns = None
+        attributes = None
 
         if len(proto.row) != 0:
             inputStream = PlainBufferInputStream(proto.row)
             codedInputStream = PlainBufferCodedInputStream(inputStream)
-            primary_key, attribute_columns = codedInputStream.read_row()
+            primary_key, attributes = codedInputStream.read_row()
 
-        return (consumed, primary_key, attribute_columns), proto
+        return (consumed, primary_key, attributes), proto
 
     def _decode_put_row(self, body):
         proto = pb2.PutRowResponse()
@@ -264,14 +264,33 @@ class OTSProtoBufferDecoder:
         proto.ParseFromString(body)
 
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
-        return consumed, proto
+        
+        primary_key = None 
+        attribute_columns = None
+
+        if len(proto.row) != 0:
+            inputStream = PlainBufferInputStream(proto.row)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            primary_key, attribute_columns = codedInputStream.read_row()
+
+        return (consumed, primary_key, attribute_columns), proto
 
     def _decode_delete_row(self, body):
         proto = pb2.DeleteRowResponse()
         proto.ParseFromString(body)
 
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
-        return consumed, proto
+
+        primary_key = None 
+        attribute_columns = None
+
+        if len(proto.row) != 0:
+            inputStream = PlainBufferInputStream(proto.row)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            primary_key, attribute_columns = codedInputStream.read_row()
+
+        return (consumed, primary_key, attribute_columns), proto
+
 
     def _decode_batch_get_row(self, body):
         proto = pb2.BatchGetRowResponse()

@@ -5,6 +5,7 @@ from ots2.metadata import *
 from ots2.error import *
 from plain_buffer_consts import *
 from plain_buffer_crc8 import *
+from plain_buffer_consts import *
 
 class PlainBufferCodedInputStream:
     def __init__(self, inputStream):
@@ -139,15 +140,16 @@ class PlainBufferCodedInputStream:
             raise OTSClientError("Expect TAG_CELL_NAME but it was " + str(self.get_last_tag()))
                    
         cell_check_sum = 0
+        column_name = None
+        column_value = None
+        timestamp = None
         name_size = self.inputStream.read_raw_little_endian32()
         column_name = self.inputStream.read_utf_string(name_size)
         cell_check_sum = PlainBufferCrc8.crc_string(cell_check_sum, column_name)
         self.read_tag()
     
-        column = Column(column_name)
-        
         if self.get_last_tag() == TAG_CELL_VALUE:
-            column.value, cell_check_sum = self.read_column_value(cell_check_sum)
+            column_value, cell_check_sum = self.read_column_value(cell_check_sum)
         # skip CELL_TYPE
         if self.get_last_tag() == TAG_CELL_TYPE:
             cell_type = PlainBufferCrc8.crc_int8(cell_check_sum, cell_type)
@@ -155,7 +157,6 @@ class PlainBufferCodedInputStream:
         
         if self.get_last_tag() == TAG_CELL_TIMESTAMP:
             timestamp = self.inputStream.read_int64()
-            column.timestamp = timestamp
             cell_check_sum = PlainBufferCrc8.crc_int64(cell_check_sum, timestamp)
             self.read_tag()
 
@@ -168,12 +169,12 @@ class PlainBufferCodedInputStream:
             raise OTSClientError("Expect TAG_CELL_CHECKSUM but it was " + str(self.get_last_tag()))
         
         row_check_sum = PlainBufferCrc8.crc_int8(row_check_sum, cell_check_sum)
-        return column, row_check_sum
+        return column_name, column_value, timestamp, row_check_sum
 
     def read_row_without_header(self):
         row_check_sum = 0
         primary_key = {}
-        attribute_columns = []
+        attributes = {}
         
         if not self.check_last_tag_was(TAG_ROW_PK):
             raise OTSClientError("Expect TAG_ROW_PK but it was " + str(self.get_last_tag()))
@@ -187,8 +188,8 @@ class PlainBufferCodedInputStream:
         if self.check_last_tag_was(TAG_ROW_DATA):
             self.read_tag()
             while self.check_last_tag_was(TAG_CELL):
-                column, row_check_sum = self.read_column(row_check_sum)
-                attribute_columns.append(column)
+                column_name, column_value, timestamp, row_check_sum = self.read_column(row_check_sum)
+                attributes[column_name] = (column_value, timestamp)
 
         if self.check_last_tag_was(TAG_DELETE_ROW_MARKER):
             self.read_tag()
@@ -204,7 +205,7 @@ class PlainBufferCodedInputStream:
         else:
             raise OTSClientError("Expect TAG_ROW_CHECKSUM but it was " + str(self.get_last_tag()))
         
-        return primary_key, attribute_columns
+        return primary_key, attributes
 
     def read_row(self):
         if self.read_header() != HEADER:
@@ -348,22 +349,62 @@ class PlainBufferCodedOutputStream:
         row_check_sum = PlainBufferCrc8.crc_int8(row_check_sum, cell_check_sum)
         return row_check_sum
 
-    def write_column(self, column, row_check_sum):
+    def write_column(self, column_name, column_value, row_check_sum):
         cell_check_sum = 0
         self.write_tag(TAG_CELL)
-        cell_check_sum = self.write_cell_name(column.name, cell_check_sum)
-        cell_check_sum = self.write_column_value_with_checksum(column.value, cell_check_sum)
-        if column.timestamp is not None:
+        cell_check_sum = self.write_cell_name(column_name, cell_check_sum)
+        timestamp = None
+        if isinstance(column_value, tuple):
+            cell_check_sum = self.write_column_value_with_checksum(column_value[0], cell_check_sum)
+            timestamp = column_value[1]
+        else:
+            cell_check_sum = self.write_column_value_with_checksum(column_value, cell_check_sum)
+
+        if timestamp is not None:
             self.write_tag(TAG_CELL_TIMESTAMP)
-            self.outputStream.write_raw_little_endian64(column.timestamp)
-            cell_check_sum = PlainBufferCrc8.crc_int64(cell_check_sum, column.timestamp)
+            self.outputStream.write_raw_little_endian64(timestamp)
+            cell_check_sum = PlainBufferCrc8.crc_int64(cell_check_sum, timestamp)
         self.write_tag(TAG_CELL_CHECKSUM)
         self.outputStream.write_raw_byte(cell_check_sum)
         row_check_sum = PlainBufferCrc8.crc_int8(row_check_sum, cell_check_sum)
         return row_check_sum
 
-    def write_column2(self, column, column_type, row_check_sum):
-        pass
+    def write_update_column(self, update_type, column_name, column_value, row_check_sum):
+        update_type = update_type.upper()
+        cell_check_sum = 0
+        self.write_tag(TAG_CELL)
+        cell_check_sum = self.write_cell_name(column_name, cell_check_sum)
+        timestamp = None
+        if column_value is not None:
+            if isinstance(column_value, tuple):
+                if column_value[0] is not None:
+                    cell_check_sum = self.write_column_value_with_checksum(column_value[0], cell_check_sum)
+                if column_value[1] is not None:
+                    timestamp = column_value[1]
+            else:
+                cell_check_sum = self.write_column_value_with_checksum(column_value, cell_check_sum)
+        if update_type == UpdateType.DELETE:
+            self.write_tag(TAG_CELL_TYPE)
+            self.outputStream.write_raw_byte(const.DELETE_ONE_VERSION)
+        elif update_type == UpdateType.DELETE_ALL:
+            self.write_tag(TAG_CELL_TYPE)
+            self.outputStream.write_raw_byte(const.DELETE_ALL_VERSION)
+
+        if timestamp is not None:
+            self.write_tag(TAG_CELL_TIMESTAMP)
+            self.outputStream.write_raw_little_endian64(timestamp)
+
+        if timestamp is not None:
+            cell_check_sum = PlainBufferCrc8.crc_int64(cell_check_sum, timestamp)
+        if update_type == UpdateType.DELETE:
+            cell_check_sum = PlainBufferCrc8.crc_int8(cell_check_sum, const.DELETE_ONE_VERSION)
+        if update_type == UpdateType.DELETE_ALL:
+            cell_check_sum = PlainBufferCrc8.crc_int8(cell_check_sum, const.DELETE_ALL_VERSION)
+
+        self.write_tag(TAG_CELL_CHECKSUM)
+        self.outputStream.write_raw_byte(cell_check_sum)
+        row_check_sum = PlainBufferCrc8.crc_int8(row_check_sum, cell_check_sum)
+        return row_check_sum
 
     def write_primary_key(self, primary_key, row_check_sum):
         self.write_tag(TAG_ROW_PK)
@@ -374,17 +415,24 @@ class PlainBufferCodedOutputStream:
     def write_columns(self, columns, row_check_sum):
         if columns is not None and len(columns) != 0:
             self.write_tag(TAG_ROW_DATA)
-            for column in columns:
-                row_check_sum = self.write_column(column, row_check_sum)
+            for column_name in columns.keys():
+                row_check_sum = self.write_column(column_name, columns[column_name], row_check_sum)
         return row_check_sum
 
-    def write_columns2(self, columns, update_types, row_check_sum):
-        pass
+    def write_update_columns(self, attribute_columns, row_check_sum):
+        if len(attribute_columns) != 0:
+            self.write_tag(TAG_ROW_DATA)
+            for update_type in attribute_columns.keys():
+                columns = attribute_columns[update_type]
+                for column_name in columns.keys():
+                    row_check_sum = self.write_update_column(update_type, column_name, columns[column_name], row_check_sum)
+        return row_check_sum
 
-    def write_delete_marker(self, row_check_sum):
-        pass
+    def write_delete_marker(self, row_checksum):
+        self.write_tag(TAG_DELETE_ROW_MARKER)
+        return PlainBufferCrc8.crc_int8(row_checksum, 1);
 
-    def write_row_checksum(self, row_check_sum):
+    def write_row_checksum(self, row_checksum):
         self.write_tag(TAG_ROW_CHECKSUM)                                                                                  
-        self.outputStream.write_raw_byte(row_check_sum)
+        self.outputStream.write_raw_byte(row_checksum)
 

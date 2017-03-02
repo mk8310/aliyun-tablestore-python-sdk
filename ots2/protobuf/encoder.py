@@ -575,6 +575,8 @@ class OTSProtoBufferEncoder:
     def _encode_put_row(self, table_name, condition, primary_key, attribute_columns, return_type):
         proto = pb2.PutRowRequest()
         proto.table_name = self._get_unicode(table_name)
+        if condition is None:
+            condition = Condition(RowExistenceExpectation.IGNORE, None)
         self._make_condition(proto.condition, condition)
         if return_type == pb2.RT_NONE or return_type == pb2.RT_PK:
             proto.return_content.return_type = return_type
@@ -582,19 +584,30 @@ class OTSProtoBufferEncoder:
         proto.row = str(PlainBufferBuilder.serialize_for_put_row(primary_key, attribute_columns))
         return proto
 
-    def _encode_update_row(self, table_name, condition, primary_key, update_of_attribute_columns):
+    def _encode_update_row(self, table_name, condition, primary_key, update_of_attribute_columns, return_type):
         proto = pb2.UpdateRowRequest()
         proto.table_name = self._get_unicode(table_name)
+        if condition is None:
+            condition = Condition(RowExistenceExpectation.IGNORE, None)
         self._make_condition(proto.condition, condition)
-        self._make_columns_with_dict(proto.primary_key, primary_key)
-        self._make_update_of_attribute_columns_with_dict(proto.attribute_columns, update_of_attribute_columns)
+
+        if return_type == pb2.RT_NONE or return_type == pb2.RT_PK:
+            proto.return_content.return_type = return_type
+
+        proto.row_change = str(PlainBufferBuilder.serialize_for_update_row(primary_key, update_of_attribute_columns))
         return proto
 
-    def _encode_delete_row(self, table_name, condition, primary_key):
+    def _encode_delete_row(self, table_name, condition, primary_key, return_type):
         proto = pb2.DeleteRowRequest()
         proto.table_name = self._get_unicode(table_name)
+        if condition is None:
+            condition = Condition(RowExistenceExpectation.IGNORE, None)
         self._make_condition(proto.condition, condition)
-        self._make_columns_with_dict(proto.primary_key, primary_key)
+
+        if return_type == pb2.RT_NONE or return_type == pb2.RT_PK:
+            proto.return_content.return_type = return_type
+
+        proto.primary_key = str(PlainBufferBuilder.serialize_for_delete_row(primary_key))
         return proto
 
     def _encode_batch_get_row(self, request):

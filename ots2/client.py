@@ -285,7 +285,7 @@ class OTSClient(object):
                     'PutRow', table_name, condition, primary_key, attribute_columns, return_type
         )
     
-    def update_row(self, table_name, condition, primary_key, update_of_attribute_columns):
+    def update_row(self, table_name, condition, primary_key, update_of_attribute_columns, return_type = None):
         """
         说明：更新一行数据。
 
@@ -312,10 +312,10 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'UpdateRow', table_name, condition, primary_key, update_of_attribute_columns 
+                    'UpdateRow', table_name, condition, primary_key, update_of_attribute_columns, return_type
         )
 
-    def delete_row(self, table_name, condition, primary_key):
+    def delete_row(self, table_name, condition, primary_key, return_type = None):
         """
         说明：删除一行数据。
 
@@ -336,7 +336,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'DeleteRow', table_name, condition, primary_key 
+                    'DeleteRow', table_name, condition, primary_key, return_type
         )
 
     def batch_get_row(self, request):

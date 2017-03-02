@@ -13,6 +13,7 @@ __all__ = [
     'ColumnType',
     'Column',
     'Direction',
+    'UpdateType',
     'UpdateTableResponse',
     'DescribeTableResponse',
     'RowDataItem',
@@ -98,6 +99,11 @@ class Column(object):
 class Direction(object):
     FORWARD = "FORWARD"
     BACKWARD = "BACKWARD"
+
+class UpdateType(object):
+    PUT = "PUT"
+    DELETE = "DELETE"
+    DELETE_ALL = "DELETE_ALL"
 
 class UpdateTableResponse(object):
 

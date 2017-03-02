@@ -1,55 +1,63 @@
-# -*- coding: utf8 -*-
-
-from example_config import *
 from ots2 import *
 import time
 
-table_name = 'OTSGetRowSimpleExample'
 
-def create_table(ots_client):
-    schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
-    table_meta = TableMeta(table_name, schema_of_primary_key)
-    reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
-    ots_client.create_table(table_meta, reserved_throughput)
-    print 'Table has been created.'
+'''
+get row with max version
+'''
+def get_row_1(ots_client):
+    primary_key = {'gid':1, 'uid':'500'}
+    columns_to_get = [] 
 
-def delete_table(ots_client):
-    ots_client.delete_table(table_name)
-    print 'Table \'%s\' has been deleted.' % table_name
+    cond = CompositeCondition(LogicalOperator.OR)
+    cond.add_sub_condition(RelationCondition("age", 10, ComparatorType.NOT_EQUAL))
+    cond.add_sub_condition(RelationCondition("address", 'hangzhou', ComparatorType.EQUAL))
 
-def put_row(ots_client):
-    primary_key = {'gid':1, 'uid':101}
-    attribute_columns = {'name':'John', 'mobile':15100000000, 'address':'China', 'age':20}
-    condition = Condition(RowExistenceExpectation.EXPECT_NOT_EXIST) # Expect not exist: put it into table only when this row is not exist.
-    consumed = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
-    print u'Write succeed, consume %s write cu.' % consumed.write
+    consumed, primary_key_columns, attribute_columns = ots_client.get_row("python_sdk_4", primary_key, columns_to_get, None, 2, None)
 
-def get_row(ots_client):
-    primary_key = {'gid':1, 'uid':101}
+    print primary_key_columns
+    for attribute in attribute_columns:
+        print "name:" + attribute.name + ", value:" + str(attribute.value) + ", timestamp:" + str(attribute.timestamp)
+
+'''
+get row with special timestamp
+'''
+def get_row_2(ots_client):
+    primary_key = {'gid':1, 'uid':'200'}
+    columns_to_get = ['name', 'address', 'age'] 
+
+    cond = CompositeCondition(LogicalOperator.OR)
+    cond.add_sub_condition(RelationCondition("age", 10, ComparatorType.NOT_EQUAL))
+    cond.add_sub_condition(RelationCondition("address", 'hangzhou', ComparatorType.EQUAL))
+
+    consumed, primary_key_columns, attribute_columns = ots_client.get_row("python_sdk_4", primary_key, columns_to_get, cond, None, 1487141236212)
+
+    print primary_key_columns
+    for attribute in attribute_columns:
+        print "name:" + attribute.name + ", value:" + str(attribute.value) + ", timestamp:" + str(attribute.timestamp)
+
+
+'''
+get row with time range
+'''
+def get_row_3(ots_client):
+    primary_key = {'gid':1, 'uid':'200'}
     columns_to_get = ['name', 'address', 'age'] # given a list of columns to get, or empty list if you want to get entire row.
 
-    cond = CompositeCondition(LogicalOperator.AND)
-    cond.add_sub_condition(RelationCondition("age", 20, ComparatorType.EQUAL))
-    cond.add_sub_condition(RelationCondition("addr", 'china', ComparatorType.NOT_EQUAL))
+    cond = CompositeCondition(LogicalOperator.OR)
+    cond.add_sub_condition(RelationCondition("age", 10, ComparatorType.NOT_EQUAL))
+    cond.add_sub_condition(RelationCondition("address", 'hangzhou', ComparatorType.EQUAL))
 
-    consumed, primary_key_columns, attribute_columns = ots_client.get_row(table_name, primary_key, columns_to_get, cond)
+    consumed, primary_key_columns, attribute_columns = ots_client.get_row("python_sdk_4", primary_key, columns_to_get, None, None, (1487141236212, 1487142337252))
 
-    print u'Read succeed, consume %s read cu.' % consumed.read
+    print primary_key_columns
+    for attribute in attribute_columns:
+        print "name:" + attribute.name + ", value:" + str(attribute.value) + ", timestamp:" + str(attribute.timestamp)
 
-    print u'Value of attribute \'name\': %s' % attribute_columns.get('name')
-    print u'Value of attribute \'address\': %s' % attribute_columns.get('address')
-    print u'Value of attribute \'age\': %s' % attribute_columns.get('age')
 
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
-    try:
-        delete_table(ots_client)
-    except:
-        pass
-    create_table(ots_client)
 
-    time.sleep(3) # wait for table ready
-    put_row(ots_client)
-    get_row(ots_client)
-    delete_table(ots_client)
+    get_row_1(ots_client)
+
 

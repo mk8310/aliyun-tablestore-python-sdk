@@ -68,21 +68,28 @@ class PlainBufferBuilder:
         return PlainBufferBuilder.compute_column_value_size(column_value) - const.LITTLE_ENDIAN_32_SIZE - 1
     
     @staticmethod
-    def compute_column_size(column):
+    def compute_column_size(column_name, column_value):
         size = 1
         size += 1 + const.LITTLE_ENDIAN_32_SIZE
-        size += len(column.get_name())
-        if column.value is not None:
-            size += PlainBufferBuilder.compute_column_value_size(column.get_value())         
-        if column.timestamp is not None:
+        size += len(column_name)
+        timestamp = None
+        if column_value is not None:
+            if isinstance(column_value, tuple):
+                if column_value[0] is not None:
+                    size += PlainBufferBuilder.compute_column_value_size(column_value[0]) 
+                if column_value[1] is not None:
+                    timestamp = column_value[1]
+            else:
+                size += PlainBufferBuilder.compute_column_value_size(column_value) 
+        if timestamp is not None:
             size += 1 + LITTLE_ENDIAN_64_SIZE
         size += 2
         return size
     
     @staticmethod
-    def compute_column_size2(column, update_type):
-        size = PlainBufferBuilder.compute_column_size(column)
-        if update_type == DELETE or update_type == DELETE_ALL:
+    def compute_column_size2(column_name, column_value, update_type):
+        size = PlainBufferBuilder.compute_column_size(column_name, column_value)
+        if update_type == UpdateType.DELETE or update_type == UpdateType.DELETE_ALL:
             size += 2
         return size
     
@@ -100,31 +107,37 @@ class PlainBufferBuilder:
 
         if len(attribute_columns) != 0:
             size += 1
-            for column in attribute_columns:
-                size += PlainBufferBuilder.compute_column_size(column)
+            for column_name in attribute_columns.keys():
+                size += PlainBufferBuilder.compute_column_size(column_name, attribute_columns[column_name])
+                
+        size += 2
+        return size
+
+    @staticmethod
+    def compute_update_row_size(primary_key, attribute_columns):
+        size = const.LITTLE_ENDIAN_32_SIZE
+        size += PlainBufferBuilder.compute_primary_key_size(primary_key)
+
+        if len(attribute_columns) != 0:
+            size += 1
+            for update_type in attribute_columns.keys():
+                columns = attribute_columns[update_type]
+                if isinstance(columns, dict):
+                    for column_name in columns.keys():
+                        size += PlainBufferBuilder.compute_column_size2(column_name, columns[column_name], update_type)
+                elif isinstance(columns, list):
+                    for column_name in columns:
+                        size += PlainBufferBuilder.compute_column_size2(column_name, None, update_type)
+                else:
+                    raise OTSClientError("Unsupported column type:" + str(type(columns)))
                 
         size += 2
         return size
     
     @staticmethod
-    def compute_update_row_size(row_change):
+    def compute_delete_row_size(primary_key):
         size = const.LITTLE_ENDIAN_32_SIZE
-        size += PlainBufferBuilder.compute_primary_key_size(rowChange.get_primary_key())
-
-        columns = rowChange.get_columns()
-        updateTypes = rowChange.get_update_types()
-
-        if len(columns) != 0:
-            size += 1
-            for i in range(len(columns)):
-                size += PlainBufferBuilder.compute_column_size(columns[i], updateTypes[i])
-        size += 2
-        return size
-    
-    @staticmethod
-    def compute_delete_row_size(row_change):
-        size = const.LITTLE_ENDIAN_32_SIZE
-        size += PlainBufferBuilder.compute_primary_key_size(rowchange.get_primary_key())
+        size += PlainBufferBuilder.compute_primary_key_size(primary_key)
         size += 3
         return size
 
@@ -178,28 +191,28 @@ class PlainBufferBuilder:
         return output_stream.get_buffer()
 
     @staticmethod
-    def serialize_for_update_row(row_change):
-        buf_size = PlainBufferBuilder.compute_row_size(row_change)
-        output_stream = PlainBufferOutputStream(buf_size)
-        coded_output_stream = PlainBufferCodedOutputStream(output_stream)
-
-        row_checksum = 0
-        coded_output_stream.Write_header()
-        coded_output_stream.write_primary_key(rowChange.GetPrimaryKey(), row_checksum)
-        coded_output_stream.write_columns(rowChange.get_columns(), row_change.get_update_types(), row_checksum)
-        row_checksum = PlainBufferCrc8.crc_int8(row_checksum, 0)
-        coded_output_stream.write_row_checksum(row_checksum)
-        return output_stream.get_buffer()
-
-    @staticmethod
-    def serialize_for_delete_row(row_change):
-        buf_size = PlainBufferBuilder.compute_row_size(row_change)
+    def serialize_for_update_row(primary_key, attribute_columns):
+        buf_size = PlainBufferBuilder.compute_update_row_size(primary_key, attribute_columns)
         output_stream = PlainBufferOutputStream(buf_size)
         coded_output_stream = PlainBufferCodedOutputStream(output_stream)
 
         row_checksum = 0
         coded_output_stream.write_header()
-        coded_output_stream.Write_primary_key(rowChange.get_primary_key(), row_checksum)
-        coded_output_stream.write_delete_marker(row_checksum)
+        row_checksum = coded_output_stream.write_primary_key(primary_key, row_checksum)
+        row_checksum = coded_output_stream.write_update_columns(attribute_columns, row_checksum)
+        row_checksum = PlainBufferCrc8.crc_int8(row_checksum, 0)
+        coded_output_stream.write_row_checksum(row_checksum)
+        return output_stream.get_buffer()
+
+    @staticmethod
+    def serialize_for_delete_row(primary_key):
+        buf_size = PlainBufferBuilder.compute_delete_row_size(primary_key)
+        output_stream = PlainBufferOutputStream(buf_size)
+        coded_output_stream = PlainBufferCodedOutputStream(output_stream)
+
+        row_checksum = 0
+        coded_output_stream.write_header()
+        row_checksum = coded_output_stream.write_primary_key(primary_key, row_checksum)
+        row_checksum = coded_output_stream.write_delete_marker(row_checksum)
         coded_output_stream.write_row_checksum(row_checksum)
         return output_stream.get_buffer()

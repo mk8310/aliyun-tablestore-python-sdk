@@ -41,8 +41,8 @@ class OTSProtocol:
         # 'UpdateTable',
         'GetRow',
         'PutRow',
-        # 'UpdateRow',
-        # 'DeleteRow',
+        'UpdateRow',
+        'DeleteRow',
         # 'BatchGetRow',
         # 'BatchWriteRow',
         # 'GetRange'
