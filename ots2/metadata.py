@@ -7,6 +7,7 @@ __all__ = [
     'INF_MAX',
     'PK_AUTO_INCR',
     'TableMeta',
+    'TableOptions',
     'CapacityUnit',
     'ReservedThroughput',
     'ReservedThroughputDetails',
@@ -46,6 +47,11 @@ class TableMeta(object):
         self.table_name = table_name
         self.schema_of_primary_key = schema_of_primary_key
 
+class TableOptions(object):
+    def __init__(self, time_to_live = -1, max_version = 1, max_time_deviation = 86400):
+        self.time_to_live = time_to_live
+        self.max_version = max_version
+        self.max_time_deviation = max_time_deviation
 
 class CapacityUnit(object):
 
@@ -62,11 +68,10 @@ class ReservedThroughput(object):
 
 class ReservedThroughputDetails(object):
     
-    def __init__(self, capacity_unit, last_increase_time, last_decrease_time, number_of_decreases_today):
+    def __init__(self, capacity_unit, last_increase_time, last_decrease_time):
         self.capacity_unit = capacity_unit
         self.last_increase_time = last_increase_time
         self.last_decrease_time = last_decrease_time
-        self.number_of_decreases_today = number_of_decreases_today
 
 class ColumnType(object):
     STRING = "STRING"
@@ -107,8 +112,9 @@ class UpdateType(object):
 
 class UpdateTableResponse(object):
 
-    def __init__(self, reserved_throughput_details):
+    def __init__(self, reserved_throughput_details, table_options):
         self.reserved_throughput_details = reserved_throughput_details
+        self.table_options = table_options
 
 
 class DescribeTableResponse(object):

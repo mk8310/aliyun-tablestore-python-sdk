@@ -34,18 +34,18 @@ class OTSProtocol:
     user_agent = 'aliyun-tablestore-sdk-python/%s(%s/%s/%s;%s)' % (ots2.__version__, platform.system(), platform.release(), platform.machine(), python_version)
 
     api_list = {
-        # 'CreateTable',
-        # 'ListTable',
-        # 'DeleteTable',
+        'CreateTable',
+        'ListTable',
+        'DeleteTable',
         # 'DescribeTable',
-        # 'UpdateTable',
+        'UpdateTable',
         'GetRow',
         'PutRow',
         'UpdateRow',
         'DeleteRow',
         # 'BatchGetRow',
         # 'BatchWriteRow',
-        # 'GetRange'
+        'GetRange'
     }
 
     def __init__(self, user_id, user_key, instance_name, encoding, logger):

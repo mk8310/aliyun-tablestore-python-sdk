@@ -9,6 +9,7 @@ __all__ = [
     'INF_MAX',
     'PK_AUTO_INCR',
     'TableMeta',
+    'TableOptions',
     'CapacityUnit',
     'ReservedThroughput',
     'ReservedThroughputDetails',

@@ -11,6 +11,12 @@ import ots2.protobuf.table_store_filter_pb2 as filter_pb2
 INT32_MAX = 2147483647
 INT32_MIN = -2147483648
 
+COLUMN_TYPE_MAP = {
+    'INTEGER'   : pb2.INTEGER,
+    'STRING'    : pb2.STRING,
+    'BINARY'    : pb2.BINARY,
+}
+
 LOGICAL_OPERATOR_MAP = {
     LogicalOperator.NOT     : filter_pb2.LO_NOT,
     LogicalOperator.AND     : filter_pb2.LO_AND,
@@ -341,6 +347,17 @@ class OTSProtoBufferEncoder:
             table_meta.schema_of_primary_key,
         )
 
+    def _make_table_options(self, proto, table_options):
+        if not isinstance(table_options, TableOptions):
+            raise OTSClientError(
+                "table_option should be an instance of TableOptions, not %s" 
+                % table_options.__class__.__name__
+            )
+
+        proto.time_to_live = table_options.time_to_live
+        proto.max_versions = table_options.max_version
+        proto.deviation_cell_version_in_sec = table_options.max_time_deviation
+
     def _make_capacity_unit(self, proto, capacity_unit):
 
         if not isinstance(capacity_unit, CapacityUnit):
@@ -517,10 +534,11 @@ class OTSProtoBufferEncoder:
             raise OTSClientError("The request should be a instance of MultiTableInBatchWriteRowItem, not %d"%(len(request.__class__.__name__)))
     
              
-    def _encode_create_table(self, table_meta, reserved_throughput):
+    def _encode_create_table(self, table_meta, table_options, reserved_throughput):
         proto = pb2.CreateTableRequest()
         self._make_table_meta(proto.table_meta, table_meta)
         self._make_reserved_throughput(proto.reserved_throughput, reserved_throughput)
+        self._make_table_options(proto.table_options, table_options)
         return proto
 
     def _encode_delete_table(self, table_name):
@@ -532,10 +550,11 @@ class OTSProtoBufferEncoder:
         proto = pb2.ListTableRequest()
         return proto
 
-    def _encode_update_table(self, table_name, reserved_throughput):
+    def _encode_update_table(self, table_name, table_options, reserved_throughput):
         proto = pb2.UpdateTableRequest()
         proto.table_name = self._get_unicode(table_name)
         self._make_update_reserved_throughput(proto.reserved_throughput, reserved_throughput)
+        self._make_table_options(proto.table_options, table_options)
         return proto
 
     def _encode_describe_table(self, table_name):
@@ -543,15 +562,8 @@ class OTSProtoBufferEncoder:
         proto.table_name = self._get_unicode(table_name)
         return proto
 
-    # def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter):
-    #     proto = pb2.GetRowRequest()
-    #     proto.table_name = self._get_unicode(table_name)
-    #     self._make_columns_with_dict(proto.primary_key, primary_key)
-    #     self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
-    #     self._make_column_condition(proto.filter, column_filter)
-    #     return proto
-
-    def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter, max_version, time_range):
+    def _encode_get_row(self, table_name, primary_key, columns_to_get, column_filter, 
+                        max_version, time_range, start_column, end_column, token):
         proto = pb2.GetRowRequest()
         proto.table_name = self._get_unicode(table_name)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
@@ -570,6 +582,14 @@ class OTSProtoBufferEncoder:
                 proto.time_range.end_time = time_range[1]
             elif isinstance(time_range, int) or isinstance(time_range, long):
                 proto.time_range.specific_time = time_range
+
+        if start_column is not None:
+            proto.start_column = start_column
+        if end_column is not None:
+            proto.end_column = end_column
+        if token is not None:
+            proto.token = token
+
         return proto
 
     def _encode_put_row(self, table_name, condition, primary_key, attribute_columns, return_type):
@@ -622,16 +642,38 @@ class OTSProtoBufferEncoder:
 
     def _encode_get_range(self, table_name, direction, 
                 inclusive_start_primary_key, exclusive_end_primary_key, 
-                columns_to_get, limit, column_filter):
+                columns_to_get, limit, column_filter,
+                max_version, time_range, start_column,
+                end_column, token):
         proto = pb2.GetRangeRequest()
         proto.table_name = self._get_unicode(table_name)
         proto.direction = self._get_direction(direction)
-        self._make_columns_with_dict(proto.inclusive_start_primary_key, inclusive_start_primary_key)
-        self._make_columns_with_dict(proto.exclusive_end_primary_key, exclusive_end_primary_key)
         self._make_repeated_column_names(proto.columns_to_get, columns_to_get)
-        self._make_column_condition(proto.filter, column_filter)
+
+        proto.inclusive_start_primary_key = str(PlainBufferBuilder.serialize_primary_key(inclusive_start_primary_key))
+        proto.exclusive_end_primary_key = str(PlainBufferBuilder.serialize_primary_key(exclusive_end_primary_key))
+
+        if column_filter is not None:
+            pb_filter = filter_pb2.Filter()
+            self._make_column_condition(pb_filter, column_filter)
+            proto.filter = pb_filter.SerializeToString()
+
         if limit is not None:
             proto.limit = self._get_int32(limit)
+        if max_version is not None:
+            proto.max_versions = max_version
+        if time_range is not None:
+            if isinstance(time_range, tuple):
+                proto.time_range.start_time = time_range[0]
+                proto.time_range.end_time = time_range[1]
+            elif isinstance(time_range, int) or isinstance(time_range, long):
+                proto.time_range.specific_time = time_range 
+        if start_column is not None:
+            proto.start_column = start_column
+        if end_column is not None:
+            proto.end_colun = end_column
+        if token is not None:
+            proto.token = token
         return proto
 
     def encode_request(self, api_name, *args, **kwargs):

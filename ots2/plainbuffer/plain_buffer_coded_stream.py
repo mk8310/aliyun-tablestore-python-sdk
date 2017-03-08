@@ -213,6 +213,17 @@ class PlainBufferCodedInputStream:
         self.read_tag()
         return self.read_row_without_header()
 
+    def read_rows(self):
+        if self.read_header() != HEADER:
+            raise OTSClientError("Invalid header from plain buffer.")
+        self.read_tag()
+        
+        row_list = []
+        while not self.inputStream.is_at_end():
+            (pk, attr) = self.read_row_without_header()
+            row_list.append((pk, attr))
+        return row_list
+
 class PlainBufferCodedOutputStream:
     def __init__(self, outputStream):
         self.outputStream = outputStream

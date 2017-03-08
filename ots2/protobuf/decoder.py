@@ -102,10 +102,16 @@ class OTSProtoBufferDecoder:
         reserved_throughput_details = ReservedThroughputDetails(
             capacity_unit,
             proto.last_increase_time, 
-            last_decrease_time,
-            proto.number_of_decreases_today
+            last_decrease_time
         )
         return reserved_throughput_details
+
+    def _parse_table_options(self, proto):
+        time_to_live = proto.time_to_live 
+        max_versions = proto.max_versions
+        max_deviation_time  = proto.deviation_cell_version_in_sec
+        return TableOptions(time_to_live, max_versions, max_deviation_time)
+
 
     def _parse_get_row_item(self, proto, table_name):
         row_list = []
@@ -207,6 +213,7 @@ class OTSProtoBufferDecoder:
         )
         
         reserved_throughput_details = self._parse_reserved_throughput_details(proto.reserved_throughput_details)
+        table_options = self._parse_table_options(proto.table_options)
         describe_table_response = DescribeTableResponse(table_meta, reserved_throughput_details)
         return describe_table_response, proto
 
@@ -215,23 +222,17 @@ class OTSProtoBufferDecoder:
         proto.ParseFromString(body)
 
         reserved_throughput_details = self._parse_reserved_throughput_details(proto.reserved_throughput_details)
-        update_table_response = UpdateTableResponse(reserved_throughput_details)
+        table_options = self._parse_table_options(proto.table_options)
+        update_table_response = UpdateTableResponse(reserved_throughput_details, table_options)
 
         return update_table_response, proto
-
-    # def _decode_get_row(self, body):
-    #     proto = pb2.GetRowResponse()
-    #     proto.ParseFromString(body)
-
-    #     primary_key_columns, attribute_columns = self._parse_row(proto.row)
-    #     consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
-    #     return (consumed, primary_key_columns, attribute_columns), proto
 
     def _decode_get_row(self, body):
         proto = pb2.GetRowResponse()
         proto.ParseFromString(body)
 
         consumed = self._parse_capacity_unit(proto.consumed.capacity_unit)
+        next_token = proto.next_token
 
         primary_key = None 
         attributes = None
@@ -241,7 +242,7 @@ class OTSProtoBufferDecoder:
             codedInputStream = PlainBufferCodedInputStream(inputStream)
             primary_key, attributes = codedInputStream.read_row()
 
-        return (consumed, primary_key, attributes), proto
+        return (consumed, primary_key, attributes, next_token), proto
 
     def _decode_put_row(self, body):
         proto = pb2.PutRowResponse()
@@ -311,11 +312,22 @@ class OTSProtoBufferDecoder:
         proto.ParseFromString(body)
         
         capacity_unit = self._parse_capacity_unit(proto.consumed.capacity_unit)
-        next_start_pk = self._parse_column_dict(proto.next_start_primary_key)
-        if not next_start_pk:
-            next_start_pk = None
-        row_list = self._parse_row_list(proto.rows)
-        return (capacity_unit, next_start_pk, row_list), proto
+
+        next_start_pk = None
+        row_list = []
+        if len(proto.next_start_primary_key) != 0:
+            inputStream = PlainBufferInputStream(proto.next_start_primary_key)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            next_start_pk,att = codedInputStream.read_row()
+
+        if len(proto.rows) != 0:
+            inputStream = PlainBufferInputStream(proto.rows)
+            codedInputStream = PlainBufferCodedInputStream(inputStream)
+            row_list = codedInputStream.read_rows()
+        
+        next_token = proto.next_token
+            
+        return (capacity_unit, next_start_pk, row_list, next_token), proto
 
     def decode_response(self, api_name, response_body):
         if api_name not in self.api_decode_map:

@@ -142,7 +142,7 @@ class OTSClient(object):
 
         return self.protocol.parse_response(api_name, status, resheaders, resbody)
 
-    def create_table(self, table_meta, reserved_throughput):
+    def create_table(self, table_meta, table_options, reserved_throughput):
         """
         说明：根据表信息创建表。
 
@@ -161,7 +161,7 @@ class OTSClient(object):
             ots_client.create_table(table_meta, reserved_throughput)
         """
 
-        self._request_helper('CreateTable', table_meta, reserved_throughput)
+        self._request_helper('CreateTable', table_meta, table_options, reserved_throughput)
 
     def delete_table(self, table_name):
         """
@@ -193,7 +193,7 @@ class OTSClient(object):
 
         return self._request_helper('ListTable')
 
-    def update_table(self, table_name, reserved_throughput):
+    def update_table(self, table_name, table_options, reserved_throughput):
         """ 
         说明：更新表属性，目前只支持修改预留读写吞吐量。
         
@@ -211,7 +211,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'UpdateTable', table_name, reserved_throughput
+                    'UpdateTable', table_name, table_options, reserved_throughput
         )
 
     def describe_table(self, table_name):
@@ -231,7 +231,9 @@ class OTSClient(object):
 
         return self._request_helper('DescribeTable', table_name)
 
-    def get_row(self, table_name, primary_key, columns_to_get=None, column_filter=None, max_version=None, time_range=None):
+    def get_row(self, table_name, primary_key, columns_to_get=None, 
+                column_filter=None, max_version=None, time_range=None,
+                start_column=None, end_column=None, token=None):
         """
         说明：获取一行数据。
 
@@ -256,7 +258,9 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'GetRow', table_name, primary_key, columns_to_get, column_filter, max_version, time_range
+                    'GetRow', table_name, primary_key, columns_to_get, 
+                    column_filter, max_version, time_range,
+                    start_column, end_column, token
         )
 
     def put_row(self, table_name, condition, primary_key, attribute_columns, return_type = None):
@@ -572,7 +576,12 @@ class OTSClient(object):
                   exclusive_end_primary_key, 
                   columns_to_get=None, 
                   limit=None, 
-                  column_filter=None):
+                  column_filter=None,
+                  max_version=None,
+                  time_range=None,
+                  start_column=None,
+                  end_column=None,
+                  token = None):
         """
         说明：根据范围条件获取多行数据。
 
@@ -606,7 +615,9 @@ class OTSClient(object):
                     'GetRange', table_name, direction, 
                     inclusive_start_primary_key, exclusive_end_primary_key,
                     columns_to_get, limit,
-                    column_filter
+                    column_filter, max_version,
+                    time_range, start_column,
+                    end_column, token
         )
 
     def xget_range(self, table_name, direction,
@@ -615,7 +626,12 @@ class OTSClient(object):
                    consumed_counter,
                    columns_to_get=None, 
                    count=None,
-                   column_filter=None):
+                   column_filter=None,
+                   max_version=None, 
+                   time_range=None,
+                   start_column=None,
+                   end_column=None,
+                   token = None):
         """
         说明：根据范围条件获取多行数据，iterator版本。
 
@@ -664,10 +680,12 @@ class OTSClient(object):
         consumed_counter.write = 0
         next_start_pk = inclusive_start_primary_key
         while next_start_pk:
-            consumed, next_start_pk, row_list = self.get_range(
+            consumed, next_start_pk, row_list, next_token = self.get_range(
                 table_name, direction,
                 next_start_pk, exclusive_end_primary_key, 
-                columns_to_get, left_count, column_filter
+                columns_to_get, left_count, column_filter,
+                max_version, time_range, start_column,
+                end_column, token
             )
             consumed_counter.read += consumed.read
             for row in row_list:
