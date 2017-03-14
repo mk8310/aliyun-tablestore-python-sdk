@@ -7,7 +7,7 @@ import time
 table_name = 'OTSGetRangeSimpleExample'
 
 def create_table(ots_client):
-    schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
+    schema_of_primary_key = [('uid', 'INTEGER'), ('gid', 'INTEGER')]
     table_meta = TableMeta(table_name, schema_of_primary_key)
     table_option = TableOptions()
     reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -20,8 +20,8 @@ def delete_table(ots_client):
 
 def put_row(ots_client):
     for i in range(0, 100):
-        primary_key = {'gid':i, 'uid':i+1}
-        attribute_columns = {'name':'John', 'mobile':i, 'address':'China', 'age':i}
+        primary_key = [('uid',i), ('gid',i+1)]
+        attribute_columns = [('name','John'), ('mobile',i), ('address','China'), ('age',i)]
         condition = Condition(RowExistenceExpectation.IGNORE) # Expect not exist: put it into table only when this row is not exist.
         consumed,pk,attr = ots_client.put_row(table_name, condition, primary_key, attribute_columns)
         print u'Write succeed, consume %s write cu.' % consumed.write
@@ -31,8 +31,8 @@ def get_range(ots_client):
         Scan table to get all the rows.
         It will not return you all once, you should continue read from next start primary key till next start primary key is None.
     '''
-    inclusive_start_primary_key = {'gid':INF_MIN, 'uid':INF_MIN} 
-    exclusive_end_primary_key = {'gid':INF_MAX, 'uid':INF_MAX} 
+    inclusive_start_primary_key = [('uid',INF_MIN), ('gid',INF_MIN)]
+    exclusive_end_primary_key = [('uid',INF_MAX), ('gid',INF_MAX)]
     columns_to_get = []
     limit = 9
 
@@ -71,8 +71,8 @@ def xget_range(ots_client):
         You can easily scan the range use xget_range, without handling next start primary key.
     '''
     consumed_counter = CapacityUnit(0, 0)
-    inclusive_start_primary_key = {'gid':INF_MIN, 'uid':INF_MIN} 
-    exclusive_end_primary_key = {'gid':INF_MAX, 'uid':INF_MAX}
+    inclusive_start_primary_key = [('uid',INF_MIN), ('gid',INF_MIN)]
+    exclusive_end_primary_key = [('uid',INF_MAX), ('gid',INF_MAX)]
 
     cond = CompositeCondition(LogicalOperator.AND)
     cond.add_sub_condition(RelationCondition("address", 'China', ComparatorType.EQUAL))

@@ -35,12 +35,8 @@ class OTSProtoBufferDecoder:
 
     def _parse_column_type(self, column_type_enum):
         reverse_enum_map = {
-            pb2.INF_MIN : 'INF_MIN',
-            pb2.INF_MAX : 'INF_MAX',
             pb2.INTEGER : 'INTEGER',
             pb2.STRING  : 'STRING',
-            pb2.BOOLEAN : 'BOOLEAN',
-            pb2.DOUBLE  : 'DOUBLE',
             pb2.BINARY  : 'BINARY'
         }
         if column_type_enum in reverse_enum_map:
@@ -214,7 +210,7 @@ class OTSProtoBufferDecoder:
         
         reserved_throughput_details = self._parse_reserved_throughput_details(proto.reserved_throughput_details)
         table_options = self._parse_table_options(proto.table_options)
-        describe_table_response = DescribeTableResponse(table_meta, reserved_throughput_details)
+        describe_table_response = DescribeTableResponse(table_meta, table_options, reserved_throughput_details)
         return describe_table_response, proto
 
     def _decode_update_table(self, body):

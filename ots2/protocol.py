@@ -37,7 +37,7 @@ class OTSProtocol:
         'CreateTable',
         'ListTable',
         'DeleteTable',
-        # 'DescribeTable',
+        'DescribeTable',
         'UpdateTable',
         'GetRow',
         'PutRow',

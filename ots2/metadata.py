@@ -119,8 +119,9 @@ class UpdateTableResponse(object):
 
 class DescribeTableResponse(object):
 
-    def __init__(self, table_meta, reserved_throughput_details):
+    def __init__(self, table_meta, table_options, reserved_throughput_details):
         self.table_meta = table_meta
+        self.table_options = table_options
         self.reserved_throughput_details = reserved_throughput_details
 
 

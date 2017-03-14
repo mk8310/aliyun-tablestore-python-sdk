@@ -28,6 +28,10 @@ def describe_table(ots_client):
     print u'Reserved write throughput: %s' % describe_response.reserved_throughput_details.capacity_unit.write
     print u'Last increase throughput time: %s' % describe_response.reserved_throughput_details.last_increase_time
     print u'Last decrease throughput time: %s' % describe_response.reserved_throughput_details.last_decrease_time
+    print u'table options\'s time to live: %s' % describe_response.table_options.time_to_live
+    print u'table options\'s max version: %s' % describe_response.table_options.max_version
+    print u'table options\'s max_time_deviation: %s' % describe_response.table_options.max_time_deviation
+
         
 def update_table(ots_client):
     reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -37,6 +41,9 @@ def update_table(ots_client):
     print u'Reserved write throughput: %s' % update_response.reserved_throughput_details.capacity_unit.write
     print u'Last increase throughput time: %s' % update_response.reserved_throughput_details.last_increase_time
     print u'Last decrease throughput time: %s' % update_response.reserved_throughput_details.last_decrease_time
+    print u'table options\'s time to live: %s' % update_response.table_options.time_to_live
+    print u'table options\'s max version: %s' % update_response.table_options.max_version
+    print u'table options\'s max_time_deviation: %s' % update_response.table_options.max_time_deviation
 
 def delete_table(ots_client):
     ots_client.delete_table(table_name)
@@ -44,9 +51,16 @@ def delete_table(ots_client):
 
 if __name__ == '__main__':
     ots_client = OTSClient(OTS_ENDPOINT, OTS_ID, OTS_SECRET, OTS_INSTANCE)
-    #create_table(ots_client)
+    try:
+        delete_table(ots_client)
+    except:
+        pass
+    create_table(ots_client)
+
+    time.sleep(3) # wait for table ready
+
     list_table(ots_client)
-    #describe_table(ots_client)
+    describe_table(ots_client)
     update_table(ots_client)
-    delete_table(ots_client)
+    #delete_table(ots_client)
 

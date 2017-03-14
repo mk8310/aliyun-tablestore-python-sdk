@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys
 import struct
 from ots2.const import *
@@ -173,8 +175,8 @@ class PlainBufferCodedInputStream:
 
     def read_row_without_header(self):
         row_check_sum = 0
-        primary_key = {}
-        attributes = {}
+        primary_key = []
+        attributes = []
         
         if not self.check_last_tag_was(TAG_ROW_PK):
             raise OTSClientError("Expect TAG_ROW_PK but it was " + str(self.get_last_tag()))
@@ -183,13 +185,13 @@ class PlainBufferCodedInputStream:
         
         while self.check_last_tag_was(TAG_CELL):
             (name, value, row_check_sum) = self.read_primary_key_column(row_check_sum)
-            primary_key[name] = value
+            primary_key.append((name, value))
 
         if self.check_last_tag_was(TAG_ROW_DATA):
             self.read_tag()
             while self.check_last_tag_was(TAG_CELL):
                 column_name, column_value, timestamp, row_check_sum = self.read_column(row_check_sum)
-                attributes[column_name] = (column_value, timestamp)
+                attributes.append((column_name, column_value, timestamp))
 
         if self.check_last_tag_was(TAG_DELETE_ROW_MARKER):
             self.read_tag()
@@ -360,16 +362,11 @@ class PlainBufferCodedOutputStream:
         row_check_sum = PlainBufferCrc8.crc_int8(row_check_sum, cell_check_sum)
         return row_check_sum
 
-    def write_column(self, column_name, column_value, row_check_sum):
+    def write_column(self, column_name, column_value, timestamp, row_check_sum):
         cell_check_sum = 0
         self.write_tag(TAG_CELL)
         cell_check_sum = self.write_cell_name(column_name, cell_check_sum)
-        timestamp = None
-        if isinstance(column_value, tuple):
-            cell_check_sum = self.write_column_value_with_checksum(column_value[0], cell_check_sum)
-            timestamp = column_value[1]
-        else:
-            cell_check_sum = self.write_column_value_with_checksum(column_value, cell_check_sum)
+        cell_check_sum = self.write_column_value_with_checksum(column_value, cell_check_sum)
 
         if timestamp is not None:
             self.write_tag(TAG_CELL_TIMESTAMP)
@@ -419,15 +416,18 @@ class PlainBufferCodedOutputStream:
 
     def write_primary_key(self, primary_key, row_check_sum):
         self.write_tag(TAG_ROW_PK)
-        for pk_name in primary_key.keys():
-            row_check_sum = self.write_primary_key_column(pk_name, primary_key.get(pk_name), row_check_sum)
+        for pk in primary_key:
+            row_check_sum = self.write_primary_key_column(pk[0], pk[1], row_check_sum)
         return row_check_sum
 
     def write_columns(self, columns, row_check_sum):
         if columns is not None and len(columns) != 0:
             self.write_tag(TAG_ROW_DATA)
-            for column_name in columns.keys():
-                row_check_sum = self.write_column(column_name, columns[column_name], row_check_sum)
+            for column in columns:
+                if len(column) == 2:
+                    row_check_sum = self.write_column(column[0], column[1], None, row_check_sum)
+                elif len(column) == 3:
+                    row_check_sum = self.write_column(column[0], column[1], column[2], row_check_sum)
         return row_check_sum
 
     def write_update_columns(self, attribute_columns, row_check_sum):
@@ -435,8 +435,13 @@ class PlainBufferCodedOutputStream:
             self.write_tag(TAG_ROW_DATA)
             for update_type in attribute_columns.keys():
                 columns = attribute_columns[update_type]
-                for column_name in columns.keys():
-                    row_check_sum = self.write_update_column(update_type, column_name, columns[column_name], row_check_sum)
+                for column in columns:
+                    if isinstance(column, str):
+                        row_check_sum = self.write_update_column(update_type, column, None, row_check_sum)
+                    elif len(column) == 2:
+                        row_check_sum = self.write_update_column(update_type, column[0], column[1], row_check_sum)
+                    elif len(column) == 3:
+                        row_check_sum = self.write_update_column(update_type, column[0], (column[1], column[2]), row_check_sum)
         return row_check_sum
 
     def write_delete_marker(self, row_checksum):

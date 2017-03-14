@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys
 import ots2 
 from ots2.metadata import *
@@ -68,19 +70,13 @@ class PlainBufferBuilder:
         return PlainBufferBuilder.compute_column_value_size(column_value) - const.LITTLE_ENDIAN_32_SIZE - 1
     
     @staticmethod
-    def compute_column_size(column_name, column_value):
+    def compute_column_size(column_name, column_value, timestamp = None):
         size = 1
         size += 1 + const.LITTLE_ENDIAN_32_SIZE
         size += len(column_name)
         timestamp = None
         if column_value is not None:
-            if isinstance(column_value, tuple):
-                if column_value[0] is not None:
-                    size += PlainBufferBuilder.compute_column_value_size(column_value[0]) 
-                if column_value[1] is not None:
-                    timestamp = column_value[1]
-            else:
-                size += PlainBufferBuilder.compute_column_value_size(column_value) 
+            size += PlainBufferBuilder.compute_column_value_size(column_value) 
         if timestamp is not None:
             size += 1 + LITTLE_ENDIAN_64_SIZE
         size += 2
@@ -96,8 +92,8 @@ class PlainBufferBuilder:
     @staticmethod
     def compute_primary_key_size(primary_key):
         size = 1
-        for key in primary_key.keys():
-            size += PlainBufferBuilder.compute_primary_key_column_size(key, primary_key.get(key))
+        for pk in primary_key:
+            size += PlainBufferBuilder.compute_primary_key_column_size(pk[0], pk[1])
         return size
     
     @staticmethod
@@ -107,8 +103,11 @@ class PlainBufferBuilder:
 
         if len(attribute_columns) != 0:
             size += 1
-            for column_name in attribute_columns.keys():
-                size += PlainBufferBuilder.compute_column_size(column_name, attribute_columns[column_name])
+            for attr in attribute_columns:
+                if len(attr) == 2:
+                    size += PlainBufferBuilder.compute_column_size(attr[0], attr[1])
+                else:
+                    size += PlainBufferBuilder.compute_column_size(attr[0], attr[1], attr[2])
                 
         size += 2
         return size
@@ -122,12 +121,12 @@ class PlainBufferBuilder:
             size += 1
             for update_type in attribute_columns.keys():
                 columns = attribute_columns[update_type]
-                if isinstance(columns, dict):
-                    for column_name in columns.keys():
-                        size += PlainBufferBuilder.compute_column_size2(column_name, columns[column_name], update_type)
-                elif isinstance(columns, list):
-                    for column_name in columns:
-                        size += PlainBufferBuilder.compute_column_size2(column_name, None, update_type)
+                if isinstance(columns, list):
+                    for column in columns:
+                        if len(column) == 1:
+                            size += PlainBufferBuilder.compute_column_size2(column[0], None, update_type)
+                        elif len(column) >= 2:
+                            size += PlainBufferBuilder.compute_column_size2(column[0], column[1], update_type)
                 else:
                     raise OTSClientError("Unsupported column type:" + str(type(columns)))
                 
