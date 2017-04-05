@@ -559,16 +559,9 @@ class OTSClient(object):
 
         """
 
-        deprecated = None
-        if isinstance(request, list):
-            deprecated = True
-
         response = self._request_helper('BatchWriteRow', request)
-
-        if deprecated:
-            return response
-        else:
-            return MultiTableInBatchWriteRowResult(response)
+        
+        return MultiTableInBatchWriteRowResult(request, response)
 
 
     def get_range(self, table_name, direction, 

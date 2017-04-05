@@ -112,12 +112,18 @@ class OTSProtoBufferDecoder:
     def _parse_get_row_item(self, proto, table_name):
         row_list = []
         for row_item in proto:
+            primary_key_columns = None 
+            attribute_columns = None
+
             if row_item.is_ok:
                 error_code = None
                 error_message = None
                 capacity_unit = self._parse_capacity_unit(row_item.consumed.capacity_unit)
-                primary_key_columns = self._parse_column_dict(row_item.row.primary_key_columns)
-                attribute_columns = self._parse_column_dict(row_item.row.attribute_columns)
+
+                if len(row_item.row) != 0:
+                    inputStream = PlainBufferInputStream(row_item.row)
+                    codedInputStream = PlainBufferCodedInputStream(inputStream)
+                    primary_key_columns, attribute_columns = codedInputStream.read_row()
             else:
                 error_code = row_item.error.code
                 error_message = row_item.error.message if row_item.error.HasField('message') else ''
@@ -125,8 +131,6 @@ class OTSProtoBufferDecoder:
                     capacity_unit = self._parse_capacity_unit(row_item.consumed.capacity_unit)
                 else:
                     capacity_unit = None
-                primary_key_columns = None
-                attribute_columns = None
 
             row_data_item = RowDataItem(
                 row_item.is_ok, error_code, error_message,
@@ -143,42 +147,40 @@ class OTSProtoBufferDecoder:
             rows.append(self._parse_get_row_item(table_item.rows, table_item.table_name)) 
         return rows
 
-    def _parse_write_row_item(self, proto, table_name):
-        row_list = []
-        for row_item in proto:
-            if row_item.is_ok:
-                error_code = None
-                error_message = None
+    def _parse_write_row_item(self, row_item):
+        primary_key = None 
+
+        if row_item.is_ok:
+            error_code = None
+            error_message = None
+            consumed = self._parse_capacity_unit(row_item.consumed.capacity_unit)
+
+            if len(row_item.row) != 0:
+                inputStream = PlainBufferInputStream(row_item.row)
+                codedInputStream = PlainBufferCodedInputStream(inputStream)
+                primary_key, = codedInputStream.read_row()
+        else:
+            error_code = row_item.error.code
+            error_message = row_item.error.message if row_item.error.HasField('message') else ''
+            if row_item.HasField('consumed'):
                 consumed = self._parse_capacity_unit(row_item.consumed.capacity_unit)
             else:
-                error_code = row_item.error.code
-                error_message = row_item.error.message if row_item.error.HasField('message') else ''
-                if row_item.HasField('consumed'):
-                    consumed = self._parse_capacity_unit(row_item.consumed.capacity_unit)
-                else:
-                    consumed = None
+                consumed = None
 
-            write_row_item = BatchWriteRowResponseItem(
-                row_item.is_ok, error_code, error_message, table_name, consumed
+        write_row_item = BatchWriteRowResponseItem(
+            row_item.is_ok, error_code, error_message, consumed, primary_key
             )
-            row_list.append(write_row_item)
-        
-        return row_list
+        return write_row_item
 
     def _parse_batch_write_row(self, proto):
-        result_list = []
+        result_list = {}
         for table_item in proto:
-            table_dict = {}
-            if table_item.put_rows:
-                put_list = self._parse_write_row_item(table_item.put_rows, table_item.table_name)
-                table_dict['put'] = put_list
-            if table_item.update_rows:
-                update_list = self._parse_write_row_item(table_item.update_rows, table_item.table_name)
-                table_dict['update'] = update_list
-            if table_item.delete_rows:
-                delete_list = self._parse_write_row_item(table_item.delete_rows, table_item.table_name)
-                table_dict['delete'] = delete_list
-            result_list.append(table_dict)
+            table_name = table_item.table_name
+            result_list[table_name] = []
+
+            for row_item in table_item.rows:
+                row = self._parse_write_row_item(row_item)
+                result_list[table_name].append(row)
         return result_list
 
     def _decode_create_table(self, body):

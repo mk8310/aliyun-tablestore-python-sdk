@@ -43,8 +43,8 @@ class OTSProtocol:
         'PutRow',
         'UpdateRow',
         'DeleteRow',
-        # 'BatchGetRow',
-        # 'BatchWriteRow',
+        'BatchGetRow',
+        'BatchWriteRow',
         'GetRange'
     }
 

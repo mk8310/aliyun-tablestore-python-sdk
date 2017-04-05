@@ -19,9 +19,7 @@ __all__ = [
     'DescribeTableResponse',
     'RowDataItem',
     'Condition',
-    'PutRowItem',
-    'UpdateRowItem',
-    'DeleteRowItem',
+    'RowItem',
     'MultiTableInBatchGetRowItem',
     'TableInBatchGetRowItem',
     'MultiTableInBatchGetRowResult',
@@ -342,36 +340,30 @@ class Condition(object):
     def get_column_condition(self):
         self.column_condition
 
-class PutRowItem(object):
+class RowItem(object):
 
-    def __init__(self, condition, primary_key, attribute_columns):
+    def __init__(self, row_type, condition, primary_key, attribute_columns, return_type = None):
+        self.type = row_type
         self.condition = condition
         self.primary_key = primary_key
         self.attribute_columns = attribute_columns
-
-
-class UpdateRowItem(object):
-    
-    def __init__(self, condition, primary_key, update_of_attribute_columns):
-        self.condition = condition
-        self.primary_key = primary_key
-        self.update_of_attribute_columns = update_of_attribute_columns
-
-
-class DeleteRowItem(object):
-    
-    def __init__(self, condition, primary_key):
-        self.condition = condition
-        self.primary_key = primary_key
+        self.return_type = return_type
 
 
 class TableInBatchGetRowItem(object):
 
-    def __init__(self, table_name, primary_keys, columns_to_get=None, column_filter=None):
+    def __init__(self, table_name, primary_keys, columns_to_get=None, 
+                 column_filter=None, max_version=None, time_range=None,
+                 start_column=None, end_column=None, token=None):
         self.table_name = table_name
         self.primary_keys = primary_keys
         self.columns_to_get = columns_to_get
         self.column_filter = column_filter
+        self.max_version = max_version
+        self.time_range = time_range
+        self.start_column = start_column
+        self.end_column = end_column
+        self.token = token
 
 
 class MultiTableInBatchGetRowItem(object):
@@ -440,13 +432,11 @@ class BatchWriteRowType(object):
 
 
 class TableInBatchWriteRowItem(object):
-    
-    def __init__(self, table_name, put=None, update=None, delete=None):
-        self.table_name = table_name
-        self.put = put
-        self.update = update
-        self.delete = delete
 
+    def __init__(self, table_name, row_items):
+        self.table_name = table_name
+        self.row_items = row_items
+        
 
 class MultiTableInBatchWriteRowItem(object):
 
@@ -469,21 +459,27 @@ class MultiTableInBatchWriteRowItem(object):
 
 class MultiTableInBatchWriteRowResult(object):
 
-    def __init__(self, response):
+    def __init__(self, request, response):
         self.table_of_put = {}
         self.table_of_update = {}
         self.table_of_delete = {}
-
-        for table in response:
-            for type, rows in table.items():
-                if len(rows) > 0:
-                    row = rows[0]
-                    if type == BatchWriteRowType.PUT:
-                        self.table_of_put[row.table_name] = rows
-                    elif type == BatchWriteRowType.UPDATE:
-                        self.table_of_update[row.table_name] = rows
-                    else:
-                        self.table_of_delete[row.table_name] = rows
+        
+        for table_name in response.keys():
+            put_list = []
+            update_list = []
+            delete_list = []
+            for index in range(len(response[table_name])):
+                row_item = response[table_name][index]
+                request_row = request.items[table_name].row_items[index]
+                if request_row.type == BatchWriteRowType.PUT:
+                    put_list.append(row_item)
+                elif request_row.type == BatchWriteRowType.UPDATE:
+                    update_list.append(row_item)
+                else:
+                    delete_list.append(row_item)
+            self.table_of_put[table_name] = put_list
+            self.table_of_update[table_name] = update_list
+            self.table_of_delete[table_name] = delete_list
 
     def get_put(self):
         succ = []
@@ -568,12 +564,12 @@ class MultiTableInBatchWriteRowResult(object):
 
 class BatchWriteRowResponseItem(object):
 
-    def __init__(self, is_ok, error_code, error_message, table_name, consumed):
+    def __init__(self, is_ok, error_code, error_message, consumed, primary_key):
         self.is_ok = is_ok
         self.error_code = error_code
         self.error_message = error_message
-        self.table_name = table_name
         self.consumed = consumed
+        self.primary_key = primary_key
 
 
 class INF_MIN(object):

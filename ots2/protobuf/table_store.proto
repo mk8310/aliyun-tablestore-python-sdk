@@ -282,9 +282,6 @@ message DeleteRowResponse {
 /* ####################################################################################################### */
 
 /* #############################################  BatchGetRow  ############################################# */
-/**
- * HBase支持Batch操作的每行都拥有不同的查询参数，OTS不支持。
- */
 message TableInBatchGetRowRequest {
     required string table_name = 1;
     repeated bytes primary_key = 2; // encoded as InplaceRowChangeSet, but only has primary key

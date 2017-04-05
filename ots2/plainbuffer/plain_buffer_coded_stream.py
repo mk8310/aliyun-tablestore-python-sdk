@@ -52,7 +52,7 @@ class PlainBufferCodedInputStream:
             cell_check_sum = PlainBufferCrc8.crc_int32(cell_check_sum, value_size)
             cell_check_sum = PlainBufferCrc8.crc_string(cell_check_sum, binary_value)            
             self.read_tag()
-            return (binary_value, cell_check_sum)
+            return (bytearray(binary_value), cell_check_sum)
         else:
             raise OTSClientError("Unsupported primary key type: " + column_type)
 
@@ -280,7 +280,7 @@ class PlainBufferCodedOutputStream:
 
             cell_check_sum = PlainBufferCrc8.crc_int8(cell_check_sum, VT_BLOB)
             cell_check_sum = PlainBufferCrc8.crc_int32(cell_check_sum, len(binary_value))
-            cell_check_sum = PlainBufferCrc8.crc_string(cell_check_sum, binary_value) 
+            cell_check_sum = PlainBufferCrc8.crc_string(cell_check_sum, binary_value.decode("utf-8")) 
         else:
             raise OTSClientError("Unsupported primary key type: " + type(value)) 
         return cell_check_sum

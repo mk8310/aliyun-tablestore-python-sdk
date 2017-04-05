@@ -7,7 +7,7 @@ import time
 table_name = 'OTSGetRangeSimpleExample'
 
 def create_table(ots_client):
-    schema_of_primary_key = [('uid', 'INTEGER'), ('gid', 'INTEGER')]
+    schema_of_primary_key = [('uid', 'INTEGER'), ('gid', 'BINARY')]
     table_meta = TableMeta(table_name, schema_of_primary_key)
     table_option = TableOptions()
     reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
@@ -20,7 +20,7 @@ def delete_table(ots_client):
 
 def put_row(ots_client):
     for i in range(0, 100):
-        primary_key = [('uid',i), ('gid',i+1)]
+        primary_key = [('uid',i), ('gid', bytearray(str(i+1)))]
         attribute_columns = [('name','John'), ('mobile',i), ('address','China'), ('age',i)]
         condition = Condition(RowExistenceExpectation.IGNORE) # Expect not exist: put it into table only when this row is not exist.
         consumed,pk,attr = ots_client.put_row(table_name, condition, primary_key, attribute_columns)

@@ -27,7 +27,7 @@ class PlainBufferBuilder:
             size += const.LITTLE_ENDIAN_32_SIZE
             size += len(value)
         else:
-            raise OTSClientError("Unsupported primary key type:" + value_type)
+            raise OTSClientError("Unsupported primary key type:" + str(type(value)))
         
         return size
        

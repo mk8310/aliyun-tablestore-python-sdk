@@ -72,7 +72,7 @@ class PlainBufferInputStream:
 
         tmp_pos = self.cur_pos
         self.cur_pos += size
-        return self.buffer[tmp_pos, tmp_pos + size]
+        return self.buffer[tmp_pos: tmp_pos + size]
 
     def read_utf_string(self, size):
         if len(self.buffer) - self.cur_pos < size:

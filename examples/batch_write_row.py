@@ -9,8 +9,9 @@ table_name = 'OTSBatchWriteRowSimpleExample'
 def create_table(ots_client):
     schema_of_primary_key = [('gid', 'INTEGER'), ('uid', 'INTEGER')]
     table_meta = TableMeta(table_name, schema_of_primary_key)
+    table_options = TableOptions()
     reserved_throughput = ReservedThroughput(CapacityUnit(0, 0))
-    ots_client.create_table(table_meta, reserved_throughput)
+    ots_client.create_table(table_meta, table_options, reserved_throughput)
     print 'Table has been created.'
 
 def delete_table(ots_client):
@@ -21,30 +22,29 @@ def batch_write_row(ots_client):
     # batch put 10 rows and update 10 rows on exist table, delete 10 rows on a not-exist table.
     put_row_items = []
     for i in range(0, 10):
-        primary_key = {'gid':i, 'uid':i+1}
-        attribute_columns = {'name':'somebody'+str(i), 'address':'somewhere'+str(i), 'age':i}
+        primary_key = [('gid',i), ('uid',i+1)]
+        attribute_columns = [('name','somebody'+str(i)), ('address','somewhere'+str(i)), ('age',i)]
         condition = Condition(RowExistenceExpectation.IGNORE)
-        item = PutRowItem(condition, primary_key, attribute_columns)
+        item = RowItem(BatchWriteRowType.PUT, condition, primary_key, attribute_columns)
         put_row_items.append(item)
 
-    update_row_items = []
     for i in range(10, 20):
-        primary_key = {'gid':i, 'uid':i+1}
-        attribute_columns = {'put': {'name':'somebody'+str(i), 'address':'somewhere'+str(i), 'age':i}}
+        primary_key = [('gid',i), ('uid',i+1)]
+        attribute_columns = {'put': [('name','somebody'+str(i)), ('address','somewhere'+str(i)), ('age',i)]}
         condition = Condition(RowExistenceExpectation.IGNORE, RelationCondition("age", i, ComparatorType.EQUAL))
-        item = UpdateRowItem(condition, primary_key, attribute_columns)
-        update_row_items.append(item)
+        item = RowItem(BatchWriteRowType.UPDATE, condition, primary_key, attribute_columns)
+        put_row_items.append(item)
 
     delete_row_items = []
     for i in range(10, 20):
-        primary_key = {'gid':i, 'uid':i+1}
+        primary_key = [('gid',i), ('uid',i+1)]
         condition = Condition(RowExistenceExpectation.IGNORE)
-        item = DeleteRowItem(condition, primary_key)
+        item = RowItem(BatchWriteRowType.DELETE, condition, primary_key, None)
         delete_row_items.append(item)
 
     request = MultiTableInBatchWriteRowItem()
-    request.add(TableInBatchWriteRowItem(table_name, put=put_row_items, update=update_row_items))
-    request.add(TableInBatchWriteRowItem('notExistTable', delete=delete_row_items))
+    request.add(TableInBatchWriteRowItem(table_name, put_row_items))
+    request.add(TableInBatchWriteRowItem('notExistTable', delete_row_items))
     result = ots_client.batch_write_row(request)
 
     print 'Result status: %s'%(result.is_all_succeed())
