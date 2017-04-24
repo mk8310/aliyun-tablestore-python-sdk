@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 
 import unittest
-from lib.ots2_api_test_base import OTS2APITestBase
-import lib.restriction as restriction
+from .lib.ots2_api_test_base import OTS2APITestBase
+from .lib import restriction as restriction
 from ots2 import *
 from ots2.error import *
 import time

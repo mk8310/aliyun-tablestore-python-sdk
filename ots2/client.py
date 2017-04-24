@@ -3,16 +3,14 @@
 
 __all__ = ['OTSClient']
 
-import sys
 import logging
-import urlparse
 import time
-import _strptime
+from urllib import parse as urlparse
 
-from ots2.error import *
-from ots2.protocol import OTSProtocol
 from ots2.connection import ConnectionPool
+from ots2.error import *
 from ots2.metadata import *
+from ots2.protocol import OTSProtocol
 from ots2.retry import DefaultRetryPolicy
 
 
@@ -25,14 +23,13 @@ class OTSClient(object):
     )，即如果某个函数有返回值，则会在描述中说明；否则返回None。
     """
 
-
     DEFAULT_ENCODING = 'utf8'
     DEFAULT_SOCKET_TIMEOUT = 50
     DEFAULT_MAX_CONNECTION = 50
     DEFAULT_LOGGER_NAME = 'ots2-client'
 
     protocol_class = OTSProtocol
-    connection_pool_class = ConnectionPool 
+    connection_pool_class = ConnectionPool
 
     def __init__(self, end_point, accessid, accesskey, instance_name, **kwargs):
         """
@@ -87,6 +84,8 @@ class OTSClient(object):
 
         # parse end point
         scheme, netloc, path = urlparse.urlparse(end_point)[:3]
+        scheme = scheme if isinstance(scheme, str) else str(scheme, encoding='utf-8')
+        netloc = netloc if isinstance(netloc, str) else str(netloc, encoding='utf-8')
         host = scheme + "://" + netloc
 
         if scheme != 'http' and scheme != 'https':
@@ -102,7 +101,7 @@ class OTSClient(object):
         self.protocol = self.protocol_class(
             accessid, accesskey, instance_name, self.encoding, self.logger
         )
-        
+
         # initialize connection via user configuration
         self.connection = self.connection_pool_class(
             host, path, timeout=self.socket_timeout, maxsize=self.max_connection,
@@ -211,7 +210,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'UpdateTable', table_name, reserved_throughput
+            'UpdateTable', table_name, reserved_throughput
         )
 
     def describe_table(self, table_name):
@@ -254,7 +253,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'GetRow', table_name, primary_key, columns_to_get, column_filter
+            'GetRow', table_name, primary_key, columns_to_get, column_filter
         )
 
     def put_row(self, table_name, condition, primary_key, attribute_columns):
@@ -280,9 +279,9 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'PutRow', table_name, condition, primary_key, attribute_columns
+            'PutRow', table_name, condition, primary_key, attribute_columns
         )
-    
+
     def update_row(self, table_name, condition, primary_key, update_of_attribute_columns):
         """
         说明：更新一行数据。
@@ -310,7 +309,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'UpdateRow', table_name, condition, primary_key, update_of_attribute_columns 
+            'UpdateRow', table_name, condition, primary_key, update_of_attribute_columns
         )
 
     def delete_row(self, table_name, condition, primary_key):
@@ -334,7 +333,7 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'DeleteRow', table_name, condition, primary_key 
+            'DeleteRow', table_name, condition, primary_key
         )
 
     def batch_get_row(self, request):
@@ -564,12 +563,11 @@ class OTSClient(object):
         else:
             return MultiTableInBatchWriteRowResult(response)
 
-
-    def get_range(self, table_name, direction, 
-                  inclusive_start_primary_key, 
-                  exclusive_end_primary_key, 
-                  columns_to_get=None, 
-                  limit=None, 
+    def get_range(self, table_name, direction,
+                  inclusive_start_primary_key,
+                  exclusive_end_primary_key,
+                  columns_to_get=None,
+                  limit=None,
                   column_filter=None):
         """
         说明：根据范围条件获取多行数据。
@@ -601,17 +599,17 @@ class OTSClient(object):
         """
 
         return self._request_helper(
-                    'GetRange', table_name, direction, 
-                    inclusive_start_primary_key, exclusive_end_primary_key,
-                    columns_to_get, limit,
-                    column_filter
+            'GetRange', table_name, direction,
+            inclusive_start_primary_key, exclusive_end_primary_key,
+            columns_to_get, limit,
+            column_filter
         )
 
     def xget_range(self, table_name, direction,
                    inclusive_start_primary_key,
-                   exclusive_end_primary_key, 
+                   exclusive_end_primary_key,
                    consumed_counter,
-                   columns_to_get=None, 
+                   columns_to_get=None,
                    count=None,
                    column_filter=None):
         """
@@ -664,7 +662,7 @@ class OTSClient(object):
         while next_start_pk:
             consumed, next_start_pk, row_list = self.get_range(
                 table_name, direction,
-                next_start_pk, exclusive_end_primary_key, 
+                next_start_pk, exclusive_end_primary_key,
                 columns_to_get, left_count, column_filter
             )
             consumed_counter.read += consumed.read
@@ -673,5 +671,4 @@ class OTSClient(object):
                 if left_count is not None:
                     left_count -= 1
                     if left_count <= 0:
-                        return 
-
+                        return

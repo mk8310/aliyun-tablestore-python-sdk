@@ -1,19 +1,19 @@
 # -*- coding: utf8 -*-
 
-import unittest
-from lib.ots2_api_test_base import OTS2APITestBase
-from ots2 import *
-import lib.restriction as restriction 
 import copy
-from collections import OrderedDict
-from ots2.error import *
 import math
-import time
+import unittest
+from collections import OrderedDict
+
+from ots2 import *
+from ots2.error import *
+from .lib import restriction as restriction
+from .lib.ots2_api_test_base import OTS2APITestBase
 
 
 class RowOpTest(OTS2APITestBase):
-
     """行读写测试"""
+
     # 行操作API： GetRow, PutRow, UpdateRow, BatchGetRow, BatchWriteRow, GetRange
     # 测试每一个写操作，都要用GetRow或BatchGetRow验证数据操作符合预期
     def _check_all_row_op_with_exception_meta_not_match(self, wrong_pk):
@@ -30,7 +30,7 @@ class RowOpTest(OTS2APITestBase):
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
 
         try:
-            self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put':{'C1': 'V'}})
+            self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put': {'C1': 'V'}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
@@ -40,26 +40,29 @@ class RowOpTest(OTS2APITestBase):
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSInvalidPK", "Primary key schema mismatch.")
-        
+
         response = self.client_test.batch_get_row([('XX', [wrong_pk], [])])
         eresponse = [[RowDataItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None, None, None)]]
         self.assert_RowDataItem_equal(response, eresponse)
 
         wrong_pk_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'put': [wrong_pk_item]}])
-        eresponse = [{'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "",  None)]}]
+        eresponse = [
+            {'put': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
 
-        wrong_pk_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put':{'C1': 'V'}})
+        wrong_pk_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk, {'put': {'C1': 'V'}})
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [wrong_pk_item]}])
-        eresponse = [{'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
+        eresponse = [
+            {'update': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
-        
+
         wrong_pk_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), wrong_pk)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'delete': [wrong_pk_item]}])
-        eresponse = [{'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
+        eresponse = [
+            {'delete': [BatchWriteRowResponseItem(False, "OTSInvalidPK", "Primary key schema mismatch.", "", None)]}]
         self.assert_BatchWriteRowResponseItem(response, eresponse)
-        
+
         get_range_end = {}
         for k, v in wrong_pk.iteritems():
             get_range_end[k] = INF_MAX
@@ -84,9 +87,8 @@ class RowOpTest(OTS2APITestBase):
         self.assert_consumed(cu, CapacityUnit(ercu, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
-        
 
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put': cols})
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         ercu = ewcu
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -101,7 +103,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_consumed(cu, CapacityUnit(ercu, 0))
         self.assert_equal(rpks, {})
         self.assert_equal(rcols, {})
-        
+
         response = self.client_test.batch_get_row([('XX', [pks], [])])
         eresponse = [[RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})]]
         self.assert_RowDataItem_equal(response, eresponse)
@@ -117,7 +119,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        pks_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        pks_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pks, {'put': cols})
         ewcu = self.sum_CU_from_row(pks, cols)
         response = self.client_test.batch_write_row([{'table_name': 'XX', 'update': [pks_item]}])
         eresponse = [{'update': [BatchWriteRowResponseItem(True, '', '', '', CapacityUnit(0, ewcu))]}]
@@ -143,7 +145,7 @@ class RowOpTest(OTS2APITestBase):
         for k, v in pks.iteritems():
             get_range_end[k] = INF_MAX
         self.client_test.get_range('XX', 'FORWARD', pks, get_range_end)
- 
+
     def test_pk_name_not_match(self):
         """建一个表，PK为[('PK1', 'STRING')]，测试所有行操作API，PK为{'PK2' : 'blah'}，期望返回OTSMetaNotMatch"""
         table_meta = TableMeta('XX', [('PK1', 'STRING')])
@@ -153,7 +155,7 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
+
         wrong_pk = {'PK2': 'blah'}
         self._check_all_row_op_with_exception_meta_not_match(wrong_pk)
 
@@ -166,7 +168,7 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
+
         wrong_pk = {'PK2': 123}
         self._check_all_row_op_with_exception_meta_not_match(wrong_pk)
 
@@ -179,7 +181,7 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
+
         wrong_pk = {'PK1': 'blah'}
         self._check_all_row_op_with_exception_meta_not_match(wrong_pk)
 
@@ -195,7 +197,7 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
+
         pks = OrderedDict([('PK2', 123), ('PK1', 'blah')])
         self._check_all_row_op_without_exception(pks, {'C1': 'V'})
 
@@ -208,9 +210,9 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
-        pks = {'PK1' : 'blah', 'PK2' : 123}
-        cols = {'C1' : 'blah', 'C2' : 123, 'C3' : True, 'C4' : False, 'C5' : 3.14, 'C6' : bytearray(1)}
+
+        pks = {'PK1': 'blah', 'PK2': 123}
+        cols = {'C1': 'blah', 'C2': 123, 'C3': True, 'C4': False, 'C5': 3.14, 'C6': bytearray(1)}
         self._check_all_row_op_without_exception(pks, cols)
 
     def test_row_op_with_binary_type_pk(self):
@@ -222,9 +224,9 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
- 
-        pks = {'PK1' : bytearray(3), 'PK2' : bytearray(2)}
-        cols = {'C1' : 'blah', 'C2' : 123, 'C3' : True, 'C4' : False, 'C5' : 3.14, 'C6' : bytearray(1)}
+
+        pks = {'PK1': bytearray(3), 'PK2': bytearray(2)}
+        cols = {'C1': 'blah', 'C2': 123, 'C3': True, 'C4': False, 'C5': 3.14, 'C6': bytearray(1)}
         self._check_all_row_op_without_exception(pks, cols)
 
     def test_columns_to_get_semantics(self):
@@ -232,7 +234,7 @@ class RowOpTest(OTS2APITestBase):
         table_meta_a = TableMeta('AA', [('PK1', 'STRING'), ('PK2', 'INTEGER')])
         table_meta_b = TableMeta('BB', [('PK1', 'STRING'), ('PK2', 'INTEGER')])
         reserved_throughput = ReservedThroughput(CapacityUnit(
-            restriction.MaxReadWriteCapacityUnit, 
+            restriction.MaxReadWriteCapacityUnit,
             restriction.MaxReadWriteCapacityUnit
         ))
         self.client_test.create_table(table_meta_a, reserved_throughput)
@@ -246,7 +248,7 @@ class RowOpTest(OTS2APITestBase):
         putrow_item0 = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks0, cols)
         putrow_item1 = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pks1, cols)
         self.client_test.batch_write_row([
-            {'table_name': 'AA', 'put': [putrow_item0, putrow_item1]}, 
+            {'table_name': 'AA', 'put': [putrow_item0, putrow_item1]},
             {'table_name': 'BB', 'put': [putrow_item0, putrow_item1]}
         ])
 
@@ -269,9 +271,9 @@ class RowOpTest(OTS2APITestBase):
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(rpks, {})
         self.assert_equal(rcols, {})
-        
+
         response = self.client_test.batch_get_row([
-            ('AA', [pks0, pks1], []), 
+            ('AA', [pks0, pks1], []),
             ('BB', [pks0, pks1], [])
         ])
         rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), pks0, cols)
@@ -280,7 +282,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_RowDataItem_equal(response, eresponse)
 
         response = self.client_test.batch_get_row([
-            ('AA', [pks0, pks1], ['C1']), 
+            ('AA', [pks0, pks1], ['C1']),
             ('BB', [pks0, pks1], ['C1'])
         ])
         rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {'C1': 'blah'})
@@ -288,7 +290,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_RowDataItem_equal(response, eresponse)
 
         response = self.client_test.batch_get_row([
-            ('AA', [pks0, pks1], ['PK1']), 
+            ('AA', [pks0, pks1], ['PK1']),
             ('BB', [pks0, pks1], ['PK1'])
         ])
         rowdata_item0 = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {'PK1': '0'}, {})
@@ -297,54 +299,54 @@ class RowOpTest(OTS2APITestBase):
         self.assert_RowDataItem_equal(response, eresponse)
 
         response = self.client_test.batch_get_row([
-            ('AA', [pks0, pks1], ['blah']), 
+            ('AA', [pks0, pks1], ['blah']),
             ('BB', [pks0, pks1], ['blah'])
         ])
         rowdata_item = RowDataItem(True, '', '', '', CapacityUnit(1, 0), {}, {})
         eresponse = [[rowdata_item, rowdata_item], [rowdata_item, rowdata_item]]
         self.assert_RowDataItem_equal(response, eresponse)
 
-        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD', 
-                {'PK1': INF_MIN, 'PK2': INF_MIN}, 
-                {'PK1': INF_MAX, 'PK2': INF_MAX},
-                []
-        )
+        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD',
+                                                        {'PK1': INF_MIN, 'PK2': INF_MIN},
+                                                        {'PK1': INF_MAX, 'PK2': INF_MAX},
+                                                        []
+                                                        )
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(next_pks, None)
         self.assert_equal(rows, [(pks0, cols), (pks1, cols)])
 
-        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD', 
-                {'PK1': INF_MIN, 'PK2': INF_MIN}, 
-                {'PK1': INF_MAX, 'PK2': INF_MAX},
-                ['C1']
-        )
+        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD',
+                                                        {'PK1': INF_MIN, 'PK2': INF_MIN},
+                                                        {'PK1': INF_MAX, 'PK2': INF_MAX},
+                                                        ['C1']
+                                                        )
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(next_pks, None)
         self.assert_equal(rows, [({}, {'C1': 'blah'}), ({}, {'C1': 'blah'})])
 
-        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD', 
-                {'PK1': INF_MIN, 'PK2': INF_MIN}, 
-                {'PK1': INF_MAX, 'PK2': INF_MAX},
-                ['PK1']
-        )
+        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD',
+                                                        {'PK1': INF_MIN, 'PK2': INF_MIN},
+                                                        {'PK1': INF_MAX, 'PK2': INF_MAX},
+                                                        ['PK1']
+                                                        )
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(next_pks, None)
         self.assert_equal(rows, [({'PK1': '0'}, {}), ({'PK1': '1'}, {})])
-           
-        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD', 
-                {'PK1': INF_MIN, 'PK2': INF_MIN}, 
-                {'PK1': INF_MAX, 'PK2': INF_MAX},
-                ['PK1', 'C1']
-        )
+
+        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD',
+                                                        {'PK1': INF_MIN, 'PK2': INF_MIN},
+                                                        {'PK1': INF_MAX, 'PK2': INF_MAX},
+                                                        ['PK1', 'C1']
+                                                        )
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(next_pks, None)
         self.assert_equal(rows, [({'PK1': '0'}, {'C1': 'blah'}), ({'PK1': '1'}, {'C1': 'blah'})])
-           
-        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD', 
-                {'PK1': INF_MIN, 'PK2': INF_MIN}, 
-                {'PK1': INF_MAX, 'PK2': INF_MAX},
-                ['blah']
-        )
+
+        cu, next_pks, rows = self.client_test.get_range('AA', 'FORWARD',
+                                                        {'PK1': INF_MIN, 'PK2': INF_MIN},
+                                                        {'PK1': INF_MAX, 'PK2': INF_MAX},
+                                                        ['blah']
+                                                        )
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(next_pks, None)
         self.assert_equal(rows, [])
@@ -392,7 +394,7 @@ class RowOpTest(OTS2APITestBase):
         ))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('XX')
-        
+
         cu_expect = CapacityUnit(1, 0)
         cu, rpks, rcols = self.client_test.get_row('XX', {'PK1': 'b'})
         self.assert_consumed(cu, cu_expect)
@@ -418,34 +420,36 @@ class RowOpTest(OTS2APITestBase):
         cols = {'C0': 'V' * 2048, 'C1': 'B' * 2048}
         self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
 
-        #EXIST+COVER
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'put' : cols })
+        # EXIST+COVER
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, {'put': cols})
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        #EXIST+ADD
+        # EXIST+ADD
         cols = {'C2': 'V' * 2048, 'C3': 'B' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'put' : cols })
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, {'put': cols})
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(3, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, {'C0': 'V' * 2048, 'C1': 'B' * 2048, 'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
-        #EXIST+DELETE
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, { 'delete' : ['C0', 'C1'] })
+        # EXIST+DELETE
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks,
+                                         {'delete': ['C0', 'C1']})
         self.assert_consumed(cu, CapacityUnit(1, 1))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, {'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
-        #EXIST+MIX
+        # EXIST+MIX
         cols = {'C0': 'V' * 2048, 'C1': None, 'C2': 'V' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks, {'put' : {'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete' : ['C1']})
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_EXIST), pks,
+                                         {'put': {'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete': ['C1']})
         self.assert_consumed(cu, CapacityUnit(1, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -456,33 +460,34 @@ class RowOpTest(OTS2APITestBase):
         cols = {'C0': 'V' * 2048, 'C1': 'B' * 2048}
         self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
 
-        #IGNORE+COVER
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        # IGNORE+COVER
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put': cols})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, cols)
 
-        #IGNORE+ADD
+        # IGNORE+ADD
         cols = {'C2': 'V' * 2048, 'C3': 'B' * 2048}
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':cols})
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put': cols})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(3, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, {'C0': 'V' * 2048, 'C1': 'B' * 2048, 'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
-        #IGNORE+DELETE
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'delete':['C0', 'C1']})
+        # IGNORE+DELETE
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'delete': ['C0', 'C1']})
         self.assert_consumed(cu, CapacityUnit(0, 1))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
         self.assert_equal(rpks, pks)
         self.assert_equal(rcols, {'C2': 'V' * 2048, 'C3': 'B' * 2048})
 
-        #IGNORE+MIX
-        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, {'put':{'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete':['C1']})
+        # IGNORE+MIX
+        cu = self.client_test.update_row('XX', Condition(RowExistenceExpectation.IGNORE), pks,
+                                         {'put': {'C0': 'V' * 2048, 'C2': 'V' * 2048}, 'delete': ['C1']})
         self.assert_consumed(cu, CapacityUnit(0, 2))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
         self.assert_consumed(cu, CapacityUnit(2, 0))
@@ -521,7 +526,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, cols)
 
         for k in cols.keys():
-            cols[k] = 'V' * 8 
+            cols[k] = 'V' * 8
         cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
         cu, rpks, rcols = self.client_test.get_row('XX', pks)
@@ -530,7 +535,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, cols)
 
         for k in cols.keys():
-            cols[k] = True 
+            cols[k] = True
         ewcu = self.sum_CU_from_row(pks, cols)
         cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
@@ -540,7 +545,7 @@ class RowOpTest(OTS2APITestBase):
         self.assert_equal(rcols, cols)
 
         for k in cols.keys():
-            cols[k] = bytearray('V' * 8) 
+            cols[k] = bytearray('V' * 8)
         ewcu = self.sum_CU_from_row(pks, cols)
         cu = self.client_test.put_row('XX', Condition(RowExistenceExpectation.IGNORE), pks, cols)
         self.assert_consumed(cu, CapacityUnit(0, ewcu))
@@ -560,7 +565,8 @@ class RowOpTest(OTS2APITestBase):
         self.wait_for_partition_load('XX')
 
         try:
-            self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_NOT_EXIST), {'PK1': '0'}, {'put':{'Col0' : 'XXXX'}})
+            self.client_test.update_row('XX', Condition(RowExistenceExpectation.EXPECT_NOT_EXIST), {'PK1': '0'},
+                                        {'put': {'Col0': 'XXXX'}})
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, "OTSParameterInvalid", "Invalid condition: EXPECT_NOT_EXIST while updating row.")
@@ -618,54 +624,59 @@ class RowOpTest(OTS2APITestBase):
         i = 0
         for row in self.client_test.xget_range('XX', 'FORWARD', {'PK1': INF_MIN}, {'PK1': INF_MAX}, cu_sum):
             epk = {'PK1': str(i)}
-            ecol ={ 'C': 'V' * 800}
+            ecol = {'C': 'V' * 800}
             self.assert_equal(row, (epk, ecol))
             i += 1
         self.assert_consumed(cu_sum, CapacityUnit(2, 0))
 
     def _valid_column_name_test(self, table_name, pk, columns):
-        #put_row
+        # put_row
         consumed = self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, columns)
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
-        #get_row
+        # get_row
         consumed, primary_keys, columns_res = self.client_test.get_row(table_name, pk)
         self.assert_consumed(consumed, CapacityUnit(self.sum_CU_from_row(pk, columns), 0))
         self.assert_equal(primary_keys, pk)
         self.assert_equal(columns_res, columns)
-        #batch_get_row
+        # batch_get_row
         batches = [(table_name, [pk], [])]
         response = self.client_test.batch_get_row(batches)
-        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk, columns)
+        expect_row_data_item = RowDataItem(True, "", "", "", CapacityUnit(self.sum_CU_from_row(pk, columns), 0), pk,
+                                           columns)
         eresponse = [[expect_row_data_item]]
         self.assert_RowDataItem_equal(response, eresponse)
-        #get_range
+        # get_range
         inclusive_key = copy.copy(pk)
         exclusive_key = copy.copy(pk)
         for k in pk.keys():
             inclusive_key[k] = INF_MIN
             exclusive_key[k] = INF_MAX
-        consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name, 'FORWARD', inclusive_key,exclusive_key, [], None)
+        consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name, 'FORWARD', inclusive_key,
+                                                                             exclusive_key, [], None)
         self.assert_consumed(consumed, CapacityUnit(self.sum_CU_from_row(pk, columns), 0))
         self.assert_equal(next_start_primary_keys, None)
         self.assert_equal(rows, [(pk, columns)])
 
-        #update_row
-        consumed = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk, {'put':columns})
+        # update_row
+        consumed = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk,
+                                               {'put': columns})
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
 
-        #delete_row
+        # delete_row
         consumed = self.client_test.delete_row(table_name, Condition(RowExistenceExpectation.IGNORE), pk)
         self.assert_consumed(consumed, CapacityUnit(0, self.sum_CU_from_row(pk, {})))
-        #batch_write_row
+        # batch_write_row
         put_row_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk, columns)
-        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put':columns})
+        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk, {'put': columns})
         delete_row_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pk)
-        batches_list = [{'put':[put_row_item]}, {'update':[update_row_item]}, {'delete':[delete_row_item]}]
-        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
+        batches_list = [{'put': [put_row_item]}, {'update': [update_row_item]}, {'delete': [delete_row_item]}]
+        expect_write_data_item = BatchWriteRowResponseItem(True, "", "", "",
+                                                           CapacityUnit(0, self.sum_CU_from_row(pk, columns)))
         response_list = [
-            {'put':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'update':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]}, 
-            {'delete':[BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]}, 
+            {'put': [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]},
+            {'update': [
+                BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, columns)))]},
+            {'delete': [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, self.sum_CU_from_row(pk, {})))]},
         ]
         for i in range(len(batches_list)):
             write_batches = batches_list[i]
@@ -676,16 +687,20 @@ class RowOpTest(OTS2APITestBase):
 
     def test_max_data_size_row(self):
         """对于每一个行操作API，测试一个数据量最大的行， 主键为max个，每个主键名字长度为max，value为string长度为max，列的数据为max byte，类型分别为INTEGER, BOOLEAN, BINARY, STRING, DOUBLE, 判断消耗的CU符合预期"""
-        #这里假设MaxPKColumnNum <=10 ,不然PKname的长度不能符合要求
-        pk_schema, pk = self.get_primary_keys(restriction.MaxPKColumnNum, "STRING", pk_name="P" * (restriction.MaxColumnNameLength - 1), pk_value="x" * (restriction.MaxPKStringValueLength))
+        # 这里假设MaxPKColumnNum <=10 ,不然PKname的长度不能符合要求
+        pk_schema, pk = self.get_primary_keys(restriction.MaxPKColumnNum, "STRING",
+                                              pk_name="P" * (restriction.MaxColumnNameLength - 1),
+                                              pk_value="x" * (restriction.MaxPKStringValueLength))
 
         table_name = "table_test"
         table_meta = TableMeta(table_name, pk_schema)
-        reserved_throughput = ReservedThroughput(CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
+        reserved_throughput = ReservedThroughput(
+            CapacityUnit(restriction.MaxReadWriteCapacityUnit, restriction.MaxReadWriteCapacityUnit))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test')
-        
-        remained_size = restriction.MaxColumnDataSizeForRow - restriction.MaxPKColumnNum * (restriction.MaxColumnNameLength + restriction.MaxPKStringValueLength)
+
+        remained_size = restriction.MaxColumnDataSizeForRow - restriction.MaxPKColumnNum * (
+        restriction.MaxColumnNameLength + restriction.MaxPKStringValueLength)
         remained_column_cnt = restriction.MaxColumnCountForRow - restriction.MaxPKColumnNum
 
         integer_columns = {}
@@ -693,30 +708,30 @@ class RowOpTest(OTS2APITestBase):
         bool_columns = {}
         binary_columns = {}
         double_columns = {}
-        #INTEGER and DOUBLE
+        # INTEGER and DOUBLE
         col_key_tmp = "a%0" + str(restriction.MaxColumnNameLength - 1) + "d"
         if (remained_size / (restriction.MaxColumnNameLength + 8)) > remained_column_cnt:
             for i in range(remained_column_cnt):
-                integer_columns[col_key_tmp%i] = i
-                double_columns[col_key_tmp%i] = i + 0.1
+                integer_columns[col_key_tmp % i] = i
+                double_columns[col_key_tmp % i] = i + 0.1
         else:
             for i in range(remained_size / (restriction.MaxColumnNameLength + 8)):
-                integer_columns[col_key_tmp%i] = i
-                double_columns[col_key_tmp%i] = i + 0.1
-        #BOOL
+                integer_columns[col_key_tmp % i] = i
+                double_columns[col_key_tmp % i] = i + 0.1
+        # BOOL
         if (remained_size / (restriction.MaxColumnNameLength + 1)) > remained_column_cnt:
             for i in range(remained_column_cnt):
-                bool_columns[col_key_tmp%i] = True
+                bool_columns[col_key_tmp % i] = True
         else:
             for i in range(remained_size / (restriction.MaxColumnNameLength + 1)):
-                bool_columns[col_key_tmp%i] = False
-        #string
+                bool_columns[col_key_tmp % i] = False
+        # string
         for i in range(remained_size / (restriction.MaxColumnNameLength + restriction.MaxNonPKStringValueLength)):
-            string_columns[col_key_tmp%i] = "X" * restriction.MaxNonPKStringValueLength
-        #binary
+            string_columns[col_key_tmp % i] = "X" * restriction.MaxNonPKStringValueLength
+        # binary
         for i in range(remained_size / (restriction.MaxColumnNameLength + restriction.MaxBinaryValueLength)):
-            binary_columns[col_key_tmp%i] = bytearray(restriction.MaxBinaryValueLength)
-        
+            binary_columns[col_key_tmp % i] = bytearray(restriction.MaxBinaryValueLength)
+
         for col in [integer_columns, string_columns, bool_columns, binary_columns, double_columns]:
             self._valid_column_name_test(table_name, pk, col)
 
@@ -724,7 +739,7 @@ class RowOpTest(OTS2APITestBase):
         """创建一个表T，一个行R，数据量为 < 1KB，BatchGetRow([(T, [R, R])])，重复行，期望返回OTSParameterInvalid，再一次BatchGetRow([(T, [R]), (T, [R]])，同名表在不同组，期望返回OTSParameterInvalid"""
         table_name = 'table_test_batch_get_on_the_same_row'
         table_meta = TableMeta(table_name, [('PK0', 'STRING'), ('PK1', 'INTEGER')])
-        pk_dict = {'PK0':'a', 'PK1':1}
+        pk_dict = {'PK0': 'a', 'PK1': 1}
         column_dict = {'col1': 'M' * 500}
         reserved_throughput = ReservedThroughput(CapacityUnit(10, 10))
 
@@ -745,24 +760,27 @@ class RowOpTest(OTS2APITestBase):
             response = self.client_test.batch_get_row([(table_name, [pk_dict], []), (table_name, [pk_dict], [])])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "Duplicated table name: 'table_test_batch_get_on_the_same_row'.")
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "Duplicated table name: 'table_test_batch_get_on_the_same_row'.")
 
     def test_batch_write_on_the_same_row(self):
         """BatchWriteRow，分别为put, delete, update，操作在同一行（在同一个表名下，或者重复的两个表名下），期望返回OTSParameterInvalid"""
         table_name = 'table_test_batch_write_on_the_same_row'
         table_meta = TableMeta(table_name, [('PK0', 'STRING'), ('PK1', 'INTEGER')])
-        pk_dict = {'PK0':'a', 'PK1':1}
-        pk_dict_2 = {'PK0':'a', 'PK1':2}
+        pk_dict = {'PK0': 'a', 'PK1': 1}
+        pk_dict_2 = {'PK0': 'a', 'PK1': 2}
         column_dict = {'col1': 'M'}
         reserved_throughput = ReservedThroughput(CapacityUnit(100, 100))
 
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test_batch_write_on_the_same_row')
 
-        put_row_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'col1':150})
-        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'put':{'col1':200}})
+        put_row_item = PutRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'col1': 150})
+        update_row_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict, {'put': {'col1': 200}})
         delete_row_item = DeleteRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict)
-        test_batch_write_row_list = [{'put':[put_row_item], 'update':[update_row_item]}, {'put':[put_row_item], 'delete':[delete_row_item]}, {'update':[update_row_item], 'delete':[delete_row_item]}]
+        test_batch_write_row_list = [{'put': [put_row_item], 'update': [update_row_item]},
+                                     {'put': [put_row_item], 'delete': [delete_row_item]},
+                                     {'update': [update_row_item], 'delete': [delete_row_item]}]
 
         for i in range(len(test_batch_write_row_list)):
             try:
@@ -773,23 +791,31 @@ class RowOpTest(OTS2APITestBase):
             except OTSServiceError as e:
                 self.assert_error(e, 400, "OTSParameterInvalid", "The input parameter is invalid.")
 
-        update_row_item_2 = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict_2, {'put':{'col1':200}})
+        update_row_item_2 = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), pk_dict_2, {'put': {'col1': 200}})
         try:
-            write_response = self.client_test.batch_write_row([{'table_name':table_name, 'put':[put_row_item]}, {'table_name':table_name, 'update':[update_row_item_2]}])
+            write_response = self.client_test.batch_write_row([{'table_name': table_name, 'put': [put_row_item]},
+                                                               {'table_name': table_name,
+                                                                'update': [update_row_item_2]}])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "Duplicated table name: table_test_batch_write_on_the_same_row.")
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "Duplicated table name: table_test_batch_write_on_the_same_row.")
         try:
-            write_response = self.client_test.batch_write_row([{'table_name':table_name, 'update':[update_row_item]}, {'table_name':table_name, 'update':[update_row_item_2]}])
+            write_response = self.client_test.batch_write_row([{'table_name': table_name, 'update': [update_row_item]},
+                                                               {'table_name': table_name,
+                                                                'update': [update_row_item_2]}])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "Duplicated table name: table_test_batch_write_on_the_same_row.")
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "Duplicated table name: table_test_batch_write_on_the_same_row.")
         try:
-            write_response = self.client_test.batch_write_row([{'table_name':table_name, 'delete':[delete_row_item]}, {'table_name':table_name, 'update':[update_row_item_2]}])
+            write_response = self.client_test.batch_write_row([{'table_name': table_name, 'delete': [delete_row_item]},
+                                                               {'table_name': table_name,
+                                                                'update': [update_row_item_2]}])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "Duplicated table name: table_test_batch_write_on_the_same_row.")
-
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "Duplicated table name: table_test_batch_write_on_the_same_row.")
 
     def test_no_item_in_batch_ops(self):
         """BatchGetRow和BatchWriteRow没有包含任何行，期望返回OTSParameterInvalid"""
@@ -801,16 +827,18 @@ class RowOpTest(OTS2APITestBase):
         self.wait_for_partition_load('table_test_no_item_in_batch_ops')
 
         try:
-            write_response = self.client_test.batch_write_row([{'table_name':table_name}])
+            write_response = self.client_test.batch_write_row([{'table_name': table_name}])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "No row specified in table: 'table_test_no_item_in_batch_ops'.")
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "No row specified in table: 'table_test_no_item_in_batch_ops'.")
 
         try:
             response = self.client_test.batch_get_row([(table_name, [], [])])
             self.assert_false()
         except OTSServiceError as e:
-            self.assert_error(e, 400, "OTSParameterInvalid", "No row specified in table: 'table_test_no_item_in_batch_ops'.")
+            self.assert_error(e, 400, "OTSParameterInvalid",
+                              "No row specified in table: 'table_test_no_item_in_batch_ops'.")
 
     def test_no_table_in_batch_ops(self):
         """BatchGetRow和BatchWriteRow没有包含任何行，期望返回OTSParameterInvalid"""
@@ -846,22 +874,30 @@ class RowOpTest(OTS2APITestBase):
         self.wait_for_partition_load('table_test_get_range_when_direction_string')
         self.wait_for_partition_load('table_test_get_range_when_direction_integer')
 
-        pk_dict_small = {'PK0':'AAA'}
-        pk_dict_big = {'PK0':'DDDD'}
-        self._check_get_range_expect_exception(table_name_string, pk_dict_big, pk_dict_small, 'FORWARD', "The input parameter is invalid.")
-        self._check_get_range_expect_exception(table_name_string, pk_dict_small, pk_dict_big, 'BACKWARD', "The input parameter is invalid.")
+        pk_dict_small = {'PK0': 'AAA'}
+        pk_dict_big = {'PK0': 'DDDD'}
+        self._check_get_range_expect_exception(table_name_string, pk_dict_big, pk_dict_small, 'FORWARD',
+                                               "The input parameter is invalid.")
+        self._check_get_range_expect_exception(table_name_string, pk_dict_small, pk_dict_big, 'BACKWARD',
+                                               "The input parameter is invalid.")
 
-        pk_dict_small = {'PK0':10}
-        pk_dict_big = {'PK0':90}
-        self._check_get_range_expect_exception(table_name_integer, pk_dict_big, pk_dict_small, 'FORWARD', "The input parameter is invalid.")
-        self._check_get_range_expect_exception(table_name_integer, pk_dict_small, pk_dict_big, 'BACKWARD', "The input parameter is invalid.")
+        pk_dict_small = {'PK0': 10}
+        pk_dict_big = {'PK0': 90}
+        self._check_get_range_expect_exception(table_name_integer, pk_dict_big, pk_dict_small, 'FORWARD',
+                                               "The input parameter is invalid.")
+        self._check_get_range_expect_exception(table_name_integer, pk_dict_small, pk_dict_big, 'BACKWARD',
+                                               "The input parameter is invalid.")
 
-    def _check_get_range_expect_exception(self, table_name, inclusive_start_primary_keys, exclusive_end_primary_keys, direction, error_msg, error_code="OTSParameterInvalid", limit=None, columns_to_get=[]):
+    def _check_get_range_expect_exception(self, table_name, inclusive_start_primary_keys, exclusive_end_primary_keys,
+                                          direction, error_msg, error_code="OTSParameterInvalid", limit=None,
+                                          columns_to_get=[]):
         try:
-            consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name, direction, inclusive_start_primary_keys,
-                                                                                 exclusive_end_primary_keys, columns_to_get, limit)
-            print inclusive_start_primary_keys
-            print exclusive_end_primary_keys
+            consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name, direction,
+                                                                                 inclusive_start_primary_keys,
+                                                                                 exclusive_end_primary_keys,
+                                                                                 columns_to_get, limit)
+            print(inclusive_start_primary_keys)
+            print(exclusive_end_primary_keys)
             self.assert_false()
         except OTSServiceError as e:
             self.assert_error(e, 400, error_code, error_msg)
@@ -885,41 +921,42 @@ class RowOpTest(OTS2APITestBase):
                 else:
                     x, y = 1, 2
 
-                #pk_list = [{'PK0': 'a', 'PK1': 1}, {'PK0': 'a', 'PK1': 2}, {'PK0': 'b', 'PK1': 1}, 
+                # pk_list = [{'PK0': 'a', 'PK1': 1}, {'PK0': 'a', 'PK1': 2}, {'PK0': 'b', 'PK1': 1},
                 #           {'PK0': 'b', 'PK1': 2}, {'PK0': 'c', 'PK1': 1}, {'PK0': 'c', 'PK1': 2}]
                 #
                 row_list = []
                 for first_pk_value in [a, b, c]:
                     for second_pk_value in [x, y]:
-                        row_list.append(({'PK0' : first_pk_value, 'PK1' : second_pk_value}, {}))
-                        self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE), {'PK0' : first_pk_value, 'PK1' : second_pk_value}, {})
+                        row_list.append(({'PK0': first_pk_value, 'PK1': second_pk_value}, {}))
+                        self.client_test.put_row(table_name, Condition(RowExistenceExpectation.IGNORE),
+                                                 {'PK0': first_pk_value, 'PK1': second_pk_value}, {})
 
                 def get_range(begin_pk0, begin_pk1, end_pk0, end_pk1):
-                    return [{'PK0' : begin_pk0, 'PK1' : begin_pk1}, {'PK0' : end_pk0, 'PK1' : end_pk1}]
+                    return [{'PK0': begin_pk0, 'PK1': begin_pk1}, {'PK0': end_pk0, 'PK1': end_pk1}]
 
                 range_list = [
                     # range                             是否正常 期望rows        
-                    (get_range(b, x,       a, x),       False,   row_list[0:1]          ),
-                    (get_range(a, x,       a, y),       True,    row_list[0:2]  ),
-                    (get_range(a, x,       c, x),       True,    row_list[0:5]),
-                    (get_range(a, x,       c, y),       True,    row_list[0:6]),
-                    (get_range(a, y,       c, x),       True,    row_list[1:5]),
-                    (get_range(a, x,       a, x),       False,   row_list[0:1]          ),
+                    (get_range(b, x, a, x), False, row_list[0:1]),
+                    (get_range(a, x, a, y), True, row_list[0:2]),
+                    (get_range(a, x, c, x), True, row_list[0:5]),
+                    (get_range(a, x, c, y), True, row_list[0:6]),
+                    (get_range(a, y, c, x), True, row_list[1:5]),
+                    (get_range(a, x, a, x), False, row_list[0:1]),
                 ]
 
                 range_list_1 = [
-                    (get_range(a, INF_MAX, b, INF_MIN), True,    row_list[0:0]          ),
-                    (get_range(b, INF_MAX, a, INF_MIN), False,   row_list[0:0]          ),
-                    (get_range(b, INF_MAX, a, INF_MAX), False,   row_list[0:0]          ),
-                    (get_range(a, INF_MIN, a, INF_MAX), True,    row_list[0:2]),
-                    (get_range(a, INF_MAX, a, INF_MIN), False,   row_list[0:0]          ),
-                    (get_range(a, INF_MAX, b, INF_MIN), True,    row_list[0:0]          ),
-                    (get_range(a, INF_MAX, c, INF_MIN), True,    row_list[2:4]),
+                    (get_range(a, INF_MAX, b, INF_MIN), True, row_list[0:0]),
+                    (get_range(b, INF_MAX, a, INF_MIN), False, row_list[0:0]),
+                    (get_range(b, INF_MAX, a, INF_MAX), False, row_list[0:0]),
+                    (get_range(a, INF_MIN, a, INF_MAX), True, row_list[0:2]),
+                    (get_range(a, INF_MAX, a, INF_MIN), False, row_list[0:0]),
+                    (get_range(a, INF_MAX, b, INF_MIN), True, row_list[0:0]),
+                    (get_range(a, INF_MAX, c, INF_MIN), True, row_list[2:4]),
                 ]
 
                 range_list_2 = [
-                    (get_range(a, INF_MIN, a, y),       True,    row_list[0:2]  ),
-                    (get_range(a, x,       a, INF_MAX), True,    row_list[0:3]),
+                    (get_range(a, INF_MIN, a, y), True, row_list[0:2]),
+                    (get_range(a, x, a, INF_MAX), True, row_list[0:3]),
                 ]
                 begin, end = get_range(a, INF_MIN, a, y)
                 self._check_xget_range(table_name, begin, end, 'FORWARD', row_list[0:1])
@@ -937,11 +974,12 @@ class RowOpTest(OTS2APITestBase):
                         else:
                             end, begin = range_
                             expect_rows = _expect_rows[1:(len(_expect_rows))]
-                        self.logger.debug("%s  %s  %s  %s" %(begin, end, direction, expect_rows))
+                        self.logger.debug("%s  %s  %s  %s" % (begin, end, direction, expect_rows))
                         if is_normal:
                             self._check_xget_range(table_name, begin, end, direction, expect_rows)
                         else:
-                            self._check_get_range_expect_exception(table_name, begin, end, direction, "The input parameter is invalid.")
+                            self._check_get_range_expect_exception(table_name, begin, end, direction,
+                                                                   "The input parameter is invalid.")
 
                     for range_, is_normal, _expect_rows in range_list_1:
                         expect_rows = _expect_rows
@@ -949,20 +987,22 @@ class RowOpTest(OTS2APITestBase):
                             begin, end = range_
                         else:
                             end, begin = range_
-                        self.logger.debug("%s  %s  %s  %s" %(begin, end, direction, expect_rows))
+                        self.logger.debug("%s  %s  %s  %s" % (begin, end, direction, expect_rows))
                         if is_normal:
                             self._check_xget_range(table_name, begin, end, direction, expect_rows)
                         else:
-                            self._check_get_range_expect_exception(table_name, begin, end, direction, "The input parameter is invalid.")
+                            self._check_get_range_expect_exception(table_name, begin, end, direction,
+                                                                   "The input parameter is invalid.")
 
     def test_4_PK_range(self):
         """一个表有4个PK，类型分别是STRING, STRING, INTEGER，测试range: ('A' 'A' 10 False, 'A' 'A' 10 True), ('A' 'A' 10 False, 'A' 'A' 11 True),  ('A' 'A' 10 False, 'A' 'A' 9 True)（出错）, ('A' 'A' 10 MAX, 'A' 'B' 10 MIN), ('A' MIN 10 False, 'B' MAX 2 True)，构造数据让每个区间都有值"""
         table_name = 'table_test_4_PK_range'
-        table_meta = TableMeta(table_name, [('PK0', 'STRING'), ('PK1', 'STRING'), ('PK2', 'INTEGER'), ('PK3', 'INTEGER')])
-        pk_dict_list = [{'PK0':'A', 'PK1':'A', 'PK2':9, 'PK3':9}, 
-                   {'PK0':'A', 'PK1':'A', 'PK2':10, 'PK3':1},
-                   {'PK0':'A', 'PK1':'A', 'PK2':10, 'PK3':9},
-                   {'PK0':'A', 'PK1':'A', 'PK2':11, 'PK3':9}]
+        table_meta = TableMeta(table_name,
+                               [('PK0', 'STRING'), ('PK1', 'STRING'), ('PK2', 'INTEGER'), ('PK3', 'INTEGER')])
+        pk_dict_list = [{'PK0': 'A', 'PK1': 'A', 'PK2': 9, 'PK3': 9},
+                        {'PK0': 'A', 'PK1': 'A', 'PK2': 10, 'PK3': 1},
+                        {'PK0': 'A', 'PK1': 'A', 'PK2': 10, 'PK3': 9},
+                        {'PK0': 'A', 'PK1': 'A', 'PK2': 11, 'PK3': 9}]
         row_list = []
         putrow_list = []
         for pk_dict in pk_dict_list:
@@ -972,14 +1012,15 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test_4_PK_range')
 
-        self.client_test.batch_write_row([{'table_name':table_name, 'put':putrow_list}])
+        self.client_test.batch_write_row([{'table_name': table_name, 'put': putrow_list}])
 
-        pk_dict_min = {'PK0':'A', 'PK1':INF_MIN, 'PK2':10, 'PK3':1}
-        pk_dict3 = {'PK0':'A', 'PK1':'A', 'PK2':10, 'PK3':INF_MAX}
-        pk_dict5 = {'PK0':'A', 'PK1':'B', 'PK2':10, 'PK3':INF_MIN}
-        pk_dict_max = {'PK0':'B', 'PK1':INF_MAX, 'PK2':2, 'PK3':9}
+        pk_dict_min = {'PK0': 'A', 'PK1': INF_MIN, 'PK2': 10, 'PK3': 1}
+        pk_dict3 = {'PK0': 'A', 'PK1': 'A', 'PK2': 10, 'PK3': INF_MAX}
+        pk_dict5 = {'PK0': 'A', 'PK1': 'B', 'PK2': 10, 'PK3': INF_MIN}
+        pk_dict_max = {'PK0': 'B', 'PK1': INF_MAX, 'PK2': 2, 'PK3': 9}
 
-        self._check_get_range_expect_exception(table_name, pk_dict_list[1], pk_dict_list[0], 'FORWARD',  "The input parameter is invalid.")
+        self._check_get_range_expect_exception(table_name, pk_dict_list[1], pk_dict_list[0], 'FORWARD',
+                                               "The input parameter is invalid.")
 
         self._check_xget_range(table_name, pk_dict_list[1], pk_dict_list[2], 'FORWARD', row_list[1:2])
         self._check_xget_range(table_name, pk_dict_list[1], pk_dict_list[3], 'FORWARD', row_list[1:3])
@@ -988,7 +1029,8 @@ class RowOpTest(OTS2APITestBase):
 
     def test_empty_range(self):
         """分别测试PK个数为1，2，3，4的4个表，range中包含的row个数为0的情况，期望返回为空，CU消耗为(1, 0)"""
-        table_name_list = ['table_test_empty_range_0', 'table_test_empty_range_1', 'table_test_empty_range_2', 'table_test_empty_range_3']
+        table_name_list = ['table_test_empty_range_0', 'table_test_empty_range_1', 'table_test_empty_range_2',
+                           'table_test_empty_range_3']
         pk_schema0, pk_dict0_exclusive = self.get_primary_keys(1, 'STRING', 'PK', INF_MAX)
         pk_schema1, pk_dict1_exclusive = self.get_primary_keys(2, 'STRING', 'PK', INF_MAX)
         pk_schema2, pk_dict2_exclusive = self.get_primary_keys(3, 'STRING', 'PK', INF_MAX)
@@ -1006,7 +1048,9 @@ class RowOpTest(OTS2APITestBase):
             table_meta = TableMeta(table_name_list[i], pk_schema_list[i])
             self.client_test.create_table(table_meta, reserved_throughput)
             self.wait_for_partition_load(table_name_list[i])
-            consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name_list[i], 'FORWARD',  pk_dict_inclusive_list[i], pk_dict_exclusive_list[i])
+            consumed, next_start_primary_keys, rows = self.client_test.get_range(table_name_list[i], 'FORWARD',
+                                                                                 pk_dict_inclusive_list[i],
+                                                                                 pk_dict_exclusive_list[i])
             self.assert_consumed(consumed, CapacityUnit(1, 0))
             self.assert_equal(next_start_primary_keys, None)
             self.assert_equal(rows, [])
@@ -1020,13 +1064,16 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load('table_test_get_range_limit_invalid')
 
-        pk_dict_small = {'PK0':'AAA'}
-        pk_dict_big = {'PK0':'DDDD'}
-        self._check_get_range_expect_exception(table_name, pk_dict_small, pk_dict_big, 'FORWARD', "The limit must be greater than 0.", "OTSParameterInvalid", 0)
-        self._check_get_range_expect_exception(table_name, pk_dict_small, pk_dict_big, 'FORWARD', "The limit must be greater than 0.", "OTSParameterInvalid", -1)
+        pk_dict_small = {'PK0': 'AAA'}
+        pk_dict_big = {'PK0': 'DDDD'}
+        self._check_get_range_expect_exception(table_name, pk_dict_small, pk_dict_big, 'FORWARD',
+                                               "The limit must be greater than 0.", "OTSParameterInvalid", 0)
+        self._check_get_range_expect_exception(table_name, pk_dict_small, pk_dict_big, 'FORWARD',
+                                               "The limit must be greater than 0.", "OTSParameterInvalid", -1)
 
-    def _check_xget_range(self, table_name, inclusive_start_primary_keys, exclusive_end_primary_keys, direction, expect_rows, limit=10, columns=[]):
-        consumed_count =  CapacityUnit(0, 0)
+    def _check_xget_range(self, table_name, inclusive_start_primary_keys, exclusive_end_primary_keys, direction,
+                          expect_rows, limit=10, columns=[]):
+        consumed_count = CapacityUnit(0, 0)
         row_size_sum = 0
         count = 0
         for row in self.client_test.xget_range(table_name, direction, inclusive_start_primary_keys,
@@ -1034,7 +1081,7 @@ class RowOpTest(OTS2APITestBase):
             if not row in expect_rows:
                 self.assert_false()
 
-            row_size_sum = row_size_sum + self.get_row_size(row[0], row[1]) 
+            row_size_sum = row_size_sum + self.get_row_size(row[0], row[1])
             count = count + 1
         self.assert_equal(count, len(expect_rows))
         cu_read = int(math.ceil(row_size_sum * 1.0 / 4096))
@@ -1046,56 +1093,58 @@ class RowOpTest(OTS2APITestBase):
     def test_read_empty_row(self):
         """测试对空行的读操作，以及GetRange在行没有对应的列时期望不返回空行"""
         table_name = 'T'
-        
+
         table_meta = TableMeta('T', [('PK0', 'INTEGER')])
         self.client_test.create_table(table_meta, ReservedThroughput(CapacityUnit(20, 20)))
         self.wait_for_partition_load('T')
 
-        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0' : 0}, {})
+        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0': 0}, {})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
 
-        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0' : 1}, {'Col' : 1})
+        consumed = self.client_test.put_row('T', Condition(RowExistenceExpectation.IGNORE), {'PK0': 1}, {'Col': 1})
         self.assert_consumed(consumed, CapacityUnit(0, 1))
 
-        consumed, pks, columns = self.client_test.get_row('T', {'PK0' : 0})
+        consumed, pks, columns = self.client_test.get_row('T', {'PK0': 0})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
-        self.assert_equal(pks, {'PK0' : 0})
+        self.assert_equal(pks, {'PK0': 0})
         self.assert_equal(columns, {})
-        
-        consumed, pks, columns = self.client_test.get_row('T', {'PK0' : 0}, columns_to_get=['Col'])
+
+        consumed, pks, columns = self.client_test.get_row('T', {'PK0': 0}, columns_to_get=['Col'])
         self.assert_consumed(consumed, CapacityUnit(1, 0))
         self.assert_equal(pks, {})
         self.assert_equal(columns, {})
 
-        ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], None)])
-        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {'PK0' : 0}, {})]])
-        
-        ret = self.client_test.batch_get_row([('T', [{'PK0' : 0}], ['Col'])])
+        ret = self.client_test.batch_get_row([('T', [{'PK0': 0}], None)])
+        self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {'PK0': 0}, {})]])
+
+        ret = self.client_test.batch_get_row([('T', [{'PK0': 0}], ['Col'])])
         self.assert_RowDataItem_equal(ret, [[RowDataItem(True, None, None, "", CapacityUnit(1, 0), {}, {})]])
 
-        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 1})
+        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0': 0}, {'PK0': 1})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
         self.assert_equal(next_pk, None)
-        self.assert_equal(row_list, [({'PK0' : 0}, {})])
+        self.assert_equal(row_list, [({'PK0': 0}, {})])
 
-        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 1}, columns_to_get=['Col'])
+        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0': 0}, {'PK0': 1},
+                                                                 columns_to_get=['Col'])
         self.assert_consumed(consumed, CapacityUnit(1, 0))
         self.assert_equal(next_pk, None)
         self.assert_equal(row_list, [])
 
-        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 2})
+        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0': 0}, {'PK0': 2})
         self.assert_consumed(consumed, CapacityUnit(1, 0))
         self.assert_equal(next_pk, None)
-        self.assert_equal(row_list, [({'PK0' : 0}, {}), ({'PK0' : 1}, {'Col' : 1})])
+        self.assert_equal(row_list, [({'PK0': 0}, {}), ({'PK0': 1}, {'Col': 1})])
 
-        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0' : 0}, {'PK0' : 2}, columns_to_get=['Col'])
+        consumed, next_pk, row_list = self.client_test.get_range('T', 'FORWARD', {'PK0': 0}, {'PK0': 2},
+                                                                 columns_to_get=['Col'])
         self.assert_consumed(consumed, CapacityUnit(1, 0))
         self.assert_equal(next_pk, None)
-        self.assert_equal(row_list, [({}, {'Col' : 1})])
+        self.assert_equal(row_list, [({}, {'Col': 1})])
 
     def test_all_item_in_batch_write_row_failed(self):
         """当batch write row里的所有item全部后端失败时，期望每个item都返回具体的错误，而整个操作返回正常"""
-    
+
         table1 = "table1"
         table_meta1 = TableMeta(table1, [("PK", "INTEGER")])
         reserved_throughput = ReservedThroughput(CapacityUnit(50, 50))
@@ -1103,21 +1152,22 @@ class RowOpTest(OTS2APITestBase):
 
         self.wait_for_partition_load('table1')
         put_table1 = PutRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 11}, {"COL": "table1_11"})
-        update_table1 = UpdateRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 12}, {"put" : {"COL": "table1_12"}})
+        update_table1 = UpdateRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 12},
+                                      {"put": {"COL": "table1_12"}})
         delete_table1 = DeleteRowItem(Condition(RowExistenceExpectation.EXPECT_EXIST), {"PK": 13})
 
         batches = [{
-            'table_name':table1, 
-            'put' : [put_table1], 
-            'update' : [update_table1], 
-            'delete' : [delete_table1],
+            'table_name': table1,
+            'put': [put_table1],
+            'update': [update_table1],
+            'delete': [delete_table1],
         }]
 
         response = self.client_test.batch_write_row(batches)
         expect_res = [{
-            'put':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
-            'update':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
-            'delete':[BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'put': [BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'update': [BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
+            'delete': [BatchWriteRowResponseItem(False, "OTSConditionCheckFail", "Condition check failed.", "", None)],
 
         }]
         self.assert_BatchWriteRowResponseItem(response, expect_res)
@@ -1132,12 +1182,13 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
 
-        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK" : 11}, {"delete" : ["Col0"]})
+        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": 11},
+                                         {"delete": ["Col0"]})
         self.assert_consumed(cu, CapacityUnit(0, 1))
-        
+
     def test_all_delete_in_update(self):
         """当一行为空时，进行一个UpdateRow，并且包含128个Delete操作"""
-        
+
         table_name = 'T'
 
         table_meta = TableMeta(table_name, [("PK", "INTEGER")])
@@ -1149,21 +1200,21 @@ class RowOpTest(OTS2APITestBase):
         for i in range(restriction.MaxColumnCountForRow):
             columns_to_delete.append('Col' + str(i))
 
-        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK" : 11}, {"delete" : columns_to_delete})
-        pk_size = 10 # 'PK' + int
+        cu = self.client_test.update_row(table_name, Condition(RowExistenceExpectation.IGNORE), {"PK": 11},
+                                         {"delete": columns_to_delete})
+        pk_size = 10  # 'PK' + int
         col_size = sum([len(col) for col in columns_to_delete])
         expect_write_cu = int(math.ceil((pk_size + col_size) * 1.0 / 4096))
         self.assert_consumed(cu, CapacityUnit(0, expect_write_cu))
-    
-        cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 11})
+
+        cu, pks, cols = self.client_test.get_row(table_name, {"PK": 11})
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(pks, {})
         self.assert_equal(cols, {})
 
-        
     def test_one_delete_in_update_of_batch_write(self):
         """当一行为空时，进行一个BatchWriteRow的UpdateRow，并且仅包含一个Delete操作"""
-        
+
         table_name = 'T'
 
         table_meta = TableMeta(table_name, [("PK", "INTEGER")])
@@ -1171,43 +1222,46 @@ class RowOpTest(OTS2APITestBase):
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
 
-        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete" : ["Col0"]})
-        batches = [{'table_name' : table_name, 'update' : [update_item]}]
+        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete": ["Col0"]})
+        batches = [{'table_name': table_name, 'update': [update_item]}]
         response = self.client_test.batch_write_row(batches)
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))]}])
-    
-        cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
+        self.assert_BatchWriteRowResponseItem(response, [
+            {'update': [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, 1))]}])
+
+        cu, pks, cols = self.client_test.get_row(table_name, {"PK": 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(pks, {})
         self.assert_equal(cols, {})
 
-    
     def test_all_delete_in_update_of_batch_write(self):
         """当一行为空时，进行一个BatchWriteRow的UpdateRow，并且包含128个Delete操作"""
-        
+
         table_name = 'T'
 
         table_meta = TableMeta(table_name, [("PK", "INTEGER")])
         reserved_throughput = ReservedThroughput(CapacityUnit(50, 50))
         self.client_test.create_table(table_meta, reserved_throughput)
         self.wait_for_partition_load(table_name)
-    
+
         columns_to_delete = []
         for i in range(restriction.MaxColumnCountForRow):
             columns_to_delete.append('Col' + str(i))
-    
-        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12}, {"delete" : columns_to_delete})
-        batches = [{'table_name' : table_name, 'update' : [update_item]}]
+
+        update_item = UpdateRowItem(Condition(RowExistenceExpectation.IGNORE), {"PK": 12},
+                                    {"delete": columns_to_delete})
+        batches = [{'table_name': table_name, 'update': [update_item]}]
         response = self.client_test.batch_write_row(batches)
-        pk_size = 10 # 'PK' + int
+        pk_size = 10  # 'PK' + int
         col_size = sum([len(col) for col in columns_to_delete])
         expect_write_cu = int(math.ceil((pk_size + col_size) * 1.0 / 4096))
-        self.assert_BatchWriteRowResponseItem(response, [{'update' : [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, expect_write_cu))]}])
-    
-        cu, pks, cols = self.client_test.get_row(table_name, {"PK" : 12})
+        self.assert_BatchWriteRowResponseItem(response, [
+            {'update': [BatchWriteRowResponseItem(True, "", "", "", CapacityUnit(0, expect_write_cu))]}])
+
+        cu, pks, cols = self.client_test.get_row(table_name, {"PK": 12})
         self.assert_consumed(cu, CapacityUnit(1, 0))
         self.assert_equal(pks, {})
         self.assert_equal(cols, {})
+
 
 if __name__ == '__main__':
     unittest.main()

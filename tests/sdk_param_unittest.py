@@ -3,21 +3,20 @@
 
 import logging
 import unittest
-import exceptions
 
 from ots2.client import *
-from ots2.metadata import *
 from ots2.error import *
-from lib.mock_connection import MockConnection
-from lib.test_config import *
+from ots2.metadata import *
+from .lib.mock_connection import MockConnection
+from .lib.test_config import *
+
 
 class SDKParamTest(unittest.TestCase):
-
     def setUp(self):
         logger = logging.getLogger('test')
-        handler=logging.FileHandler("test.log")
+        handler = logging.FileHandler("test.log")
         formatter = logging.Formatter("[%(asctime)s]    [%(process)d]   [%(levelname)s] " \
-                    "[%(filename)s:%(lineno)s]   %(message)s")
+                                      "[%(filename)s:%(lineno)s]   %(message)s")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(logging.DEBUG)
@@ -127,29 +126,30 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            primary_key = {'PK1':'hello', 'PK2':100}
-            attribute_columns = {'COL1':'world', 'COL2':1000}
+            primary_key = {'PK1': 'hello', 'PK2': 100}
+            attribute_columns = {'COL1': 'world', 'COL2': 1000}
             condition = Condition('InvalidCondition')
             consumed = self.ots_client.put_row('test_table', condition, primary_key, attribute_columns)
             self.assertTrue(False)
         except OTSClientError:
             pass
-    
+
         try:
-            primary_key = {'PK1':'hello', 'PK2':100}
-            attribute_columns = {'COL1':'world', 'COL2':1000}
-            consumed = self.ots_client.put_row('test_table', [RowExistenceExpectation.IGNORE], primary_key, attribute_columns)
+            primary_key = {'PK1': 'hello', 'PK2': 100}
+            attribute_columns = {'COL1': 'world', 'COL2': 1000}
+            consumed = self.ots_client.put_row('test_table', [RowExistenceExpectation.IGNORE], primary_key,
+                                               attribute_columns)
             self.assertTrue(False)
         except:
             pass
-    
+
         try:
             condition = Condition(RowExistenceExpectation.IGNORE)
             consumed = self.ots_client.put_row('test_table', condition, 'primary_key', 'attribute_columns')
             self.assertTrue(False)
         except:
             pass
-    
+
     def test_get_row(self):
         try:
             self.ots_client.get_row('one', 'two')
@@ -158,7 +158,8 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            consumed, resp_pks, resp_attribute_columns = self.ots_client.get_row('test_table', 'primary_key', 'columns_to_get')
+            consumed, resp_pks, resp_attribute_columns = self.ots_client.get_row('test_table', 'primary_key',
+                                                                                 'columns_to_get')
             self.assertTrue(False)
         except:
             pass
@@ -172,32 +173,36 @@ class SDKParamTest(unittest.TestCase):
 
         try:
             condition = Condition(RowExistenceExpectation.IGNORE)
-            consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, 'update_of_attribute_columns')
+            consumed = self.ots_client.update_row('test_table', condition, {'PK1': 'STRING', 'PK2': 'INTEGER'},
+                                                  'update_of_attribute_columns')
             self.assertTrue(False)
         except OTSClientError as e:
             pass
 
         try:
             condition = Condition(RowExistenceExpectation.IGNORE)
-            consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'ncv' : 1})
+            consumed = self.ots_client.update_row('test_table', condition, {'PK1': 'STRING', 'PK2': 'INTEGER'},
+                                                  {'ncv': 1})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
-            
+
         try:
             condition = Condition(RowExistenceExpectation.IGNORE)
-            consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'put' : []})
+            consumed = self.ots_client.update_row('test_table', condition, {'PK1': 'STRING', 'PK2': 'INTEGER'},
+                                                  {'put': []})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
-            
+
         try:
             condition = Condition(RowExistenceExpectation.IGNORE)
-            consumed = self.ots_client.update_row('test_table', condition, {'PK1' : 'STRING', 'PK2' : 'INTEGER'}, {'delete' : {}})
+            consumed = self.ots_client.update_row('test_table', condition, {'PK1': 'STRING', 'PK2': 'INTEGER'},
+                                                  {'delete': {}})
             self.assertTrue(False)
         except OTSClientError as e:
             pass
- 
+
     def test_delete_row(self):
         try:
             self.ots_client.delete_row('one', 'two', 'three', 'four')
@@ -245,35 +250,35 @@ class SDKParamTest(unittest.TestCase):
         except OTSClientError:
             pass
 
-        batch_list = [{'table_name':None}]
+        batch_list = [{'table_name': None}]
         try:
             response = self.ots_client.batch_write_row(batch_list)
             self.assertTrue(False)
         except OTSClientError:
             pass
 
-        batch_list = [{'table_name':'abc', 'put':None}]
+        batch_list = [{'table_name': 'abc', 'put': None}]
         try:
             response = self.ots_client.batch_write_row(batch_list)
             self.assertTrue(False)
         except OTSClientError:
             pass
 
-        batch_list = [{'table_name':'abc', 'put':['xxx']}]
+        batch_list = [{'table_name': 'abc', 'put': ['xxx']}]
         try:
             response = self.ots_client.batch_write_row(batch_list)
             self.assertTrue(False)
         except OTSClientError:
             pass
 
-        batch_list = [{'table_name':'abc', 'Put':[]}]
+        batch_list = [{'table_name': 'abc', 'Put': []}]
         try:
             response = self.ots_client.batch_write_row(batch_list)
             self.assertTrue(False)
         except OTSClientError:
             pass
 
-        batch_list = [{'table_name':'abc', 'Any':[]}]
+        batch_list = [{'table_name': 'abc', 'Any': []}]
         try:
             response = self.ots_client.batch_write_row(batch_list)
             self.assertTrue(False)
@@ -288,32 +293,32 @@ class SDKParamTest(unittest.TestCase):
             pass
 
         try:
-            start_primary_key = {'PK1':'hello','PK2':100}
-            end_primary_key = {'PK1':INF_MAX,'PK2':INF_MIN}
-            columns_to_get = ['COL1','COL2']
-            response = self.ots_client.get_range('table_name', 'InvalidDirection', 
-                        start_primary_key, end_primary_key, 
-                        columns_to_get, limit=100
-            )
+            start_primary_key = {'PK1': 'hello', 'PK2': 100}
+            end_primary_key = {'PK1': INF_MAX, 'PK2': INF_MIN}
+            columns_to_get = ['COL1', 'COL2']
+            response = self.ots_client.get_range('table_name', 'InvalidDirection',
+                                                 start_primary_key, end_primary_key,
+                                                 columns_to_get, limit=100
+                                                 )
             self.assertTrue(False)
         except OTSClientError:
             pass
 
         try:
-            start_primary_key = ['PK1','hello','PK2',100]
-            end_primary_key = {'PK1':INF_MAX, 'PK2':INF_MIN}
+            start_primary_key = ['PK1', 'hello', 'PK2', 100]
+            end_primary_key = {'PK1': INF_MAX, 'PK2': INF_MIN}
             columns_to_get = ['COL1', 'COL2']
-            response = self.ots_client.get_range('table_name', 'FORWARD', 
-                        start_primary_key, end_primary_key, 
-                        columns_to_get, limit=100
-            )
+            response = self.ots_client.get_range('table_name', 'FORWARD',
+                                                 start_primary_key, end_primary_key,
+                                                 columns_to_get, limit=100
+                                                 )
             self.assertTrue(False)
         except:
             pass
 
         try:
-            response = self.ots_client.get_range('table_name', 'FORWARD', 
-                        'primary_key', 'primary_key', 'columns_to_get', 100)
+            response = self.ots_client.get_range('table_name', 'FORWARD',
+                                                 'primary_key', 'primary_key', 'columns_to_get', 100)
             self.assertTrue(False)
         except:
             pass
@@ -343,29 +348,31 @@ class SDKParamTest(unittest.TestCase):
         try:
             cond = Condition('errr')
             self.assertTrue(False)
-        except OTSClientError, e:
-            self.assertEqual("Expect input row_existence_expectation should be one of ['RowExistenceExpectation.IGNORE', 'RowExistenceExpectation.EXPECT_EXIST', 'RowExistenceExpectation.EXPECT_NOT_EXIST'], but 'errr'", str(e))
+        except OTSClientError as e:
+            self.assertEqual(
+                "Expect input row_existence_expectation should be one of ['RowExistenceExpectation.IGNORE', 'RowExistenceExpectation.EXPECT_EXIST', 'RowExistenceExpectation.EXPECT_NOT_EXIST'], but 'errr'",
+                str(e))
 
         try:
             cond = Condition(RowExistenceExpectation.IGNORE, "")
             self.assertTrue(False)
-        except OTSClientError, e:
+        except OTSClientError as e:
             self.assertEqual("The input column_condition should be an instance of ColumnCondition, not str", str(e))
 
         try:
             cond = Condition(RowExistenceExpectation.IGNORE, RelationCondition("", "", ""))
             self.assertTrue(False)
-        except OTSClientError, e:
-            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
-
+        except OTSClientError as e:
+            self.assertEqual(
+                "Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''",
+                str(e))
 
     def test_column_condition(self):
         cond = RelationCondition("uid", 100, ComparatorType.EQUAL)
         self.assertEqual(ColumnConditionType.RELATION_CONDITION, cond.get_type())
-        
+
         cond = CompositeCondition(LogicalOperator.AND)
         self.assertEqual(ColumnConditionType.COMPOSITE_CONDITION, cond.get_type())
-       
 
     def test_relation_condition(self):
         RelationCondition("uid", 100, ComparatorType.EQUAL)
@@ -378,15 +385,16 @@ class SDKParamTest(unittest.TestCase):
         try:
             cond = RelationCondition("uid", 100, "")
             self.assertTrue(False)
-        except OTSClientError, e:
-            self.assertEqual("Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''", str(e))
-       
+        except OTSClientError as e:
+            self.assertEqual(
+                "Expect input comparator should be one of ['ComparatorType.EQUAL', 'ComparatorType.NOT_EQUAL', 'ComparatorType.GREATER_THAN', 'ComparatorType.GREATER_EQUAL', 'ComparatorType.LESS_THAN', 'ComparatorType.LESS_EQUAL'], but ''",
+                str(e))
+
         try:
             cond = RelationCondition("uid", 100, ComparatorType.LESS_EQUAL, "True")
             self.assertTrue(False)
-        except OTSClientError, e:
+        except OTSClientError as e:
             self.assertEqual("The input pass_if_missing should be an instance of Bool, not str", str(e))
-       
 
     def test_composite_condition(self):
         CompositeCondition(LogicalOperator.NOT)
@@ -396,9 +404,11 @@ class SDKParamTest(unittest.TestCase):
         try:
             cond = CompositeCondition("")
             self.assertTrue(False)
-        except OTSClientError, e:
-            self.assertEqual("Expect input combinator should be one of ['LogicalOperator.NOT', 'LogicalOperator.AND', 'LogicalOperator.OR'], but ''", str(e))
- 
+        except OTSClientError as e:
+            self.assertEqual(
+                "Expect input combinator should be one of ['LogicalOperator.NOT', 'LogicalOperator.AND', 'LogicalOperator.OR'], but ''",
+                str(e))
+
 
 if __name__ == '__main__':
     unittest.main()

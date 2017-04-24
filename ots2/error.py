@@ -5,8 +5,7 @@ class OTSError(Exception):
 
 
 class OTSClientError(OTSError):
-
-    def __init__(self, message, http_status = None):
+    def __init__(self, message, http_status=None):
         self.message = message
         self.http_status = http_status
 
@@ -14,15 +13,14 @@ class OTSClientError(OTSError):
         return self.http_status
 
     def __str__(self):
-        return self.message 
+        return self.message
 
     def get_error_message(self):
         return self.message
 
 
 class OTSServiceError(OTSError):
-
-    def __init__(self, http_status, code, message, request_id = ''):
+    def __init__(self, http_status, code, message, request_id=''):
         self.http_status = http_status
         self.code = code
         self.message = message

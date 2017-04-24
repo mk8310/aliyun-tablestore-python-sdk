@@ -1,28 +1,27 @@
 # -*- coding: utf8 -*-
 
-import google.protobuf.text_format as text_format
-
+from ots2.error import OTSClientError
 from ots2.metadata import *
-import ots2.protobuf.ots_protocol_2_pb2 as pb2
+from ots2.protobuf import ots_protocol_2_pb2 as pb2
+
 
 class OTSProtoBufferDecoder:
-
     def __init__(self, encoding):
         self.encoding = encoding
 
         self.api_decode_map = {
-            'CreateTable'       : self._decode_create_table,
-            'ListTable'         : self._decode_list_table,
-            'DeleteTable'       : self._decode_delete_table,
-            'DescribeTable'     : self._decode_describe_table,
-            'UpdateTable'       : self._decode_update_table,
-            'GetRow'            : self._decode_get_row,
-            'PutRow'            : self._decode_put_row,
-            'UpdateRow'         : self._decode_update_row,
-            'DeleteRow'         : self._decode_delete_row,
-            'BatchGetRow'       : self._decode_batch_get_row,
-            'BatchWriteRow'     : self._decode_batch_write_row,
-            'GetRange'          : self._decode_get_range,
+            'CreateTable': self._decode_create_table,
+            'ListTable': self._decode_list_table,
+            'DeleteTable': self._decode_delete_table,
+            'DescribeTable': self._decode_describe_table,
+            'UpdateTable': self._decode_update_table,
+            'GetRow': self._decode_get_row,
+            'PutRow': self._decode_put_row,
+            'UpdateRow': self._decode_update_row,
+            'DeleteRow': self._decode_delete_row,
+            'BatchGetRow': self._decode_batch_get_row,
+            'BatchWriteRow': self._decode_batch_write_row,
+            'GetRange': self._decode_get_range,
         }
 
     def _parse_string(self, string):
@@ -33,13 +32,13 @@ class OTSProtoBufferDecoder:
 
     def _parse_column_type(self, column_type_enum):
         reverse_enum_map = {
-            pb2.INF_MIN : 'INF_MIN',
-            pb2.INF_MAX : 'INF_MAX',
-            pb2.INTEGER : 'INTEGER',
-            pb2.STRING  : 'STRING',
-            pb2.BOOLEAN : 'BOOLEAN',
-            pb2.DOUBLE  : 'DOUBLE',
-            pb2.BINARY  : 'BINARY'
+            pb2.INF_MIN: 'INF_MIN',
+            pb2.INF_MAX: 'INF_MAX',
+            pb2.INTEGER: 'INTEGER',
+            pb2.STRING: 'STRING',
+            pb2.BOOLEAN: 'BOOLEAN',
+            pb2.DOUBLE: 'DOUBLE',
+            pb2.BINARY: 'BINARY'
         }
         if column_type_enum in reverse_enum_map:
             return reverse_enum_map[column_type_enum]
@@ -79,7 +78,7 @@ class OTSProtoBufferDecoder:
         )
 
     def _parse_row_list(self, proto):
-        row_list = [] 
+        row_list = []
         for row_item in proto:
             row_list.append(self._parse_row(row_item))
         return row_list
@@ -99,7 +98,7 @@ class OTSProtoBufferDecoder:
 
         reserved_throughput_details = ReservedThroughputDetails(
             capacity_unit,
-            proto.last_increase_time, 
+            proto.last_increase_time,
             last_decrease_time,
             proto.number_of_decreases_today
         )
@@ -130,13 +129,13 @@ class OTSProtoBufferDecoder:
                 capacity_unit, primary_key_columns, attribute_columns
             )
             row_list.append(row_data_item)
-        
+
         return row_list
 
     def _parse_batch_get_row(self, proto):
         rows = []
         for table_item in proto:
-            rows.append(self._parse_get_row_item(table_item.rows, table_item.table_name)) 
+            rows.append(self._parse_get_row_item(table_item.rows, table_item.table_name))
         return rows
 
     def _parse_write_row_item(self, proto, table_name):
@@ -158,7 +157,7 @@ class OTSProtoBufferDecoder:
                 row_item.is_ok, error_code, error_message, table_name, consumed
             )
             row_list.append(write_row_item)
-        
+
         return row_list
 
     def _parse_batch_write_row(self, proto):
@@ -192,7 +191,7 @@ class OTSProtoBufferDecoder:
         proto = pb2.DeleteTableResponse()
         proto.ParseFromString(body)
         return None, proto
-        
+
     def _decode_describe_table(self, body):
         proto = pb2.DescribeTableResponse()
         proto.ParseFromString(body)
@@ -203,7 +202,7 @@ class OTSProtoBufferDecoder:
                 proto.table_meta.primary_key
             )
         )
-        
+
         reserved_throughput_details = self._parse_reserved_throughput_details(proto.reserved_throughput_details)
         describe_table_response = DescribeTableResponse(table_meta, reserved_throughput_details)
         return describe_table_response, proto
@@ -263,7 +262,7 @@ class OTSProtoBufferDecoder:
     def _decode_get_range(self, body):
         proto = pb2.GetRangeResponse()
         proto.ParseFromString(body)
-        
+
         capacity_unit = self._parse_capacity_unit(proto.consumed.capacity_unit)
         next_start_pk = self._parse_column_dict(proto.next_start_primary_key)
         if not next_start_pk:
@@ -277,4 +276,3 @@ class OTSProtoBufferDecoder:
 
         handler = self.api_decode_map[api_name]
         return handler(response_body)
-

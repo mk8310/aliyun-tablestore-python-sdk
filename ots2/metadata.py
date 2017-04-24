@@ -32,12 +32,11 @@ __all__ = [
     'ColumnCondition',
     'CompositeCondition',
     'RelationCondition',
-    'RowExistenceExpectation', 
+    'RowExistenceExpectation',
 ]
 
 
 class TableMeta(object):
-
     def __init__(self, table_name, schema_of_primary_key):
         # schema_of_primary_key: [('PK0', 'STRING'), ('PK1', 'INTEGER'), ...]
         self.table_name = table_name
@@ -45,25 +44,23 @@ class TableMeta(object):
 
 
 class CapacityUnit(object):
-
     def __init__(self, read=0, write=0):
         self.read = read
         self.write = write
 
 
 class ReservedThroughput(object):
-
     def __init__(self, capacity_unit):
         self.capacity_unit = capacity_unit
 
 
 class ReservedThroughputDetails(object):
-    
     def __init__(self, capacity_unit, last_increase_time, last_decrease_time, number_of_decreases_today):
         self.capacity_unit = capacity_unit
         self.last_increase_time = last_increase_time
         self.last_decrease_time = last_decrease_time
         self.number_of_decreases_today = number_of_decreases_today
+
 
 class ColumnType(object):
     STRING = "STRING"
@@ -79,21 +76,19 @@ class Direction(object):
     FORWARD = "FORWARD"
     BACKWARD = "BACKWARD"
 
-class UpdateTableResponse(object):
 
+class UpdateTableResponse(object):
     def __init__(self, reserved_throughput_details):
         self.reserved_throughput_details = reserved_throughput_details
 
 
 class DescribeTableResponse(object):
-
     def __init__(self, table_meta, reserved_throughput_details):
         self.table_meta = table_meta
         self.reserved_throughput_details = reserved_throughput_details
 
 
 class RowDataItem(object):
-
     def __init__(self, is_ok, error_code, error_message, table_name, consumed, primary_key_columns, attribute_columns):
         # is_ok can be True or False
         # when is_ok is False,
@@ -107,6 +102,7 @@ class RowDataItem(object):
         self.consumed = consumed
         self.primary_key_columns = primary_key_columns
         self.attribute_columns = attribute_columns
+
 
 class LogicalOperator(object):
     NOT = 0
@@ -124,6 +120,7 @@ class LogicalOperator(object):
         "LogicalOperator.AND",
         "LogicalOperator.OR"
     ]
+
 
 class ComparatorType(object):
     EQUAL = 0
@@ -156,11 +153,12 @@ class ColumnConditionType(object):
     COMPOSITE_CONDITION = 0
     RELATION_CONDITION = 1
 
+
 class ColumnCondition(object):
-    pass    
+    pass
+
 
 class CompositeCondition(ColumnCondition):
-    
     def __init__(self, combinator):
         self.sub_conditions = []
         self.set_combinator(combinator)
@@ -171,28 +169,28 @@ class CompositeCondition(ColumnCondition):
     def set_combinator(self, combinator):
         if combinator not in LogicalOperator.__values__:
             raise OTSClientError(
-                "Expect input combinator should be one of %s, but '%s'"%(str(LogicalOperator.__members__), combinator)
+                "Expect input combinator should be one of %s, but '%s'" % (str(LogicalOperator.__members__), combinator)
             )
         self.combinator = combinator
 
     def get_combinator(self):
-        return combinator
+        return self.combinator
 
     def add_sub_condition(self, condition):
         if not isinstance(condition, ColumnCondition):
             raise OTSClientError(
-                "The input condition should be an instance of ColumnCondition, not %s"%
+                "The input condition should be an instance of ColumnCondition, not %s" %
                 condition.__class__.__name__
             )
- 
+
         self.sub_conditions.append(condition)
 
     def clear_sub_condition(self):
         self.sub_conditions = []
 
+
 class RelationCondition(ColumnCondition):
-   
-    def __init__(self, column_name, column_value, comparator, pass_if_missing = True):
+    def __init__(self, column_name, column_value, comparator, pass_if_missing=True):
         self.column_name = column_name
         self.column_value = column_value
 
@@ -217,7 +215,7 @@ class RelationCondition(ColumnCondition):
         """
         if not isinstance(pass_if_missing, bool):
             raise OTSClientError(
-                "The input pass_if_missing should be an instance of Bool, not %s"%
+                "The input pass_if_missing should be an instance of Bool, not %s" %
                 pass_if_missing.__class__.__name__
             )
         self.pass_if_missing = pass_if_missing
@@ -240,12 +238,13 @@ class RelationCondition(ColumnCondition):
     def set_comparator(self, comparator):
         if comparator not in ComparatorType.__values__:
             raise OTSClientError(
-                "Expect input comparator should be one of %s, but '%s'"%(str(ComparatorType.__members__), comparator)
+                "Expect input comparator should be one of %s, but '%s'" % (str(ComparatorType.__members__), comparator)
             )
         self.comparator = comparator
 
     def get_comparator(self):
         return self.comparator
+
 
 class RowExistenceExpectation(object):
     IGNORE = "IGNORE"
@@ -264,9 +263,9 @@ class RowExistenceExpectation(object):
         "RowExistenceExpectation.EXPECT_NOT_EXIST",
     ]
 
-class Condition(object):
 
-    def __init__(self, row_existence_expectation, column_condition = None):
+class Condition(object):
+    def __init__(self, row_existence_expectation, column_condition=None):
         self.row_existence_expectation = None
         self.column_condition = None
 
@@ -277,27 +276,28 @@ class Condition(object):
     def set_row_existence_expectation(self, row_existence_expectation):
         if row_existence_expectation not in RowExistenceExpectation.__values__:
             raise OTSClientError(
-                "Expect input row_existence_expectation should be one of %s, but '%s'"%(str(RowExistenceExpectation.__members__), row_existence_expectation)
+                "Expect input row_existence_expectation should be one of %s, but '%s'" % (
+                    str(RowExistenceExpectation.__members__), row_existence_expectation)
             )
 
         self.row_existence_expectation = row_existence_expectation
-        
+
     def get_row_existence_expectation(self):
-        return self.row_existence_expectation 
+        return self.row_existence_expectation
 
     def set_column_condition(self, column_condition):
         if not isinstance(column_condition, ColumnCondition):
             raise OTSClientError(
-                "The input column_condition should be an instance of ColumnCondition, not %s"%
+                "The input column_condition should be an instance of ColumnCondition, not %s" %
                 column_condition.__class__.__name__
             )
         self.column_condition = column_condition
 
     def get_column_condition(self):
-        self.column_condition
+        return self.column_condition
+
 
 class PutRowItem(object):
-
     def __init__(self, condition, primary_key, attribute_columns):
         self.condition = condition
         self.primary_key = primary_key
@@ -305,7 +305,6 @@ class PutRowItem(object):
 
 
 class UpdateRowItem(object):
-    
     def __init__(self, condition, primary_key, update_of_attribute_columns):
         self.condition = condition
         self.primary_key = primary_key
@@ -313,14 +312,12 @@ class UpdateRowItem(object):
 
 
 class DeleteRowItem(object):
-    
     def __init__(self, condition, primary_key):
         self.condition = condition
         self.primary_key = primary_key
 
 
 class TableInBatchGetRowItem(object):
-
     def __init__(self, table_name, primary_keys, columns_to_get=None, column_filter=None):
         self.table_name = table_name
         self.primary_keys = primary_keys
@@ -329,7 +326,6 @@ class TableInBatchGetRowItem(object):
 
 
 class MultiTableInBatchGetRowItem(object):
-
     def __init__(self):
         self.items = {}
 
@@ -341,14 +337,14 @@ class MultiTableInBatchGetRowItem(object):
         """
         if not isinstance(table_item, TableInBatchGetRowItem):
             raise OTSClientError(
-                "The input table_item should be an instance of TableInBatchGetRowItem, not %s"%
+                "The input table_item should be an instance of TableInBatchGetRowItem, not %s" %
                 table_item.__class__.__name__
             )
 
         self.items[table_item.table_name] = table_item
 
-class MultiTableInBatchGetRowResult(object):
 
+class MultiTableInBatchGetRowResult(object):
     def __init__(self, response):
         self.items = {}
 
@@ -387,6 +383,7 @@ class MultiTableInBatchGetRowResult(object):
     def is_all_succeed(self):
         return len(self.get_failed_rows()) == 0
 
+
 class BatchWriteRowType(object):
     PUT = "put"
     UPDATE = "update"
@@ -394,7 +391,6 @@ class BatchWriteRowType(object):
 
 
 class TableInBatchWriteRowItem(object):
-    
     def __init__(self, table_name, put=None, update=None, delete=None):
         self.table_name = table_name
         self.put = put
@@ -403,7 +399,6 @@ class TableInBatchWriteRowItem(object):
 
 
 class MultiTableInBatchWriteRowItem(object):
-
     def __init__(self):
         self.items = {}
 
@@ -415,14 +410,14 @@ class MultiTableInBatchWriteRowItem(object):
         """
         if not isinstance(table_item, TableInBatchWriteRowItem):
             raise OTSClientError(
-                "The input table_item should be an instance of TableInBatchWriteRowItem, not %s"%
+                "The input table_item should be an instance of TableInBatchWriteRowItem, not %s" %
                 table_item.__class__.__name__
             )
 
         self.items[table_item.table_name] = table_item
 
-class MultiTableInBatchWriteRowResult(object):
 
+class MultiTableInBatchWriteRowResult(object):
     def __init__(self, response):
         self.table_of_put = {}
         self.table_of_update = {}
@@ -518,10 +513,11 @@ class MultiTableInBatchWriteRowResult(object):
         return succ
 
     def is_all_succeed(self):
-        return len(self.get_failed_of_put()) == 0 and len(self.get_failed_of_update()) == 0 and len(self.get_failed_of_delete()) == 0
+        return len(self.get_failed_of_put()) == 0 and len(self.get_failed_of_update()) == 0 and len(
+            self.get_failed_of_delete()) == 0
+
 
 class BatchWriteRowResponseItem(object):
-
     def __init__(self, is_ok, error_code, error_message, table_name, consumed):
         self.is_ok = is_ok
         self.error_code = error_code
@@ -538,4 +534,3 @@ class INF_MIN(object):
 class INF_MAX(object):
     # for get_range
     pass
-
