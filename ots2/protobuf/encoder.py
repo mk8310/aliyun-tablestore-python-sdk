@@ -75,9 +75,9 @@ class OTSProtoBufferEncoder:
         }
 
     def _get_str(self, value):
+        # if isinstance(value, str):
+        #     return value.decode(self.encoding)
         if isinstance(value, str):
-            return value.decode(self.encoding)
-        elif isinstance(value, str):
             return value
         else:
             raise OTSClientError(
@@ -283,7 +283,7 @@ class OTSProtoBufferEncoder:
             self._make_column_schema(schema_proto, schema_tuple)
 
     def _make_columns_with_dict(self, proto, column_dict):
-        for name, value in column_dict.iteritems():
+        for name, value in column_dict.items():
             item = proto.add()
             item.name = self._get_str(name)
             self._make_column_value(item.value, value)
@@ -297,7 +297,7 @@ class OTSProtoBufferEncoder:
                 )
             )
 
-        for key, value in column_dict.iteritems():
+        for key, value in column_dict.items():
             if key == 'put':
                 if not isinstance(column_dict[key], dict):
                     raise OTSClientError(
@@ -305,7 +305,7 @@ class OTSProtoBufferEncoder:
                             column_dict[key].__class__.__name__
                         )
                     )
-                for name, value in column_dict[key].iteritems():
+                for name, value in column_dict[key].items():
                     item = proto.add()
                     item.type = pb2.PUT
                     item.name = self._get_str(name)
@@ -460,7 +460,7 @@ class OTSProtoBufferEncoder:
             table_item = proto.tables.add()
             table_item.table_name = self._get_str(table_name)
 
-            for key, row_list in table_dict.iteritems():
+            for key, row_list in table_dict.items():
                 if key is 'table_name':
                     continue
                 if not key in enum_map:

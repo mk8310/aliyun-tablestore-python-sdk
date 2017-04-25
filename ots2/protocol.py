@@ -59,32 +59,44 @@ class OTSProtocol:
         self.logger = logger
 
     def _make_headers_string(self, headers):
-        headers_item = ["%s:%s" % (k.lower(), v.strip()) for k, v in headers.items() if
-                        k.startswith('x-ots-') and k != 'x-ots-signature']
+        headers_item = []  # ["%s:%s" % (k.lower(), str(v, encoding='utf-8').strip()) for k, v in headers.items() if
+        # k.startswith('x-ots-') and k != 'x-ots-signature']
+        for k, v in headers.items():
+            if k.startswith('x-ots-') and k != 'x-ots-signature':
+                value = v
+                if isinstance(v, bytes):
+                    value = str(v, encoding='utf-8')
+                headers_item.append("%s:%s" % (k.lower(), value.strip()))
+
         return "\n".join(sorted(headers_item))
 
     def _call_signature_method(self, signature_string):
         # The signature method is supposed to be HmacSHA1
         # A switch case is required if there is other methods available
-        key_bytes = bytes(self.user_key, encoding='utf-8')
-        # signature_bytes = bytes(signature_string, encoding='utf-8')
-        signature = base64.b64encode(hmac.new(
-            key_bytes, signature_string.encode('utf-8'), hashlib.sha1
-        ).digest())
+        key_bytes = bytes(self.user_key, 'ascii')
+        signature_string = bytes(signature_string, encoding='utf-8')
+
+        new_hmac = hmac.new(key_bytes, signature_string, hashlib.sha1)
+        hash_hex = new_hmac.digest()
+
+        signature = base64.b64encode(hash_hex)
+
         return str(signature, encoding='utf-8')
 
     def _make_request_signature(self, query, headers):
         uri, param_string, query_string = parse.urlparse(query)[2:5]
-
+        print(uri, param_string, query_string)
         # TODO a special query should be input to test query sorting,
         # because none of the current APIs uses query map, but the sorting
         # is required in the protocol document.
         query_pairs = parse.parse_qsl(query_string)
         sorted_query = parse.urlencode(sorted(query_pairs))
+
         signature_string = uri + '\n' + 'POST' + '\n' + sorted_query + '\n'
 
         headers_string = self._make_headers_string(headers)
         signature_string += headers_string + '\n'
+
         signature = self._call_signature_method(signature_string)
         return signature
 
