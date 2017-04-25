@@ -127,6 +127,7 @@ class OTSClient(object):
                 status, reason, resheaders, resbody = self.connection.send_receive(
                     query, reqheaders, reqbody
                 )
+                print(resbody)
                 self.protocol.handle_error(api_name, query, status, reason, resheaders, resbody)
                 break
 

@@ -85,7 +85,7 @@ class OTSProtocol:
 
     def _make_request_signature(self, query, headers):
         uri, param_string, query_string = parse.urlparse(query)[2:5]
-        print(uri, param_string, query_string)
+        # print(uri, param_string, query_string)
         # TODO a special query should be input to test query sorting,
         # because none of the current APIs uses query map, but the sorting
         # is required in the protocol document.
